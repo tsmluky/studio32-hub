@@ -1,48 +1,40 @@
 # Studio32 Hub: acceso privado y despliegue
 
-## Arquitectura recomendada
+## Arquitectura desplegada
 
 - **Aplicación web:** el frontend usa vinext sobre Vite y se publica como Worker mediante Sites.
 - **Dominio:** `www.hub.studio32.es` apunta al proveedor mediante un registro CNAME.
-- **Acceso:** Supabase Auth con enlace mágico por correo. No hay contraseñas que mantener.
+- **Acceso:** Supabase Auth mediante las tres cuentas `@studio32.es`. El PIN visible se transforma en una contraseña fuerte antes de enviarse a Auth.
 - **Datos compartidos:** Supabase Postgres con políticas que solo permiten entrar a miembros del workspace.
 - **Actualizaciones en directo:** Supabase Realtime para conversación, tareas e Inbox.
 - **Archivos:** Drive continúa siendo el almacén principal; el Hub guarda contexto y enlaces.
 
 ## Modelo de acceso
 
-La pantalla inicial muestra a Juanma, Pancho y Gonzalo. Cada miembro selecciona su perfil e introduce un PIN de seis dígitos. En el prototipo el PIN se configura y valida localmente; en producción:
+La pantalla inicial muestra a Juanma, Pancho y Gonzalo. Cada miembro selecciona su perfil e introduce un PIN de seis dígitos:
 
-1. Se desactiva el registro público en Supabase.
-2. Un administrador invita las tres direcciones de correo del equipo.
-3. El primer acceso en un dispositivo se confirma mediante el correo `@studio32.es` y permite configurar el PIN.
-4. Los siguientes accesos se realizan seleccionando el perfil e introduciendo el PIN.
-5. El servidor limita los intentos, bloquea temporalmente la cuenta y guarda únicamente el hash del PIN.
-6. Las políticas de base de datos comprueban que el usuario pertenece al workspace de Studio32.
+1. Las cuentas se crean con `scripts/bootstrap-supabase.mjs` usando la clave de servicio solo en local.
+2. El navegador usa únicamente la clave pública de Supabase.
+3. Supabase Auth valida cada sesión y aplica sus límites de autenticación.
+4. Cada miembro puede cambiar su PIN desde el botón de llave de su perfil.
+5. Las políticas de base de datos comprueban que `auth.uid()` pertenece al workspace de Studio32.
+6. La clave de servicio y el archivo de PINes iniciales están ignorados por Git.
 
 Así, conocer la URL no concede acceso y no es necesario desarrollar un sistema propio de contraseñas.
 
 ## Entidades de la primera versión compartida
 
-- `profiles`: nombre, avatar y rol del miembro.
 - `workspaces`: el espacio privado de Studio32.
 - `workspace_members`: relación entre cuentas y workspace.
-- `projects`: estado, foco, salud y próximo hito.
-- `tasks`: responsable, fecha, prioridad, estado y bloqueo.
-- `updates`: mensajes, notas y decisiones vinculadas a un proyecto.
-- `resources`: enlaces a Drive, Notion, PDFs y otras referencias.
-- `inbox_items`: capturas todavía sin ordenar.
-- `board_items`: ideas y elementos de la pizarra de cada proyecto.
+- `hub_states`: documento operativo compartido con tareas, agenda, conversación, recursos, Inbox y pizarra.
 
-Todas las tablas operativas incluyen `workspace_id`. Las políticas RLS deben exigir que `auth.uid()` sea miembro de ese workspace antes de leer o escribir.
+`hub_states` incluye revisión y auditoría. Las escrituras usan control optimista para reintentar sobre la última revisión si dos miembros actualizan el Hub al mismo tiempo.
 
-## Pasos para publicar
+## Alta o recuperación de cuentas
 
-1. Crear el proyecto privado en Supabase y sus tablas.
-2. Añadir las variables de `.env.example` al entorno de despliegue.
-3. Sustituir la persistencia local por un repositorio Supabase con suscripciones en tiempo real.
-4. Invitar las tres cuentas y probar permisos con cada una.
-5. Publicar el frontend y conectar `www.hub.studio32.es`.
-6. Añadir `https://www.hub.studio32.es` a las URL permitidas de Supabase Auth.
+1. Copiar `.env.example` a `.env.local` y completar las claves.
+2. Opcionalmente definir `JUANMA_PIN`, `PANCHO_PIN` y `GONZALO_PIN`.
+3. Ejecutar `npm run supabase:bootstrap`.
+4. Entregar a cada miembro su PIN y pedir que lo cambie en su primera sesión.
 
-La versión actual puede publicarse para revisar la interfaz, pero no debe tratarse todavía como un sistema privado: el selector de perfil identifica al usuario en el prototipo, pero no lo autentica frente a un servidor.
+La migración SQL versionada está en `supabase/migrations`. La web pública no expone datos sin una sesión válida: RLS es la frontera de seguridad, no el selector de perfiles.

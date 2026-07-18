@@ -249,7 +249,7 @@ p {
 
 .sidebar-account {
   display: grid;
-  grid-template-columns: 30px minmax(0, 1fr) 30px;
+  grid-template-columns: 30px minmax(0, 1fr) repeat(2, 30px);
   align-items: center;
   gap: 9px;
   padding: 11px 8px 3px;
@@ -356,6 +356,16 @@ p {
   display: flex;
   align-items: center;
   gap: 9px;
+}
+
+.sync-warning {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 300px;
+  color: #a54e3e;
+  font-size: 10px;
+  font-weight: 700;
 }
 
 .icon-button {
@@ -2151,6 +2161,18 @@ button.update-row {
   gap: 10px;
 }
 
+.pin-change-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.capture-dialog .dialog-pin-input {
+  font-family: 'Manrope', Arial, sans-serif;
+  font-size: 17px;
+  text-align: center;
+}
+
 .capture-dialog label > span {
   color: #52605b;
   font-size: 9px;
@@ -2274,6 +2296,48 @@ button.update-row {
 
 .access-brand small {
   color: #87928e;
+}
+
+.system-panel {
+  min-height: 340px;
+}
+
+.system-message {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 76px 24px 42px;
+  text-align: center;
+}
+
+.system-message h1 {
+  margin-top: 8px;
+  font-size: 22px;
+}
+
+.system-message p {
+  max-width: 330px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.system-message .access-submit {
+  width: auto;
+  min-width: 140px;
+  padding: 0 18px;
+}
+
+.system-loader {
+  width: 28px;
+  height: 28px;
+  border: 3px solid #dce8e3;
+  border-top-color: var(--green);
+  border-radius: 50%;
+  animation: system-spin 0.8s linear infinite;
+}
+
+@keyframes system-spin {
+  to { transform: rotate(360deg); }
 }
 
 .access-copy {

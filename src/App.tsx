@@ -14,6 +14,7 @@ import {
   FolderKanban,
   Home,
   Inbox,
+  KeyRound,
   LibraryBig,
   Lightbulb,
   Link as LinkIcon,
@@ -27,8 +28,9 @@ import {
   Users,
   X,
 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { FormEvent, ReactNode } from 'react'
+import { isSupabaseConfigured, pinToPassword, supabase } from './supabase'
 
 type MemberId = 'juanma' | 'pancho' | 'gonzalo'
 type ProjectId = 'studio32' | 'atlas' | 'archivo'
@@ -139,6 +141,8 @@ type HubState = {
   teamCheckIns: TeamCheckIn[]
   agendaEvents: AgendaEvent[]
 }
+
+type HubSyncStatus = 'idle' | 'loading' | 'ready' | 'error'
 
 const members: Member[] = [
   { id: 'juanma', name: 'Juanma', initials: 'JM', role: 'Equipo Studio32', email: 'juanma@studio32.es', color: '#2f6f73' },
@@ -428,10 +432,19 @@ const availabilityLabels: Record<TeamAvailability, string> = {
   away: 'Fuera',
 }
 
-function usePersistentHubState() {
+function normalizeHubState(payload: unknown): HubState {
+  if (!payload || typeof payload !== 'object') return initialState
+  return { ...initialState, ...payload } as HubState
+}
+
+function usePersistentHubState(activeMemberId: MemberId | null) {
   const [state, setState] = useState<HubState>(initialState)
+  const [status, setStatus] = useState<HubSyncStatus>(isSupabaseConfigured ? 'idle' : 'ready')
+  const [error, setError] = useState('')
+  const revisionRef = useRef(0)
 
   useEffect(() => {
+    if (isSupabaseConfigured || !activeMemberId) return
     const stored = localStorage.getItem('studio32-hub-v4')
     if (!stored) return
 
@@ -440,17 +453,156 @@ function usePersistentHubState() {
     } catch {
       localStorage.removeItem('studio32-hub-v4')
     }
-  }, [])
+  }, [activeMemberId])
+
+  useEffect(() => {
+    if (!supabase || !activeMemberId) {
+      if (isSupabaseConfigured) setStatus('idle')
+      return
+    }
+    const client = supabase
+
+    let cancelled = false
+    setStatus('loading')
+    setError('')
+
+    const loadState = async () => {
+      const { data, error: loadError } = await client
+        .from('hub_states')
+        .select('payload, revision')
+        .eq('workspace_id', 'studio32')
+        .maybeSingle()
+
+      if (cancelled) return
+
+      if (loadError) {
+        setError('No se han podido cargar los datos compartidos.')
+        setStatus('error')
+        return
+      }
+
+      if (data?.payload) {
+        revisionRef.current = Number(data.revision)
+        setState(normalizeHubState(data.payload))
+        setStatus('ready')
+        return
+      }
+
+      const { data: created, error: createError } = await client
+        .from('hub_states')
+        .insert({ workspace_id: 'studio32', payload: initialState })
+        .select('payload, revision')
+        .single()
+
+      if (cancelled) return
+      if (createError) {
+        setError('No se ha podido preparar el espacio compartido.')
+        setStatus('error')
+        return
+      }
+
+      revisionRef.current = Number(created.revision)
+      setState(normalizeHubState(created.payload))
+      setStatus('ready')
+    }
+
+    void loadState()
+
+    const channel = client
+      .channel('studio32-hub-state')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'hub_states', filter: 'workspace_id=eq.studio32' },
+        (event) => {
+          const row = event.new as { payload?: unknown; revision?: number } | null
+          const payload = row?.payload
+          const incomingRevision = Number(row?.revision ?? 0)
+          if (payload && incomingRevision >= revisionRef.current) {
+            revisionRef.current = incomingRevision
+            setState(normalizeHubState(payload))
+            setStatus('ready')
+            setError('')
+          }
+        },
+      )
+      .subscribe()
+
+    return () => {
+      cancelled = true
+      void client.removeChannel(channel)
+    }
+  }, [activeMemberId])
+
+  const persistSharedState = async (
+    updater: (current: HubState) => HubState,
+    next: HubState,
+    expectedRevision: number,
+  ) => {
+    if (!supabase || !activeMemberId) return
+    const client = supabase
+    const save = (payload: HubState, revision: number) => client
+      .from('hub_states')
+      .update({ payload })
+      .eq('workspace_id', 'studio32')
+      .eq('revision', revision)
+      .select('payload, revision')
+      .maybeSingle()
+
+    const { data, error: saveError } = await save(next, expectedRevision)
+
+    if (saveError) {
+      setError('Hay cambios pendientes de sincronizar. Comprueba la conexión.')
+      setStatus('error')
+      return
+    }
+
+    if (data) {
+      revisionRef.current = Number(data.revision)
+      setError('')
+      setStatus('ready')
+      return
+    }
+
+    const { data: latest, error: reloadError } = await client
+      .from('hub_states')
+      .select('payload, revision')
+      .eq('workspace_id', 'studio32')
+      .single()
+
+    if (reloadError) {
+      setError('El Hub ha cambiado en otro dispositivo. Recarga para continuar.')
+      setStatus('error')
+      return
+    }
+
+    const rebased = updater(normalizeHubState(latest.payload))
+    setState(rebased)
+    const { data: retried, error: retryError } = await save(rebased, Number(latest.revision))
+    if (retryError || !retried) {
+      setError('No se ha podido combinar un cambio simultáneo. Recarga para continuar.')
+      setStatus('error')
+      return
+    }
+
+    revisionRef.current = Number(retried.revision)
+    setError('')
+    setStatus('ready')
+  }
 
   const updateState = (updater: (current: HubState) => HubState) => {
     setState((current) => {
       const next = updater(current)
-      localStorage.setItem('studio32-hub-v4', JSON.stringify(next))
+      if (isSupabaseConfigured) {
+        const expectedRevision = revisionRef.current
+        void persistSharedState(updater, next, expectedRevision)
+      } else {
+        localStorage.setItem('studio32-hub-v4', JSON.stringify(next))
+      }
       return next
     })
   }
 
-  return [state, updateState] as const
+  return [state, updateState, status, error] as const
 }
 
 function getMember(id: MemberId) {
@@ -497,7 +649,7 @@ function makeId(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`
 }
 
-const demoPinLength = 6
+const pinLength = 6
 
 function demoPinStorageKey(memberId: MemberId) {
   return `studio32-demo-pin-v1:${memberId}`
@@ -510,14 +662,28 @@ async function hashDemoPin(memberId: MemberId, pin: string) {
 }
 
 function App() {
-  const [state, updateState] = usePersistentHubState()
   const [activeMemberId, setActiveMemberId] = useState<MemberId | null>(null)
+  const [authReady, setAuthReady] = useState(!isSupabaseConfigured)
+  const [state, updateState, syncStatus, syncError] = usePersistentHubState(activeMemberId)
 
   useEffect(() => {
+    if (supabase) {
+      const resolveMember = (email?: string | null) => {
+        const member = members.find((candidate) => candidate.email.toLowerCase() === email?.toLowerCase())
+        setActiveMemberId(member?.id ?? null)
+        setAuthReady(true)
+      }
+
+      void supabase.auth.getSession().then(({ data }) => resolveMember(data.session?.user.email))
+      const { data } = supabase.auth.onAuthStateChange((_event, session) => resolveMember(session?.user.email))
+      return () => data.subscription.unsubscribe()
+    }
+
     const stored = localStorage.getItem('studio32-current-member-v3')
     if (members.some((member) => member.id === stored)) {
       setActiveMemberId(stored as MemberId)
     }
+    setAuthReady(true)
   }, [])
 
   useEffect(() => {
@@ -529,6 +695,7 @@ function App() {
   const [view, setView] = useState<MainView>('today')
   const [projectTab, setProjectTab] = useState<ProjectTab>('overview')
   const [captureOpen, setCaptureOpen] = useState(false)
+  const [pinChangeOpen, setPinChangeOpen] = useState(false)
   const [search, setSearch] = useState('')
 
   const activeMember = activeMemberId ? getMember(activeMemberId) : null
@@ -546,14 +713,40 @@ function App() {
     setView(nextView)
   }
 
-  const signIn = (memberId: MemberId) => {
+  const signIn = async (memberId: MemberId, pin: string) => {
+    if (supabase) {
+      const member = getMember(memberId)
+      const password = await pinToPassword(memberId, pin)
+      const { error } = await supabase.auth.signInWithPassword({ email: member.email, password })
+      if (error) return 'El PIN no es correcto o el acceso todavía no está activo.'
+      return null
+    }
+
     localStorage.setItem('studio32-current-member-v3', memberId)
     setActiveMemberId(memberId)
+    return null
   }
 
-  const signOut = () => {
+  const signOut = async () => {
+    if (supabase) {
+      await supabase.auth.signOut()
+      return
+    }
     localStorage.removeItem('studio32-current-member-v3')
     setActiveMemberId(null)
+  }
+
+  const changePin = async (currentPin: string, nextPin: string) => {
+    if (!supabase || !activeMemberId) return 'No se puede cambiar el PIN en este dispositivo.'
+    const member = getMember(activeMemberId)
+    const currentPassword = await pinToPassword(activeMemberId, currentPin)
+    const { error: verifyError } = await supabase.auth.signInWithPassword({ email: member.email, password: currentPassword })
+    if (verifyError) return 'El PIN actual no es correcto.'
+
+    const nextPassword = await pinToPassword(activeMemberId, nextPin)
+    const { error: updateError } = await supabase.auth.updateUser({ password: nextPassword })
+    if (updateError) return 'No se ha podido cambiar el PIN. Inténtalo de nuevo.'
+    return null
   }
 
   const toggleTask = (taskId: string) => {
@@ -776,8 +969,20 @@ function App() {
     updateState((current) => ({ ...current, inbox: current.inbox.filter((item) => item.id !== itemId) }))
   }
 
+  if (!authReady) {
+    return <SystemScreen title="Abriendo Studio32 Hub" description="Comprobando tu sesión segura..." />
+  }
+
   if (!activeMember) {
-    return <AccessScreen onSelect={signIn} />
+    return <AccessScreen onAuthenticate={signIn} sharedAuth={isSupabaseConfigured} />
+  }
+
+  if (syncStatus === 'loading' || syncStatus === 'idle') {
+    return <SystemScreen title={`Hola, ${activeMember.name}`} description="Cargando el espacio compartido..." />
+  }
+
+  if (syncStatus === 'error' && state === initialState) {
+    return <SystemScreen title="No podemos abrir el Hub" description={syncError} actionLabel="Cerrar sesión" onAction={signOut} />
   }
 
   const searchTerm = search.trim().toLocaleLowerCase('es')
@@ -792,6 +997,7 @@ function App() {
         onNavigate={selectView}
         onOpenProject={openProject}
         onCapture={() => setCaptureOpen(true)}
+        onChangePin={isSupabaseConfigured ? () => setPinChangeOpen(true) : undefined}
         onSignOut={signOut}
       />
 
@@ -812,6 +1018,7 @@ function App() {
             )}
           </label>
           <div className="topbar-actions">
+            {syncError && <span className="sync-warning"><AlertCircle size={15} /> {syncError}</span>}
             <button className="primary-action" type="button" onClick={() => setCaptureOpen(true)} data-testid="quick-capture" aria-label="Capturar">
               <Plus size={17} />
               <span>Capturar</span>
@@ -875,11 +1082,53 @@ function App() {
           onSubmit={addCapture}
         />
       )}
+      {pinChangeOpen && activeMember && (
+        <PinChangeDialog
+          member={activeMember}
+          onClose={() => setPinChangeOpen(false)}
+          onSubmit={changePin}
+        />
+      )}
     </div>
   )
 }
 
-function AccessScreen({ onSelect }: { onSelect: (memberId: MemberId) => void }) {
+function SystemScreen({
+  title,
+  description,
+  actionLabel,
+  onAction,
+}: {
+  title: string
+  description: string
+  actionLabel?: string
+  onAction?: () => void | Promise<void>
+}) {
+  return (
+    <main className="access-screen">
+      <section className="access-panel system-panel" aria-live="polite">
+        <div className="brand-lockup access-brand">
+          <span className="brand-mark">32</span>
+          <span><strong>Studio32 Hub</strong><small>Espacio de trabajo privado</small></span>
+        </div>
+        <div className="system-message">
+          <span className="system-loader" aria-hidden="true" />
+          <h1>{title}</h1>
+          <p>{description}</p>
+          {actionLabel && onAction && <button className="access-submit" type="button" onClick={() => void onAction()}>{actionLabel}</button>}
+        </div>
+      </section>
+    </main>
+  )
+}
+
+function AccessScreen({
+  onAuthenticate,
+  sharedAuth,
+}: {
+  onAuthenticate: (memberId: MemberId, pin: string) => Promise<string | null>
+  sharedAuth: boolean
+}) {
   const [selectedMemberId, setSelectedMemberId] = useState<MemberId | null>(null)
   const [mode, setMode] = useState<'setup' | 'unlock'>('unlock')
   const [pin, setPin] = useState('')
@@ -891,7 +1140,7 @@ function AccessScreen({ onSelect }: { onSelect: (memberId: MemberId) => void }) 
 
   const selectMember = (memberId: MemberId) => {
     setSelectedMemberId(memberId)
-    setMode(localStorage.getItem(demoPinStorageKey(memberId)) ? 'unlock' : 'setup')
+    setMode(sharedAuth || localStorage.getItem(demoPinStorageKey(memberId)) ? 'unlock' : 'setup')
     setPin('')
     setConfirmation('')
     setError('')
@@ -914,7 +1163,7 @@ function AccessScreen({ onSelect }: { onSelect: (memberId: MemberId) => void }) 
   }
 
   const updatePin = (value: string, setter: (next: string) => void) => {
-    setter(value.replace(/\D/g, '').slice(0, demoPinLength))
+    setter(value.replace(/\D/g, '').slice(0, pinLength))
     if (error) setError('')
   }
 
@@ -922,8 +1171,19 @@ function AccessScreen({ onSelect }: { onSelect: (memberId: MemberId) => void }) 
     event.preventDefault()
     if (!selectedMember) return
 
-    if (pin.length !== demoPinLength) {
-      setError(`El PIN debe tener ${demoPinLength} dígitos.`)
+    if (pin.length !== pinLength) {
+      setError(`El PIN debe tener ${pinLength} dígitos.`)
+      return
+    }
+
+    if (sharedAuth) {
+      setBusy(true)
+      const authenticationError = await onAuthenticate(selectedMember.id, pin)
+      if (authenticationError) {
+        setBusy(false)
+        setPin('')
+        setError(authenticationError)
+      }
       return
     }
 
@@ -937,7 +1197,7 @@ function AccessScreen({ onSelect }: { onSelect: (memberId: MemberId) => void }) 
 
     if (mode === 'setup') {
       localStorage.setItem(demoPinStorageKey(selectedMember.id), pinHash)
-      onSelect(selectedMember.id)
+      await onAuthenticate(selectedMember.id, pin)
       return
     }
 
@@ -949,7 +1209,7 @@ function AccessScreen({ onSelect }: { onSelect: (memberId: MemberId) => void }) 
       return
     }
 
-    onSelect(selectedMember.id)
+    await onAuthenticate(selectedMember.id, pin)
   }
 
   return (
@@ -965,7 +1225,7 @@ function AccessScreen({ onSelect }: { onSelect: (memberId: MemberId) => void }) 
         {!selectedMember ? (
           <>
             <div className="access-copy">
-              <span className="eyebrow">Acceso de equipo</span>
+              <span className="eyebrow">Acceso seguro de equipo</span>
               <h1 id="access-title">¿Quién entra hoy?</h1>
               <p>Selecciona tu perfil para continuar.</p>
             </div>
@@ -992,7 +1252,7 @@ function AccessScreen({ onSelect }: { onSelect: (memberId: MemberId) => void }) 
             <div className="access-copy pin-copy">
               <span className="eyebrow">{mode === 'setup' ? 'Primera entrada' : 'Acceso personal'}</span>
               <h1 id="access-title">{mode === 'setup' ? 'Crea tu PIN' : `Hola, ${selectedMember.name}`}</h1>
-              <p>{mode === 'setup' ? 'Elige un PIN de 6 dígitos para entrar desde este dispositivo.' : 'Introduce tu PIN de 6 dígitos.'}</p>
+              <p>{mode === 'setup' ? 'Elige un PIN de 6 dígitos para entrar desde este dispositivo.' : 'Introduce tu PIN personal de 6 dígitos.'}</p>
             </div>
             <form className="access-form" onSubmit={submit}>
               <label htmlFor="access-pin">PIN</label>
@@ -1029,13 +1289,13 @@ function AccessScreen({ onSelect }: { onSelect: (memberId: MemberId) => void }) 
               <button
                 className="access-submit"
                 type="submit"
-                disabled={busy || pin.length !== demoPinLength || (mode === 'setup' && confirmation.length !== demoPinLength)}
+                disabled={busy || pin.length !== pinLength || (mode === 'setup' && confirmation.length !== pinLength)}
                 data-testid="access-submit"
               >
                 {busy ? 'Comprobando...' : mode === 'setup' ? 'Guardar y entrar' : 'Entrar al Hub'}
                 {!busy && <ArrowRight size={17} />}
               </button>
-              {mode === 'unlock' && import.meta.env.DEV && (
+              {!sharedAuth && mode === 'unlock' && import.meta.env.DEV && (
                 <button className="local-pin-reset" type="button" onClick={resetLocalPin} data-testid="reset-local-pin">
                   Restablecer PIN local
                 </button>
@@ -1044,8 +1304,8 @@ function AccessScreen({ onSelect }: { onSelect: (memberId: MemberId) => void }) 
           </>
         )}
         <div className="access-foot">
-          <span><Check size={14} /> Acceso privado de Studio32</span>
-          <span>Studio32 · Uso interno</span>
+          <span><Check size={14} /> Acceso protegido por Supabase</span>
+          <span>Solo Juanma, Pancho y Gonzalo</span>
         </div>
       </section>
     </main>
@@ -1060,6 +1320,7 @@ function Sidebar({
   onNavigate,
   onOpenProject,
   onCapture,
+  onChangePin,
   onSignOut,
 }: {
   activeView: MainView
@@ -1069,7 +1330,8 @@ function Sidebar({
   onNavigate: (view: Exclude<MainView, 'project'>) => void
   onOpenProject: (projectId: ProjectId) => void
   onCapture: () => void
-  onSignOut: () => void
+  onChangePin?: () => void
+  onSignOut: () => void | Promise<void>
 }) {
   return (
     <aside className="sidebar" aria-label="Navegación principal">
@@ -1138,7 +1400,8 @@ function Sidebar({
           <strong>{activeMember.name}</strong>
           <small>Vista personal</small>
         </span>
-        <button type="button" onClick={onSignOut} aria-label="Cerrar sesión" title="Cerrar sesión">
+        {onChangePin && <button type="button" onClick={onChangePin} aria-label="Cambiar PIN" title="Cambiar PIN"><KeyRound size={17} /></button>}
+        <button type="button" onClick={() => void onSignOut()} aria-label="Cerrar sesión" title="Cerrar sesión">
           <LogOut size={17} />
         </button>
       </div>
@@ -1842,6 +2105,73 @@ function AgendaDialog({ onClose, onSubmit }: { onClose: () => void; onSubmit: (e
           <footer>
             <button className="text-button" type="button" onClick={onClose}>Cancelar</button>
             <button className="primary-action" type="submit" disabled={!title.trim() || !time}><Check size={16} /> Añadir</button>
+          </footer>
+        </form>
+      </section>
+    </div>
+  )
+}
+
+function PinChangeDialog({
+  member,
+  onClose,
+  onSubmit,
+}: {
+  member: Member
+  onClose: () => void
+  onSubmit: (currentPin: string, nextPin: string) => Promise<string | null>
+}) {
+  const [currentPin, setCurrentPin] = useState('')
+  const [nextPin, setNextPin] = useState('')
+  const [confirmation, setConfirmation] = useState('')
+  const [error, setError] = useState('')
+  const [busy, setBusy] = useState(false)
+
+  const updatePinValue = (value: string, setter: (next: string) => void) => {
+    setter(value.replace(/\D/g, '').slice(0, pinLength))
+    if (error) setError('')
+  }
+
+  const submit = async (event: FormEvent) => {
+    event.preventDefault()
+    if (nextPin !== confirmation) {
+      setError('Los dos PIN nuevos no coinciden.')
+      return
+    }
+    if (currentPin === nextPin) {
+      setError('El nuevo PIN debe ser distinto del actual.')
+      return
+    }
+
+    setBusy(true)
+    const submitError = await onSubmit(currentPin, nextPin)
+    if (submitError) {
+      setBusy(false)
+      setError(submitError)
+      return
+    }
+    onClose()
+  }
+
+  return (
+    <div className="dialog-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
+      <section className="capture-dialog" role="dialog" aria-modal="true" aria-labelledby="pin-change-title">
+        <header>
+          <span><span className="dialog-icon"><KeyRound size={18} /></span><span><strong id="pin-change-title">Cambiar PIN</strong><small>Actualiza el acceso personal de {member.name}.</small></span></span>
+          <button className="icon-button compact" type="button" onClick={onClose} aria-label="Cerrar"><X size={17} /></button>
+        </header>
+        <form onSubmit={submit}>
+          <label><span>PIN actual</span><input className="dialog-pin-input" type="password" inputMode="numeric" autoComplete="current-password" value={currentPin} onChange={(event) => updatePinValue(event.target.value, setCurrentPin)} autoFocus /></label>
+          <div className="pin-change-grid">
+            <label><span>PIN nuevo</span><input className="dialog-pin-input" type="password" inputMode="numeric" autoComplete="new-password" value={nextPin} onChange={(event) => updatePinValue(event.target.value, setNextPin)} /></label>
+            <label><span>Repite el PIN</span><input className="dialog-pin-input" type="password" inputMode="numeric" autoComplete="new-password" value={confirmation} onChange={(event) => updatePinValue(event.target.value, setConfirmation)} /></label>
+          </div>
+          {error && <p className="access-error" role="alert">{error}</p>}
+          <footer>
+            <button className="text-button" type="button" onClick={onClose}>Cancelar</button>
+            <button className="primary-action" type="submit" disabled={busy || currentPin.length !== pinLength || nextPin.length !== pinLength || confirmation.length !== pinLength}>
+              <Check size={16} /> {busy ? 'Guardando...' : 'Guardar PIN'}
+            </button>
           </footer>
         </form>
       </section>
