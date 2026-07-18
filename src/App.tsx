@@ -501,6 +501,7 @@ function App() {
   const [captureOpen, setCaptureOpen] = useState(false)
   const [projectEditor, setProjectEditor] = useState<{ mode: 'create' } | { mode: 'edit'; projectId: ProjectId } | null>(null)
   const [pinChangeOpen, setPinChangeOpen] = useState(false)
+  const [mobileAccountOpen, setMobileAccountOpen] = useState(false)
   const [search, setSearch] = useState('')
 
   const activeMember = activeMemberId ? getMember(activeMemberId) : null
@@ -536,11 +537,13 @@ function App() {
   const openProject = (projectId: ProjectId) => {
     updateState((current) => ({ ...current, selectedProjectId: projectId }))
     setProjectTab('overview')
+    setMobileAccountOpen(false)
     setSearch('')
     setView('project')
   }
 
   const selectView = (nextView: Exclude<MainView, 'project'>) => {
+    setMobileAccountOpen(false)
     setSearch('')
     setView(nextView)
   }
@@ -560,6 +563,7 @@ function App() {
   }
 
   const signOut = async () => {
+    setMobileAccountOpen(false)
     if (supabase) {
       await supabase.auth.signOut()
       return
@@ -838,12 +842,16 @@ function App() {
 
       <section className="workspace">
         <header className="workspace-topbar">
+          <div className="mobile-topbar-brand" aria-label="Studio32 Hub">
+            <span className="brand-mark">32</span>
+            <span><strong>Studio32</strong><small>Hub</small></span>
+          </div>
           <label className="global-search">
             <Search size={17} aria-hidden="true" />
             <input
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Buscar proyectos, tareas, decisiones..."
+              placeholder="Buscar en el Hub..."
               aria-label="Buscar en Studio32"
             />
             {search && (
@@ -854,11 +862,33 @@ function App() {
           </label>
           <div className="topbar-actions">
             {syncError && <span className="sync-warning"><AlertCircle size={15} /> {syncError}</span>}
-            <button className="primary-action" type="button" onClick={() => setCaptureOpen(true)} data-testid="quick-capture" aria-label="Capturar">
+            <button
+              className="mobile-account-trigger"
+              type="button"
+              onClick={() => setMobileAccountOpen((current) => !current)}
+              aria-label={`Cuenta de ${activeMember.name}`}
+              aria-expanded={mobileAccountOpen}
+            >
+              <Avatar member={activeMember} />
+            </button>
+            <button className="primary-action" type="button" onClick={() => { setMobileAccountOpen(false); setCaptureOpen(true) }} data-testid="quick-capture" aria-label="Capturar">
               <Plus size={17} />
               <span>Capturar</span>
             </button>
           </div>
+          {mobileAccountOpen && (
+            <section className="mobile-account-menu" aria-label={`Cuenta de ${activeMember.name}`}>
+              <header>
+                <Avatar member={activeMember} />
+                <span><strong>{activeMember.name}</strong><small>{activeMember.email}</small></span>
+                <button type="button" onClick={() => setMobileAccountOpen(false)} aria-label="Cerrar menú de cuenta"><X size={17} /></button>
+              </header>
+              {isSupabaseConfigured && (
+                <button type="button" onClick={() => { setMobileAccountOpen(false); setPinChangeOpen(true) }}><KeyRound size={17} /> Cambiar PIN</button>
+              )}
+              <button type="button" onClick={() => void signOut()}><LogOut size={17} /> Cerrar sesión</button>
+            </section>
+          )}
         </header>
 
         <main className="workspace-main">

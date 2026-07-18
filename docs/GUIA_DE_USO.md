@@ -18,6 +18,15 @@ La regla principal es sencilla: **si una informacion afecta al trabajo del equip
 
 Cada persona tiene una cuenta independiente. La informacion de trabajo, sin embargo, es compartida y se sincroniza entre los tres miembros mediante Supabase.
 
+### Uso desde movil
+
+En movil, la navegacion principal permanece fija en la parte inferior para poder usarla con una mano. La cabecera contiene la busqueda, la captura rapida y el acceso a la cuenta personal.
+
+- Usa el boton `+` de la cabecera para capturar sin abandonar la pantalla actual.
+- Pulsa tu avatar para cambiar el PIN o cerrar sesion.
+- Los formularios se abren como un panel inferior y pueden desplazarse si el teclado ocupa parte de la pantalla.
+- Las cuatro secciones principales siempre estan disponibles en la barra inferior.
+
 ## 3. Navegacion principal
 
 ### Hoy
