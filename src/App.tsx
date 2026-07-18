@@ -20,7 +20,6 @@ import {
   Link as LinkIcon,
   LogOut,
   MessageCircle,
-  MoreHorizontal,
   Pencil,
   Plus,
   Search,
@@ -507,6 +506,11 @@ function App() {
   const activeMember = activeMemberId ? getMember(activeMemberId) : null
   const selectedProject = getProject(state.projects, state.selectedProjectId)
 
+  const openProjectCreator = () => {
+    setMobileAccountOpen(false)
+    setProjectEditor({ mode: 'create' })
+  }
+
   const saveProject = (project: ProjectInput) => {
     if (projectEditor?.mode === 'edit') {
       const projectId = projectEditor.projectId
@@ -835,6 +839,7 @@ function App() {
         projects={state.projects}
         onNavigate={selectView}
         onOpenProject={openProject}
+        onCreateProject={openProjectCreator}
         onCapture={() => setCaptureOpen(true)}
         onChangePin={isSupabaseConfigured ? () => setPinChangeOpen(true) : undefined}
         onSignOut={signOut}
@@ -914,7 +919,7 @@ function App() {
             <ProjectsView
               state={state}
               onOpenProject={openProject}
-              onCreateProject={() => setProjectEditor({ mode: 'create' })}
+              onCreateProject={openProjectCreator}
               onEditProject={(projectId) => setProjectEditor({ mode: 'edit', projectId })}
             />
           ) : view === 'inbox' ? (
@@ -1200,6 +1205,7 @@ function Sidebar({
   projects,
   onNavigate,
   onOpenProject,
+  onCreateProject,
   onCapture,
   onChangePin,
   onSignOut,
@@ -1211,6 +1217,7 @@ function Sidebar({
   projects: Project[]
   onNavigate: (view: Exclude<MainView, 'project'>) => void
   onOpenProject: (projectId: ProjectId) => void
+  onCreateProject: () => void
   onCapture: () => void
   onChangePin?: () => void
   onSignOut: () => void | Promise<void>
@@ -1254,7 +1261,16 @@ function Sidebar({
       <div className="sidebar-projects">
         <div className="sidebar-section-title">
           <span>Proyectos activos</span>
-          <MoreHorizontal size={16} />
+          <button
+            className="sidebar-project-create"
+            type="button"
+            onClick={onCreateProject}
+            aria-label="Crear nuevo proyecto"
+            title="Nuevo proyecto"
+            data-testid="sidebar-new-project"
+          >
+            <Plus size={16} />
+          </button>
         </div>
         {projects.filter((project) => project.status !== 'Archivado' && project.status !== 'Completado').map((project) => (
           <button

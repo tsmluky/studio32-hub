@@ -228,6 +228,25 @@ p {
   text-transform: uppercase;
 }
 
+.sidebar-project-create {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  color: #a9bbb5;
+  background: transparent;
+  border: 0;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.sidebar-project-create:hover,
+.sidebar-project-create:focus-visible {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.09);
+}
+
 .project-dot {
   width: 7px;
   height: 7px;

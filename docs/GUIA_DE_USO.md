@@ -50,7 +50,7 @@ Muestra todos los espacios de trabajo, su estado, proximo hito y progreso basado
 - **Clientes:** encargos y proyectos de clientes.
 - **Archivo:** trabajos cerrados o material que conviene conservar como referencia.
 
-El boton **Nuevo proyecto** crea un espacio nuevo. Conviene definir:
+El boton **Nuevo proyecto** crea un espacio nuevo. En escritorio tambien puedes usar el boton `+` situado junto a **Proyectos activos** en el lateral. En movil, entra en **Proyectos** desde la barra inferior y pulsa **Nuevo proyecto**. Conviene definir:
 
 - Un nombre reconocible.
 - El cliente o contexto.
