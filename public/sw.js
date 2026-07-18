@@ -1,4 +1,4 @@
-const CACHE_NAME = 'studio32-hub-v3'
+const CACHE_NAME = 'studio32-hub-v4'
 const APP_SHELL = ['/', '/manifest.webmanifest', '/studio32-mark.svg']
 
 self.addEventListener('install', (event) => {

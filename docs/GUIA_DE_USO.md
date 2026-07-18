@@ -35,7 +35,11 @@ Al comenzar el dia, cada persona deberia pulsar **Mi actualizacion** y escribir 
 
 ### Proyectos
 
-Muestra todos los espacios de trabajo activos, su estado, proximo hito y progreso basado en tareas completadas.
+Muestra todos los espacios de trabajo, su estado, proximo hito y progreso basado en tareas completadas. Los proyectos se organizan en tres ramas:
+
+- **Studio32:** producto propio, procesos, administracion y mejoras internas.
+- **Clientes:** encargos y proyectos de clientes.
+- **Archivo:** trabajos cerrados o material que conviene conservar como referencia.
 
 El boton **Nuevo proyecto** crea un espacio nuevo. Conviene definir:
 
@@ -43,6 +47,9 @@ El boton **Nuevo proyecto** crea un espacio nuevo. Conviene definir:
 - El cliente o contexto.
 - El foco actual.
 - El siguiente hito concreto.
+- Los temas o frentes de trabajo separados por comas.
+
+Cada fila tiene un boton de edicion. El mismo control aparece dentro del proyecto como **Editar proyecto** y permite cambiar su rama, estado, foco, hito y temas. Cuando un trabajo deja de estar activo puede marcarse como `Completado` o `Archivado` sin perder su contenido.
 
 Al abrir un proyecto aparecen cinco pestañas internas:
 

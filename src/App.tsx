@@ -21,10 +21,12 @@ import {
   LogOut,
   MessageCircle,
   MoreHorizontal,
+  Pencil,
   Plus,
   Search,
   Send,
   Sparkles,
+  Tags,
   Users,
   X,
 } from 'lucide-react'
@@ -41,6 +43,7 @@ type CaptureType = 'task' | 'note' | 'decision' | 'link'
 type UpdateKind = 'message' | 'note' | 'decision'
 type BoardLane = 'ideas' | 'decided' | 'doing'
 type TeamAvailability = 'focus' | 'available' | 'blocked' | 'away'
+type ProjectArea = 'studio32' | 'clients' | 'archive'
 
 type Member = {
   id: MemberId
@@ -55,10 +58,12 @@ type Project = {
   id: ProjectId
   name: string
   client: string
+  area: ProjectArea
   status: string
   focus: string
   nextMilestone: string
   accent: string
+  topics: string[]
 }
 
 type Task = {
@@ -131,6 +136,8 @@ type CapturePayload = {
   priority?: Task['priority']
 }
 
+type ProjectInput = Omit<Project, 'id' | 'accent'>
+
 type HubState = {
   selectedProjectId: ProjectId
   projects: Project[]
@@ -156,10 +163,12 @@ const initialProjects: Project[] = [
     id: 'studio32',
     name: 'Studio32 Hub',
     client: 'Proyecto interno',
+    area: 'studio32',
     status: 'Activo',
     focus: 'Construir y mejorar el espacio de trabajo del estudio.',
     nextMilestone: 'Primera semana de uso real',
     accent: '#2f6f73',
+    topics: [],
   },
 ]
 
@@ -202,12 +211,33 @@ const availabilityLabels: Record<TeamAvailability, string> = {
   away: 'Fuera',
 }
 
+const projectAreaLabels: Record<ProjectArea, string> = {
+  studio32: 'Studio32',
+  clients: 'Clientes',
+  archive: 'Archivo',
+}
+
+const projectStatusOptions = ['Activo', 'En pausa', 'Bloqueado', 'Completado', 'Archivado']
+
+function normalizeProject(project: Project): Project {
+  const area = project.area === 'clients' || project.area === 'archive' || project.area === 'studio32'
+    ? project.area
+    : project.id === 'studio32' ? 'studio32' : 'clients'
+  return {
+    ...project,
+    area,
+    topics: Array.isArray(project.topics) ? project.topics.filter((topic) => typeof topic === 'string' && topic.trim()) : [],
+  }
+}
+
 function normalizeHubState(payload: unknown): HubState {
   if (!payload || typeof payload !== 'object') return initialState
   const normalized = { ...initialState, ...payload } as HubState
   return {
     ...normalized,
-    projects: Array.isArray(normalized.projects) && normalized.projects.length ? normalized.projects : initialProjects,
+    projects: Array.isArray(normalized.projects) && normalized.projects.length
+      ? normalized.projects.map(normalizeProject)
+      : initialProjects,
   }
 }
 
@@ -469,14 +499,24 @@ function App() {
   const [view, setView] = useState<MainView>('today')
   const [projectTab, setProjectTab] = useState<ProjectTab>('overview')
   const [captureOpen, setCaptureOpen] = useState(false)
-  const [projectCreateOpen, setProjectCreateOpen] = useState(false)
+  const [projectEditor, setProjectEditor] = useState<{ mode: 'create' } | { mode: 'edit'; projectId: ProjectId } | null>(null)
   const [pinChangeOpen, setPinChangeOpen] = useState(false)
   const [search, setSearch] = useState('')
 
   const activeMember = activeMemberId ? getMember(activeMemberId) : null
   const selectedProject = getProject(state.projects, state.selectedProjectId)
 
-  const createProject = (project: Omit<Project, 'id' | 'accent'>) => {
+  const saveProject = (project: ProjectInput) => {
+    if (projectEditor?.mode === 'edit') {
+      const projectId = projectEditor.projectId
+      updateState((current) => ({
+        ...current,
+        projects: current.projects.map((item) => item.id === projectId ? { ...item, ...project } : item),
+      }))
+      setProjectEditor(null)
+      return
+    }
+
     const accents = ['#2f6f73', '#486ca8', '#9a5a32', '#7a5b8e', '#68733f']
     const nextProject: Project = {
       ...project,
@@ -488,7 +528,7 @@ function App() {
       projects: [...current.projects, nextProject],
       selectedProjectId: nextProject.id,
     }))
-    setProjectCreateOpen(false)
+    setProjectEditor(null)
     setProjectTab('overview')
     setView('project')
   }
@@ -841,7 +881,12 @@ function App() {
               onRemoveAgendaEvent={removeAgendaEvent}
             />
           ) : view === 'projects' ? (
-            <ProjectsView state={state} onOpenProject={openProject} onCreateProject={() => setProjectCreateOpen(true)} />
+            <ProjectsView
+              state={state}
+              onOpenProject={openProject}
+              onCreateProject={() => setProjectEditor({ mode: 'create' })}
+              onEditProject={(projectId) => setProjectEditor({ mode: 'edit', projectId })}
+            />
           ) : view === 'inbox' ? (
             <InboxView
               items={state.inbox}
@@ -865,6 +910,7 @@ function App() {
               onAddBoardItem={addBoardItem}
               onAdvanceBoardItem={advanceBoardItem}
               onCapture={() => setCaptureOpen(true)}
+              onEditProject={() => setProjectEditor({ mode: 'edit', projectId: selectedProject.id })}
             />
           )}
         </main>
@@ -879,10 +925,11 @@ function App() {
           onSubmit={addCapture}
         />
       )}
-      {projectCreateOpen && (
-        <ProjectCreateDialog
-          onClose={() => setProjectCreateOpen(false)}
-          onSubmit={createProject}
+      {projectEditor && (
+        <ProjectDialog
+          project={projectEditor.mode === 'edit' ? getProject(state.projects, projectEditor.projectId) : undefined}
+          onClose={() => setProjectEditor(null)}
+          onSubmit={saveProject}
         />
       )}
       {pinChangeOpen && activeMember && (
@@ -1179,7 +1226,7 @@ function Sidebar({
           <span>Proyectos activos</span>
           <MoreHorizontal size={16} />
         </div>
-        {projects.map((project) => (
+        {projects.filter((project) => project.status !== 'Archivado' && project.status !== 'Completado').map((project) => (
           <button
             key={project.id}
             type="button"
@@ -1358,7 +1405,7 @@ function TodayView({
       <section className="projects-overview">
         <SectionHeader icon={<FolderKanban size={18} />} title="Pulso de proyectos" action={formatOpenTasks(openTasks.length)} />
         <div className="project-pulse-grid">
-          {state.projects.map((project) => {
+          {state.projects.filter((project) => project.status !== 'Archivado' && project.status !== 'Completado').map((project) => {
             const projectTasks = state.tasks.filter((task) => task.projectId === project.id && task.status !== 'done')
             const progress = getProjectProgress(state, project.id)
             return (
@@ -1410,19 +1457,29 @@ function ProjectsView({
   state,
   onOpenProject,
   onCreateProject,
+  onEditProject,
 }: {
   state: HubState
   onOpenProject: (projectId: ProjectId) => void
   onCreateProject: () => void
+  onEditProject: (projectId: ProjectId) => void
 }) {
+  const areas = (Object.keys(projectAreaLabels) as ProjectArea[])
+  const activeProjects = state.projects.filter((project) => project.status !== 'Archivado' && project.status !== 'Completado').length
   return (
     <div className="page">
       <PageHeading
         eyebrow="Trabajo activo"
         title="Proyectos"
-        description="Estado, próximo hito y carga del estudio en una sola vista."
+        description="Trabajo de clientes, proyectos internos y memoria del estudio, cada cosa en su rama."
         meta={<button className="secondary-action" type="button" onClick={onCreateProject}><Plus size={16} /> Nuevo proyecto</button>}
       />
+      <div className="project-branch-summary" aria-label="Ramas del estudio">
+        {areas.map((area) => (
+          <span key={area}><strong>{state.projects.filter((project) => project.area === area).length}</strong><small>{projectAreaLabels[area]}</small></span>
+        ))}
+        <span className="project-active-summary"><strong>{activeProjects}</strong><small>En circulación</small></span>
+      </div>
       <section className="project-table surface">
         <div className="project-table-head">
           <span>Proyecto</span>
@@ -1431,29 +1488,37 @@ function ProjectsView({
           <span>Progreso</span>
           <span />
         </div>
-        {state.projects.map((project) => {
-          const projectTasks = state.tasks.filter((task) => task.projectId === project.id && task.status !== 'done')
-          const owners = [...new Set(state.tasks.filter((task) => task.projectId === project.id).map((task) => task.ownerId))]
-          const progress = getProjectProgress(state, project.id)
+        {areas.map((area) => {
+          const areaProjects = state.projects.filter((project) => project.area === area)
+          if (!areaProjects.length) return null
           return (
-            <button className="project-table-row" key={project.id} type="button" onClick={() => onOpenProject(project.id)}>
-              <span className="project-name-cell">
-                <i style={{ background: project.accent }} />
-                <span><strong>{project.name}</strong><small>{project.client}</small></span>
-              </span>
-              <span><StatusBadge>{project.status}</StatusBadge></span>
-              <span className="milestone-cell"><strong>{project.nextMilestone}</strong><small>{formatOpenTasks(projectTasks.length)}</small></span>
-              <span className="project-progress-cell">
-                <span><i style={{ width: `${progress}%`, background: project.accent }} /></span>
-                <small>{progress}%</small>
-              </span>
-              <span className="project-owner-cell">
-                <span className="avatar-stack small">
-                  {owners.map((ownerId) => <Avatar key={ownerId} member={getMember(ownerId)} />)}
-                </span>
-                <ChevronRight size={18} />
-              </span>
-            </button>
+            <div className="project-branch" key={area}>
+              <div className="project-branch-head"><span>{projectAreaLabels[area]}</span><small>{areaProjects.length} {areaProjects.length === 1 ? 'proyecto' : 'proyectos'}</small></div>
+              {areaProjects.map((project) => {
+                const projectTasks = state.tasks.filter((task) => task.projectId === project.id && task.status !== 'done')
+                const owners = [...new Set(state.tasks.filter((task) => task.projectId === project.id).map((task) => task.ownerId))]
+                const progress = getProjectProgress(state, project.id)
+                return (
+                  <article className="project-table-row" key={project.id}>
+                    <button className="project-name-cell project-open-cell" type="button" onClick={() => onOpenProject(project.id)}>
+                      <i style={{ background: project.accent }} />
+                      <span><strong>{project.name}</strong><small>{project.client}{project.topics.length ? ` · ${project.topics.join(', ')}` : ''}</small></span>
+                    </button>
+                    <span><StatusBadge>{project.status}</StatusBadge></span>
+                    <span className="milestone-cell"><strong>{project.nextMilestone}</strong><small>{formatOpenTasks(projectTasks.length)}</small></span>
+                    <span className="project-progress-cell">
+                      <span><i style={{ width: `${progress}%`, background: project.accent }} /></span>
+                      <small>{progress}%</small>
+                    </span>
+                    <span className="project-row-actions">
+                      <span className="avatar-stack small">{owners.map((ownerId) => <Avatar key={ownerId} member={getMember(ownerId)} />)}</span>
+                      <button className="icon-button compact" type="button" onClick={() => onEditProject(project.id)} aria-label={`Editar ${project.name}`} title="Editar proyecto"><Pencil size={15} /></button>
+                      <button className="icon-button compact" type="button" onClick={() => onOpenProject(project.id)} aria-label={`Abrir ${project.name}`} title="Abrir proyecto"><ChevronRight size={17} /></button>
+                    </span>
+                  </article>
+                )
+              })}
+            </div>
           )
         })}
       </section>
@@ -1522,7 +1587,7 @@ function InboxRow({
       </span>
       <span className="inbox-actions">
         <select value={destination} onChange={(event) => setDestination(event.target.value as ProjectId)} aria-label={`Destino de ${item.title}`}>
-          {projects.map((project) => <option key={project.id} value={project.id}>{project.name}</option>)}
+          {projects.filter((project) => project.status !== 'Archivado').map((project) => <option key={project.id} value={project.id}>{project.name}</option>)}
         </select>
         <button className="small-primary" type="button" onClick={() => onMove(item.id, destination)}>Guardar</button>
         <button className="icon-button compact" type="button" onClick={() => onDismiss(item.id)} aria-label={`Descartar ${item.title}`}><X size={16} /></button>
@@ -1586,6 +1651,7 @@ function ProjectView({
   onAddBoardItem,
   onAdvanceBoardItem,
   onCapture,
+  onEditProject,
 }: {
   project: Project
   state: HubState
@@ -1598,6 +1664,7 @@ function ProjectView({
   onAddBoardItem: (projectId: ProjectId, title: string) => void
   onAdvanceBoardItem: (itemId: string) => void
   onCapture: () => void
+  onEditProject: () => void
 }) {
   const tasks = state.tasks.filter((task) => task.projectId === project.id)
   const updates = state.updates.filter((update) => update.projectId === project.id)
@@ -1620,19 +1687,23 @@ function ProjectView({
       <button className="back-button" type="button" onClick={onBack}><ArrowLeft size={16} /> Proyectos</button>
       <section className="project-header" style={{ borderTopColor: project.accent }}>
         <div className="project-header-main">
-          <span className="eyebrow">{project.client}</span>
+          <span className="eyebrow">{projectAreaLabels[project.area]} · {project.client}</span>
           <h1>{project.name}</h1>
           <p>{project.focus}</p>
         </div>
-        <div className="project-header-stats">
-          <span><small>Estado</small><strong>{project.status}</strong></span>
-          <span><small>Progreso</small><strong>{progress}%</strong></span>
-          <span><small>Abiertas</small><strong>{openTasks.length}</strong></span>
+        <div className="project-header-side">
+          <button className="project-edit-action" type="button" onClick={onEditProject}><Pencil size={15} /> Editar proyecto</button>
+          <div className="project-header-stats">
+            <span><small>Estado</small><strong>{project.status}</strong></span>
+            <span><small>Progreso</small><strong>{progress}%</strong></span>
+            <span><small>Abiertas</small><strong>{openTasks.length}</strong></span>
+          </div>
         </div>
       </section>
 
       <div className="project-context-bar">
         <span><Clock3 size={16} /><small>Próximo hito</small><strong>{project.nextMilestone}</strong></span>
+        <span className="project-context-topics"><Tags size={16} /><small>Temas</small><strong>{project.topics.length ? project.topics.join(' · ') : 'Sin temas todavía'}</strong></span>
         <span className="project-context-people"><Users size={16} /><small>Equipo</small><span className="avatar-stack small">{members.map((member) => <Avatar key={member.id} member={member} />)}</span></span>
       </div>
 
@@ -1827,7 +1898,7 @@ function SearchResults({
   onOpenProject: (projectId: ProjectId) => void
   onToggleTask: (taskId: string) => void
 }) {
-  const matchingProjects = state.projects.filter((project) => `${project.name} ${project.client} ${project.focus}`.toLocaleLowerCase('es').includes(term))
+  const matchingProjects = state.projects.filter((project) => `${project.name} ${project.client} ${project.focus} ${projectAreaLabels[project.area]} ${project.topics.join(' ')}`.toLocaleLowerCase('es').includes(term))
   const matchingTasks = state.tasks.filter((task) => task.title.toLocaleLowerCase('es').includes(term))
   const matchingUpdates = state.updates.filter((update) => update.body.toLocaleLowerCase('es').includes(term))
   const matchingResources = state.resources.filter((resource) => resource.title.toLocaleLowerCase('es').includes(term))
@@ -1858,17 +1929,22 @@ function SearchResults({
   )
 }
 
-function ProjectCreateDialog({
+function ProjectDialog({
+  project,
   onClose,
   onSubmit,
 }: {
+  project?: Project
   onClose: () => void
-  onSubmit: (project: Omit<Project, 'id' | 'accent'>) => void
+  onSubmit: (project: ProjectInput) => void
 }) {
-  const [name, setName] = useState('')
-  const [client, setClient] = useState('')
-  const [focus, setFocus] = useState('')
-  const [nextMilestone, setNextMilestone] = useState('')
+  const [name, setName] = useState(project?.name ?? '')
+  const [client, setClient] = useState(project?.client ?? '')
+  const [area, setArea] = useState<ProjectArea>(project?.area ?? 'clients')
+  const [status, setStatus] = useState(project?.status ?? 'Activo')
+  const [focus, setFocus] = useState(project?.focus ?? '')
+  const [nextMilestone, setNextMilestone] = useState(project?.nextMilestone ?? '')
+  const [topics, setTopics] = useState(project?.topics.join(', ') ?? '')
 
   const submit = (event: FormEvent) => {
     event.preventDefault()
@@ -1876,27 +1952,46 @@ function ProjectCreateDialog({
     onSubmit({
       name: name.trim(),
       client: client.trim() || 'Proyecto interno',
-      status: 'Activo',
+      area,
+      status,
       focus: focus.trim() || 'Pendiente de definir',
       nextMilestone: nextMilestone.trim() || 'Pendiente de definir',
+      topics: [...new Set(topics.split(',').map((topic) => topic.trim()).filter(Boolean))],
     })
   }
 
   return (
     <div className="dialog-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
-      <section className="capture-dialog" role="dialog" aria-modal="true" aria-labelledby="project-create-title">
+      <section className="capture-dialog project-dialog" role="dialog" aria-modal="true" aria-labelledby="project-dialog-title">
         <header>
-          <span><span className="dialog-icon"><FolderKanban size={18} /></span><span><strong id="project-create-title">Nuevo proyecto</strong><small>Crea el espacio y completa los detalles esenciales.</small></span></span>
+          <span><span className="dialog-icon"><FolderKanban size={18} /></span><span><strong id="project-dialog-title">{project ? 'Editar proyecto' : 'Nuevo proyecto'}</strong><small>{project ? 'Actualiza la situación real del trabajo.' : 'Crea el espacio y sitúalo en su rama.'}</small></span></span>
           <button className="icon-button compact" type="button" onClick={onClose} aria-label="Cerrar"><X size={17} /></button>
         </header>
         <form onSubmit={submit}>
-          <label><span>Nombre</span><input autoFocus value={name} onChange={(event) => setName(event.target.value)} placeholder="Nombre del proyecto" /></label>
-          <label><span>Cliente o contexto</span><input value={client} onChange={(event) => setClient(event.target.value)} placeholder="Cliente, proyecto interno..." /></label>
+          <div className="project-area-options" role="group" aria-label="Rama del proyecto">
+            {(Object.keys(projectAreaLabels) as ProjectArea[]).map((option) => (
+              <button key={option} type="button" className={area === option ? 'is-active' : ''} onClick={() => setArea(option)}>{projectAreaLabels[option]}</button>
+            ))}
+          </div>
+          <div className="project-dialog-grid">
+            <label><span>Nombre</span><input autoFocus value={name} onChange={(event) => setName(event.target.value)} placeholder="Nombre del proyecto" data-testid="project-name" /></label>
+            <label><span>Cliente o contexto</span><input value={client} onChange={(event) => setClient(event.target.value)} placeholder="Cliente, proyecto interno..." /></label>
+          </div>
+          <div className="project-dialog-grid status-grid">
+            <label>
+              <span>Estado</span>
+              <select value={status} onChange={(event) => setStatus(event.target.value)}>
+                {!projectStatusOptions.includes(status) && <option value={status}>{status}</option>}
+                {projectStatusOptions.map((option) => <option key={option} value={option}>{option}</option>)}
+              </select>
+            </label>
+            <label><span>Próximo hito</span><input value={nextMilestone} onChange={(event) => setNextMilestone(event.target.value)} placeholder="Siguiente entrega o revisión" /></label>
+          </div>
           <label><span>Foco actual</span><textarea value={focus} onChange={(event) => setFocus(event.target.value)} placeholder="Qué necesita avanzar ahora" rows={2} /></label>
-          <label><span>Próximo hito</span><input value={nextMilestone} onChange={(event) => setNextMilestone(event.target.value)} placeholder="Siguiente entrega o revisión" /></label>
+          <label><span>Temas <small>separados por comas</small></span><input value={topics} onChange={(event) => setTopics(event.target.value)} placeholder="Estrategia, diseño, web, entregas..." /></label>
           <footer>
             <button className="text-button" type="button" onClick={onClose}>Cancelar</button>
-            <button className="primary-action" type="submit" disabled={!name.trim()}><Check size={16} /> Crear proyecto</button>
+            <button className="primary-action" type="submit" disabled={!name.trim()} data-testid="project-submit"><Check size={16} /> {project ? 'Guardar cambios' : 'Crear proyecto'}</button>
           </footer>
         </form>
       </section>
@@ -2105,7 +2200,7 @@ function CaptureDialog({
             <span>Guardar en</span>
             <select value={destination} onChange={(event) => setDestination(event.target.value as 'inbox' | ProjectId)}>
               <option value="inbox">Inbox · ordenar después</option>
-              {projects.map((project) => <option value={project.id} key={project.id}>{project.name}</option>)}
+              {projects.filter((project) => project.status !== 'Archivado' || project.id === selectedProjectId).map((project) => <option value={project.id} key={project.id}>{project.name}</option>)}
             </select>
           </label>
           {type === 'task' && destination !== 'inbox' && (
@@ -2239,8 +2334,8 @@ function Avatar({ member, size }: { member: Member; size?: 'large' }) {
   return <span className={`avatar ${size === 'large' ? 'avatar-large' : ''}`} style={{ background: member.color }} title={member.name}>{member.initials}</span>
 }
 
-function StatusBadge({ children }: { children: ReactNode }) {
-  return <span className="status-badge">{children}</span>
+function StatusBadge({ children }: { children: string }) {
+  return <span className="status-badge" data-status={children}>{children}</span>
 }
 
 function EmptyState({ icon, title, body }: { icon: ReactNode; title: string; body: string }) {
