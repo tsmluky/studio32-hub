@@ -1,0 +1,18 @@
+{
+  "name": "Studio32 Hub",
+  "short_name": "Studio32",
+  "description": "Espacio interno de trabajo para proyectos, chat, notas, tareas y pizarra.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f6f5f0",
+  "theme_color": "#2f6f73",
+  "icons": [
+    {
+      "src": "/studio32-mark.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
