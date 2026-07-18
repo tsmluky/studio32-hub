@@ -33,7 +33,7 @@ import type { FormEvent, ReactNode } from 'react'
 import { isSupabaseConfigured, pinToPassword, supabase } from './supabase'
 
 type MemberId = 'juanma' | 'pancho' | 'gonzalo'
-type ProjectId = 'studio32' | 'atlas' | 'archivo'
+type ProjectId = string
 type MainView = 'today' | 'projects' | 'inbox' | 'library' | 'project'
 type ProjectTab = 'overview' | 'tasks' | 'conversation' | 'board' | 'files'
 type TaskStatus = 'todo' | 'doing' | 'done'
@@ -133,6 +133,7 @@ type CapturePayload = {
 
 type HubState = {
   selectedProjectId: ProjectId
+  projects: Project[]
   tasks: Task[]
   updates: Update[]
   resources: Resource[]
@@ -150,259 +151,28 @@ const members: Member[] = [
   { id: 'gonzalo', name: 'Gonzalo', initials: 'GZ', role: 'Equipo Studio32', email: 'gonzalo@studio32.es', color: '#486ca8' },
 ]
 
-const projects: Project[] = [
+const initialProjects: Project[] = [
   {
     id: 'studio32',
     name: 'Studio32 Hub',
     client: 'Proyecto interno',
-    status: 'En definición',
-    focus: 'Convertir el Hub en el primer lugar de trabajo del día.',
-    nextMilestone: 'Probar el flujo diario con los 3 miembros',
+    status: 'Activo',
+    focus: 'Construir y mejorar el espacio de trabajo del estudio.',
+    nextMilestone: 'Primera semana de uso real',
     accent: '#2f6f73',
-  },
-  {
-    id: 'atlas',
-    name: 'Cliente Atlas',
-    client: 'Identidad y campaña',
-    status: 'En producción',
-    focus: 'Cerrar referencias, entregables y calendario de revisión.',
-    nextMilestone: 'Enviar preview antes del viernes',
-    accent: '#486ca8',
-  },
-  {
-    id: 'archivo',
-    name: 'Archivo Vivo',
-    client: 'Biblioteca del estudio',
-    status: 'Siempre abierto',
-    focus: 'Guardar procesos y referencias que merece la pena reutilizar.',
-    nextMilestone: 'Migrar 10 recursos clave',
-    accent: '#9a5a32',
   },
 ]
 
 const initialState: HubState = {
   selectedProjectId: 'studio32',
-  tasks: [
-    {
-      id: 't-1',
-      projectId: 'studio32',
-      title: 'Definir las cinco cosas que siempre deben estar visibles',
-      status: 'doing',
-      ownerId: 'juanma',
-      due: 'Hoy · 11:00',
-      priority: 'Alta',
-    },
-    {
-      id: 't-2',
-      projectId: 'studio32',
-      title: 'Preparar el acceso privado y los datos compartidos',
-      status: 'todo',
-      ownerId: 'gonzalo',
-      due: 'Hoy · 16:00',
-      priority: 'Alta',
-    },
-    {
-      id: 't-3',
-      projectId: 'studio32',
-      title: 'Crear la plantilla de revisión semanal',
-      status: 'todo',
-      ownerId: 'pancho',
-      due: 'Mañana',
-      priority: 'Media',
-    },
-    {
-      id: 't-4',
-      projectId: 'atlas',
-      title: 'Confirmar el orden de las piezas con el cliente',
-      status: 'doing',
-      ownerId: 'pancho',
-      due: 'Hoy · 13:30',
-      priority: 'Alta',
-      blocked: true,
-    },
-    {
-      id: 't-5',
-      projectId: 'atlas',
-      title: 'Preparar PDF de la segunda ronda',
-      status: 'todo',
-      ownerId: 'gonzalo',
-      due: 'Viernes',
-      priority: 'Media',
-    },
-    {
-      id: 't-6',
-      projectId: 'archivo',
-      title: 'Seleccionar cinco referencias de presentaciones',
-      status: 'todo',
-      ownerId: 'juanma',
-      due: 'Esta semana',
-      priority: 'Baja',
-    },
-    {
-      id: 't-7',
-      projectId: 'studio32',
-      title: 'Acordar el objetivo y el alcance inicial del Hub',
-      status: 'done',
-      ownerId: 'juanma',
-      due: 'Completada',
-      priority: 'Alta',
-    },
-    {
-      id: 't-8',
-      projectId: 'studio32',
-      title: 'Diseñar la estructura de navegación principal',
-      status: 'done',
-      ownerId: 'gonzalo',
-      due: 'Completada',
-      priority: 'Media',
-    },
-    {
-      id: 't-9',
-      projectId: 'atlas',
-      title: 'Aprobar el concepto creativo',
-      status: 'done',
-      ownerId: 'pancho',
-      due: 'Completada',
-      priority: 'Alta',
-    },
-    {
-      id: 't-10',
-      projectId: 'atlas',
-      title: 'Seleccionar la dirección de arte',
-      status: 'done',
-      ownerId: 'juanma',
-      due: 'Completada',
-      priority: 'Media',
-    },
-    {
-      id: 't-11',
-      projectId: 'atlas',
-      title: 'Entregar la primera ronda de piezas',
-      status: 'done',
-      ownerId: 'gonzalo',
-      due: 'Completada',
-      priority: 'Alta',
-    },
-    {
-      id: 't-12',
-      projectId: 'archivo',
-      title: 'Crear la estructura de la biblioteca',
-      status: 'done',
-      ownerId: 'gonzalo',
-      due: 'Completada',
-      priority: 'Media',
-    },
-    {
-      id: 't-13',
-      projectId: 'archivo',
-      title: 'Migrar las presentaciones de marca principales',
-      status: 'done',
-      ownerId: 'pancho',
-      due: 'Completada',
-      priority: 'Media',
-    },
-  ],
-  updates: [
-    {
-      id: 'u-1',
-      projectId: 'studio32',
-      authorId: 'juanma',
-      kind: 'decision',
-      body: 'El Hub se organizará alrededor de Hoy, Proyectos, Inbox y Biblioteca.',
-      createdAt: 'Hoy · 09:12',
-    },
-    {
-      id: 'u-2',
-      projectId: 'studio32',
-      authorId: 'pancho',
-      kind: 'message',
-      body: 'La revisión semanal debería terminar con responsables y siguientes pasos claros.',
-      createdAt: 'Hoy · 09:18',
-    },
-    {
-      id: 'u-3',
-      projectId: 'atlas',
-      authorId: 'pancho',
-      kind: 'message',
-      body: 'El PDF está listo. Falta que el cliente confirme el orden de las piezas.',
-      createdAt: 'Hoy · 10:04',
-    },
-    {
-      id: 'u-4',
-      projectId: 'archivo',
-      authorId: 'gonzalo',
-      kind: 'note',
-      body: 'Añadidas las referencias de dirección de arte de la campaña Norte.',
-      createdAt: 'Ayer · 18:20',
-    },
-  ],
-  resources: [
-    {
-      id: 'r-1',
-      projectId: 'studio32',
-      title: 'Carpeta Drive · Studio32 interno',
-      type: 'Drive',
-      url: 'https://drive.google.com',
-      updatedAt: 'Hoy',
-    },
-    {
-      id: 'r-2',
-      projectId: 'studio32',
-      title: 'Procesos actuales del estudio',
-      type: 'Notion',
-      url: 'https://notion.so',
-      updatedAt: 'Ayer',
-    },
-    {
-      id: 'r-3',
-      projectId: 'atlas',
-      title: 'Atlas · Presentación R02.pdf',
-      type: 'PDF',
-      url: '#',
-      updatedAt: 'Hoy',
-    },
-    {
-      id: 'r-4',
-      projectId: 'archivo',
-      title: 'Referencias de presentaciones',
-      type: 'Drive',
-      url: 'https://drive.google.com',
-      updatedAt: 'Lunes',
-    },
-  ],
-  inbox: [
-    {
-      id: 'i-1',
-      type: 'link',
-      title: 'Referencia de navegación para proyectos',
-      detail: 'https://basecamp.com',
-      authorId: 'gonzalo',
-      createdAt: 'Hace 25 min',
-    },
-    {
-      id: 'i-2',
-      type: 'note',
-      title: 'Revisar cómo nombramos las entregas finales',
-      authorId: 'pancho',
-      createdAt: 'Ayer',
-    },
-  ],
-  boardItems: [
-    { id: 'b-1', projectId: 'studio32', title: 'Vista diaria realmente útil', lane: 'doing', authorId: 'juanma' },
-    { id: 'b-2', projectId: 'studio32', title: 'Acceso por correo sin contraseña', lane: 'decided', authorId: 'gonzalo' },
-    { id: 'b-3', projectId: 'studio32', title: 'Resumen automático de la semana', lane: 'ideas', authorId: 'pancho' },
-    { id: 'b-4', projectId: 'atlas', title: 'Versión vertical de la campaña', lane: 'ideas', authorId: 'juanma' },
-  ],
-  teamCheckIns: [
-    { memberId: 'juanma', availability: 'focus', focus: 'Definir la información imprescindible de la vista diaria', updatedAt: 'Hoy · 09:05' },
-    { memberId: 'pancho', availability: 'blocked', focus: 'Cerrar el orden de las piezas de Atlas con el cliente', updatedAt: 'Hoy · 09:18' },
-    { memberId: 'gonzalo', availability: 'available', focus: 'Preparar el PDF de la segunda ronda de Atlas', updatedAt: 'Hoy · 09:12' },
-  ],
-  agendaEvents: [
-    { id: 'a-1', time: '10:00', title: 'Puesta al día Studio32', meta: '30 min · Equipo' },
-    { id: 'a-2', time: '12:30', title: 'Revisión interna Atlas', meta: '45 min · Pancho y Gonzalo' },
-    { id: 'a-3', time: '17:00', title: 'Bloque de trabajo profundo', meta: '60 min · Sin reuniones' },
-  ],
+  projects: initialProjects,
+  tasks: [],
+  updates: [],
+  resources: [],
+  inbox: [],
+  boardItems: [],
+  teamCheckIns: [],
+  agendaEvents: [],
 }
 
 const navigation: Array<{ id: Exclude<MainView, 'project'>; label: string; icon: typeof Home }> = [
@@ -434,7 +204,11 @@ const availabilityLabels: Record<TeamAvailability, string> = {
 
 function normalizeHubState(payload: unknown): HubState {
   if (!payload || typeof payload !== 'object') return initialState
-  return { ...initialState, ...payload } as HubState
+  const normalized = { ...initialState, ...payload } as HubState
+  return {
+    ...normalized,
+    projects: Array.isArray(normalized.projects) && normalized.projects.length ? normalized.projects : initialProjects,
+  }
 }
 
 function usePersistentHubState(activeMemberId: MemberId | null) {
@@ -445,13 +219,13 @@ function usePersistentHubState(activeMemberId: MemberId | null) {
 
   useEffect(() => {
     if (isSupabaseConfigured || !activeMemberId) return
-    const stored = localStorage.getItem('studio32-hub-v4')
+    const stored = localStorage.getItem('studio32-hub-v5')
     if (!stored) return
 
     try {
       setState({ ...initialState, ...JSON.parse(stored) } as HubState)
     } catch {
-      localStorage.removeItem('studio32-hub-v4')
+      localStorage.removeItem('studio32-hub-v5')
     }
   }, [activeMemberId])
 
@@ -596,7 +370,7 @@ function usePersistentHubState(activeMemberId: MemberId | null) {
         const expectedRevision = revisionRef.current
         void persistSharedState(updater, next, expectedRevision)
       } else {
-        localStorage.setItem('studio32-hub-v4', JSON.stringify(next))
+        localStorage.setItem('studio32-hub-v5', JSON.stringify(next))
       }
       return next
     })
@@ -609,7 +383,7 @@ function getMember(id: MemberId) {
   return members.find((member) => member.id === id) ?? members[0]
 }
 
-function getProject(id: ProjectId) {
+function getProject(projects: Project[], id: ProjectId) {
   return projects.find((project) => project.id === id) ?? projects[0]
 }
 
@@ -695,11 +469,29 @@ function App() {
   const [view, setView] = useState<MainView>('today')
   const [projectTab, setProjectTab] = useState<ProjectTab>('overview')
   const [captureOpen, setCaptureOpen] = useState(false)
+  const [projectCreateOpen, setProjectCreateOpen] = useState(false)
   const [pinChangeOpen, setPinChangeOpen] = useState(false)
   const [search, setSearch] = useState('')
 
   const activeMember = activeMemberId ? getMember(activeMemberId) : null
-  const selectedProject = getProject(state.selectedProjectId)
+  const selectedProject = getProject(state.projects, state.selectedProjectId)
+
+  const createProject = (project: Omit<Project, 'id' | 'accent'>) => {
+    const accents = ['#2f6f73', '#486ca8', '#9a5a32', '#7a5b8e', '#68733f']
+    const nextProject: Project = {
+      ...project,
+      id: makeId('project'),
+      accent: accents[state.projects.length % accents.length],
+    }
+    updateState((current) => ({
+      ...current,
+      projects: [...current.projects, nextProject],
+      selectedProjectId: nextProject.id,
+    }))
+    setProjectCreateOpen(false)
+    setProjectTab('overview')
+    setView('project')
+  }
 
   const openProject = (projectId: ProjectId) => {
     updateState((current) => ({ ...current, selectedProjectId: projectId }))
@@ -791,11 +583,13 @@ function App() {
     if (!activeMemberId || !focus.trim()) return
     updateState((current) => ({
       ...current,
-      teamCheckIns: current.teamCheckIns.map((checkIn) =>
-        checkIn.memberId === activeMemberId
-          ? { ...checkIn, availability, focus: focus.trim(), updatedAt: 'Ahora' }
-          : checkIn,
-      ),
+      teamCheckIns: current.teamCheckIns.some((checkIn) => checkIn.memberId === activeMemberId)
+        ? current.teamCheckIns.map((checkIn) =>
+            checkIn.memberId === activeMemberId
+              ? { ...checkIn, availability, focus: focus.trim(), updatedAt: 'Ahora' }
+              : checkIn,
+          )
+        : [...current.teamCheckIns, { memberId: activeMemberId, availability, focus: focus.trim(), updatedAt: 'Ahora' }],
     }))
   }
 
@@ -994,6 +788,7 @@ function App() {
         activeMember={activeMember}
         inboxCount={state.inbox.length}
         selectedProjectId={state.selectedProjectId}
+        projects={state.projects}
         onNavigate={selectView}
         onOpenProject={openProject}
         onCapture={() => setCaptureOpen(true)}
@@ -1046,10 +841,11 @@ function App() {
               onRemoveAgendaEvent={removeAgendaEvent}
             />
           ) : view === 'projects' ? (
-            <ProjectsView state={state} onOpenProject={openProject} />
+            <ProjectsView state={state} onOpenProject={openProject} onCreateProject={() => setProjectCreateOpen(true)} />
           ) : view === 'inbox' ? (
             <InboxView
               items={state.inbox}
+              projects={state.projects}
               onMove={moveInboxItem}
               onDismiss={dismissInboxItem}
               onCapture={() => setCaptureOpen(true)}
@@ -1077,9 +873,16 @@ function App() {
       {captureOpen && (
         <CaptureDialog
           selectedProjectId={view === 'project' ? state.selectedProjectId : undefined}
+          projects={state.projects}
           activeMemberId={activeMember.id}
           onClose={() => setCaptureOpen(false)}
           onSubmit={addCapture}
+        />
+      )}
+      {projectCreateOpen && (
+        <ProjectCreateDialog
+          onClose={() => setProjectCreateOpen(false)}
+          onSubmit={createProject}
         />
       )}
       {pinChangeOpen && activeMember && (
@@ -1317,6 +1120,7 @@ function Sidebar({
   activeMember,
   inboxCount,
   selectedProjectId,
+  projects,
   onNavigate,
   onOpenProject,
   onCapture,
@@ -1327,6 +1131,7 @@ function Sidebar({
   activeMember: Member
   inboxCount: number
   selectedProjectId: ProjectId
+  projects: Project[]
   onNavigate: (view: Exclude<MainView, 'project'>) => void
   onOpenProject: (projectId: ProjectId) => void
   onCapture: () => void
@@ -1494,8 +1299,9 @@ function TodayView({
           <SectionHeader icon={<CheckCircle2 size={18} />} title="Tu foco" action={formatOpenTasks(myTasks.length, true)} />
           <div className="task-list">
             {myTasks.slice(0, 5).map((task) => (
-              <TaskRow key={task.id} task={task} onToggle={onToggleTask} onOpenProject={onOpenProject} />
+              <TaskRow key={task.id} task={task} projects={state.projects} onToggle={onToggleTask} onOpenProject={onOpenProject} />
             ))}
+            {!myTasks.length && <EmptyState icon={<CheckCircle2 size={23} />} title="Sin tareas asignadas" body="Usa Capturar para añadir la primera tarea." />}
           </div>
         </section>
 
@@ -1512,6 +1318,7 @@ function TodayView({
                 <button type="button" onClick={() => onRemoveAgendaEvent(event.id)} aria-label={`Eliminar ${event.title}`} title="Eliminar bloque"><X size={15} /></button>
               </div>
             ))}
+            {!state.agendaEvents.length && <EmptyState icon={<CalendarDays size={23} />} title="Agenda vacía" body="Añade aquí reuniones y bloques importantes del día." />}
           </div>
         </section>
 
@@ -1522,7 +1329,7 @@ function TodayView({
               <span className="attention-icon"><AlertCircle size={17} /></span>
               <span>
                 <strong>{task.title}</strong>
-                <small>{getProject(task.projectId).name} · Esperando respuesta</small>
+                <small>{getProject(state.projects, task.projectId).name} · Esperando respuesta</small>
               </span>
               <ChevronRight size={17} />
             </button>
@@ -1541,8 +1348,9 @@ function TodayView({
           <SectionHeader icon={<MessageCircle size={18} />} title="Últimos movimientos" action="Equipo" />
           <div className="updates-list compact">
             {state.updates.slice(0, 4).map((update) => (
-              <UpdateRow key={update.id} update={update} onOpenProject={onOpenProject} />
+              <UpdateRow key={update.id} update={update} projects={state.projects} onOpenProject={onOpenProject} />
             ))}
+            {!state.updates.length && <EmptyState icon={<MessageCircle size={23} />} title="Sin actividad todavía" body="Los mensajes, notas y decisiones aparecerán aquí." />}
           </div>
         </section>
       </div>
@@ -1550,7 +1358,7 @@ function TodayView({
       <section className="projects-overview">
         <SectionHeader icon={<FolderKanban size={18} />} title="Pulso de proyectos" action={formatOpenTasks(openTasks.length)} />
         <div className="project-pulse-grid">
-          {projects.map((project) => {
+          {state.projects.map((project) => {
             const projectTasks = state.tasks.filter((task) => task.projectId === project.id && task.status !== 'done')
             const progress = getProjectProgress(state, project.id)
             return (
@@ -1574,10 +1382,10 @@ function TodayView({
         </div>
       </section>
 
-      {checkInOpen && currentCheckIn && (
+      {checkInOpen && (
         <CheckInDialog
           member={member}
-          checkIn={currentCheckIn}
+          checkIn={currentCheckIn ?? { memberId: member.id, availability: 'available', focus: '', updatedAt: 'Sin actualizar' }}
           onClose={() => setCheckInOpen(false)}
           onSubmit={(availability, focus) => {
             onUpdateCheckIn(availability, focus)
@@ -1598,14 +1406,22 @@ function TodayView({
   )
 }
 
-function ProjectsView({ state, onOpenProject }: { state: HubState; onOpenProject: (projectId: ProjectId) => void }) {
+function ProjectsView({
+  state,
+  onOpenProject,
+  onCreateProject,
+}: {
+  state: HubState
+  onOpenProject: (projectId: ProjectId) => void
+  onCreateProject: () => void
+}) {
   return (
     <div className="page">
       <PageHeading
         eyebrow="Trabajo activo"
         title="Proyectos"
         description="Estado, próximo hito y carga del estudio en una sola vista."
-        meta={<span className="team-capacity"><Users size={16} /> Capacidad esta semana: 72%</span>}
+        meta={<button className="secondary-action" type="button" onClick={onCreateProject}><Plus size={16} /> Nuevo proyecto</button>}
       />
       <section className="project-table surface">
         <div className="project-table-head">
@@ -1615,7 +1431,7 @@ function ProjectsView({ state, onOpenProject }: { state: HubState; onOpenProject
           <span>Progreso</span>
           <span />
         </div>
-        {projects.map((project) => {
+        {state.projects.map((project) => {
           const projectTasks = state.tasks.filter((task) => task.projectId === project.id && task.status !== 'done')
           const owners = [...new Set(state.tasks.filter((task) => task.projectId === project.id).map((task) => task.ownerId))]
           const progress = getProjectProgress(state, project.id)
@@ -1647,11 +1463,13 @@ function ProjectsView({ state, onOpenProject }: { state: HubState; onOpenProject
 
 function InboxView({
   items,
+  projects,
   onMove,
   onDismiss,
   onCapture,
 }: {
   items: InboxItem[]
+  projects: Project[]
   onMove: (itemId: string, projectId: ProjectId) => void
   onDismiss: (itemId: string) => void
   onCapture: () => void
@@ -1673,7 +1491,7 @@ function InboxView({
           <EmptyState icon={<CheckCircle2 size={25} />} title="Inbox a cero" body="Todo está en su sitio por ahora." />
         ) : (
           <div className="inbox-list">
-            {items.map((item) => <InboxRow key={item.id} item={item} onMove={onMove} onDismiss={onDismiss} />)}
+            {items.map((item) => <InboxRow key={item.id} item={item} projects={projects} onMove={onMove} onDismiss={onDismiss} />)}
           </div>
         )}
       </section>
@@ -1683,14 +1501,16 @@ function InboxView({
 
 function InboxRow({
   item,
+  projects,
   onMove,
   onDismiss,
 }: {
   item: InboxItem
+  projects: Project[]
   onMove: (itemId: string, projectId: ProjectId) => void
   onDismiss: (itemId: string) => void
 }) {
-  const [destination, setDestination] = useState<ProjectId>('studio32')
+  const [destination, setDestination] = useState<ProjectId>(projects[0]?.id ?? 'studio32')
   const member = getMember(item.authorId)
   return (
     <article className="inbox-row">
@@ -1729,10 +1549,11 @@ function LibraryView({ state, onOpenProject }: { state: HubState; onOpenProject:
                 <span className={`resource-icon resource-${resource.type.toLowerCase()}`}>
                   {resource.type === 'PDF' ? <FileText size={17} /> : <LinkIcon size={17} />}
                 </span>
-                <span><strong>{resource.title}</strong><small>{getProject(resource.projectId).name} · {resource.updatedAt}</small></span>
+                <span><strong>{resource.title}</strong><small>{getProject(state.projects, resource.projectId).name} · {resource.updatedAt}</small></span>
                 <ArrowRight size={16} />
               </a>
             ))}
+            {!state.resources.length && <EmptyState icon={<LinkIcon size={23} />} title="Sin recursos" body="Captura un enlace y guárdalo en un proyecto." />}
           </div>
         </section>
         <section className="surface">
@@ -1742,9 +1563,10 @@ function LibraryView({ state, onOpenProject }: { state: HubState; onOpenProject:
               <button key={update.id} type="button" onClick={() => onOpenProject(update.projectId)}>
                 <span className={`update-kind kind-${update.kind}`}>{updateLabels[update.kind]}</span>
                 <strong>{update.body}</strong>
-                <small>{getProject(update.projectId).name} · {update.createdAt}</small>
+                <small>{getProject(state.projects, update.projectId).name} · {update.createdAt}</small>
               </button>
             ))}
+            {!decisions.length && <EmptyState icon={<Lightbulb size={23} />} title="Sin notas ni decisiones" body="Registra aquí el contexto que el equipo debe poder recuperar." />}
           </div>
         </section>
       </div>
@@ -1828,7 +1650,8 @@ function ProjectView({
           <section className="surface">
             <SectionHeader icon={<CheckCircle2 size={18} />} title="Siguiente trabajo" action={formatOpenTasks(openTasks.length, true)} />
             <div className="task-list">
-              {openTasks.slice(0, 5).map((task) => <TaskRow key={task.id} task={task} onToggle={onToggleTask} />)}
+              {openTasks.slice(0, 5).map((task) => <TaskRow key={task.id} task={task} projects={state.projects} onToggle={onToggleTask} />)}
+              {!openTasks.length && <EmptyState icon={<CheckCircle2 size={23} />} title="Sin trabajo pendiente" body="Añade la primera tarea desde Capturar." />}
             </div>
           </section>
           <section className="surface">
@@ -1842,7 +1665,8 @@ function ProjectView({
           <section className="surface project-activity">
             <SectionHeader icon={<MessageCircle size={18} />} title="Actividad reciente" action={`${updates.length}`} />
             <div className="updates-list">
-              {updates.slice(0, 5).map((update) => <UpdateRow key={update.id} update={update} />)}
+              {updates.slice(0, 5).map((update) => <UpdateRow key={update.id} update={update} projects={state.projects} />)}
+              {!updates.length && <EmptyState icon={<MessageCircle size={23} />} title="Sin actividad" body="Las notas, decisiones y mensajes aparecerán aquí." />}
             </div>
           </section>
           <section className="surface project-links">
@@ -1855,6 +1679,7 @@ function ProjectView({
                   <ArrowRight size={16} />
                 </a>
               ))}
+              {!resources.length && <EmptyState icon={<LinkIcon size={23} />} title="Sin accesos guardados" body="Añade enlaces y entregables desde Capturar." />}
             </div>
           </section>
         </div>
@@ -1864,7 +1689,8 @@ function ProjectView({
         <section className="surface project-single-surface">
           <SectionHeader icon={<CheckCircle2 size={18} />} title="Tareas del proyecto" action={<button type="button" onClick={onCapture}><Plus size={15} /> Añadir tarea</button>} />
           <div className="task-list roomy">
-            {tasks.map((task) => <TaskRow key={task.id} task={task} onToggle={onToggleTask} />)}
+            {tasks.map((task) => <TaskRow key={task.id} task={task} projects={state.projects} onToggle={onToggleTask} />)}
+            {!tasks.length && <EmptyState icon={<CheckCircle2 size={23} />} title="Sin tareas" body="Añade una tarea y asígnala a un miembro del equipo." />}
           </div>
         </section>
       )}
@@ -1888,6 +1714,7 @@ function ProjectView({
                 <ArrowRight size={16} />
               </a>
             ))}
+            {!resources.length && <EmptyState icon={<FileText size={23} />} title="Sin entregables" body="Añade el primer enlace o documento desde Capturar." />}
           </div>
         </section>
       )}
@@ -2000,7 +1827,7 @@ function SearchResults({
   onOpenProject: (projectId: ProjectId) => void
   onToggleTask: (taskId: string) => void
 }) {
-  const matchingProjects = projects.filter((project) => `${project.name} ${project.client} ${project.focus}`.toLocaleLowerCase('es').includes(term))
+  const matchingProjects = state.projects.filter((project) => `${project.name} ${project.client} ${project.focus}`.toLocaleLowerCase('es').includes(term))
   const matchingTasks = state.tasks.filter((task) => task.title.toLocaleLowerCase('es').includes(term))
   const matchingUpdates = state.updates.filter((update) => update.body.toLocaleLowerCase('es').includes(term))
   const matchingResources = state.resources.filter((resource) => resource.title.toLocaleLowerCase('es').includes(term))
@@ -2017,16 +1844,62 @@ function SearchResults({
             <button key={project.id} type="button" onClick={() => onOpenProject(project.id)}><FolderKanban size={17} /><span><strong>{project.name}</strong><small>Proyecto · {project.client}</small></span><ChevronRight size={17} /></button>
           ))}
           {matchingTasks.map((task) => (
-            <button key={task.id} type="button" onClick={() => onToggleTask(task.id)}><CheckCircle2 size={17} /><span><strong>{task.title}</strong><small>Tarea · {getProject(task.projectId).name}</small></span><span className="search-status">{task.status === 'done' ? 'Hecha' : task.due}</span></button>
+            <button key={task.id} type="button" onClick={() => onToggleTask(task.id)}><CheckCircle2 size={17} /><span><strong>{task.title}</strong><small>Tarea · {getProject(state.projects, task.projectId).name}</small></span><span className="search-status">{task.status === 'done' ? 'Hecha' : task.due}</span></button>
           ))}
           {matchingUpdates.map((update) => (
-            <button key={update.id} type="button" onClick={() => onOpenProject(update.projectId)}><MessageCircle size={17} /><span><strong>{update.body}</strong><small>{updateLabels[update.kind]} · {getProject(update.projectId).name}</small></span><ChevronRight size={17} /></button>
+            <button key={update.id} type="button" onClick={() => onOpenProject(update.projectId)}><MessageCircle size={17} /><span><strong>{update.body}</strong><small>{updateLabels[update.kind]} · {getProject(state.projects, update.projectId).name}</small></span><ChevronRight size={17} /></button>
           ))}
           {matchingResources.map((resource) => (
-            <button key={resource.id} type="button" onClick={() => onOpenProject(resource.projectId)}><LinkIcon size={17} /><span><strong>{resource.title}</strong><small>Recurso · {getProject(resource.projectId).name}</small></span><ChevronRight size={17} /></button>
+            <button key={resource.id} type="button" onClick={() => onOpenProject(resource.projectId)}><LinkIcon size={17} /><span><strong>{resource.title}</strong><small>Recurso · {getProject(state.projects, resource.projectId).name}</small></span><ChevronRight size={17} /></button>
           ))}
         </section>
       )}
+    </div>
+  )
+}
+
+function ProjectCreateDialog({
+  onClose,
+  onSubmit,
+}: {
+  onClose: () => void
+  onSubmit: (project: Omit<Project, 'id' | 'accent'>) => void
+}) {
+  const [name, setName] = useState('')
+  const [client, setClient] = useState('')
+  const [focus, setFocus] = useState('')
+  const [nextMilestone, setNextMilestone] = useState('')
+
+  const submit = (event: FormEvent) => {
+    event.preventDefault()
+    if (!name.trim()) return
+    onSubmit({
+      name: name.trim(),
+      client: client.trim() || 'Proyecto interno',
+      status: 'Activo',
+      focus: focus.trim() || 'Pendiente de definir',
+      nextMilestone: nextMilestone.trim() || 'Pendiente de definir',
+    })
+  }
+
+  return (
+    <div className="dialog-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
+      <section className="capture-dialog" role="dialog" aria-modal="true" aria-labelledby="project-create-title">
+        <header>
+          <span><span className="dialog-icon"><FolderKanban size={18} /></span><span><strong id="project-create-title">Nuevo proyecto</strong><small>Crea el espacio y completa los detalles esenciales.</small></span></span>
+          <button className="icon-button compact" type="button" onClick={onClose} aria-label="Cerrar"><X size={17} /></button>
+        </header>
+        <form onSubmit={submit}>
+          <label><span>Nombre</span><input autoFocus value={name} onChange={(event) => setName(event.target.value)} placeholder="Nombre del proyecto" /></label>
+          <label><span>Cliente o contexto</span><input value={client} onChange={(event) => setClient(event.target.value)} placeholder="Cliente, proyecto interno..." /></label>
+          <label><span>Foco actual</span><textarea value={focus} onChange={(event) => setFocus(event.target.value)} placeholder="Qué necesita avanzar ahora" rows={2} /></label>
+          <label><span>Próximo hito</span><input value={nextMilestone} onChange={(event) => setNextMilestone(event.target.value)} placeholder="Siguiente entrega o revisión" /></label>
+          <footer>
+            <button className="text-button" type="button" onClick={onClose}>Cancelar</button>
+            <button className="primary-action" type="submit" disabled={!name.trim()}><Check size={16} /> Crear proyecto</button>
+          </footer>
+        </form>
+      </section>
     </div>
   )
 }
@@ -2067,7 +1940,7 @@ function CheckInDialog({
           </div>
           <label>
             <span>Foco o bloqueo principal</span>
-            <textarea autoFocus value={focus} onChange={(event) => setFocus(event.target.value)} placeholder="Ej. Terminar la propuesta Atlas y enviarla antes de las 13:00" rows={3} data-testid="check-in-focus" />
+            <textarea autoFocus value={focus} onChange={(event) => setFocus(event.target.value)} placeholder="Ej. Terminar la propuesta y enviarla antes de las 13:00" rows={3} data-testid="check-in-focus" />
           </label>
           <footer>
             <button className="text-button" type="button" onClick={onClose}>Cancelar</button>
@@ -2181,11 +2054,13 @@ function PinChangeDialog({
 
 function CaptureDialog({
   selectedProjectId,
+  projects,
   activeMemberId,
   onClose,
   onSubmit,
 }: {
   selectedProjectId?: ProjectId
+  projects: Project[]
   activeMemberId: MemberId
   onClose: () => void
   onSubmit: (payload: CapturePayload) => void
@@ -2272,15 +2147,17 @@ function CaptureDialog({
 
 function TaskRow({
   task,
+  projects,
   onToggle,
   onOpenProject,
 }: {
   task: Task
+  projects: Project[]
   onToggle: (taskId: string) => void
   onOpenProject?: (projectId: ProjectId) => void
 }) {
   const owner = getMember(task.ownerId)
-  const project = getProject(task.projectId)
+  const project = getProject(projects, task.projectId)
   return (
     <article className={`task-row ${task.status === 'done' ? 'is-done' : ''} ${task.blocked ? 'is-blocked' : ''}`}>
       <button className="task-check" type="button" onClick={() => onToggle(task.id)} aria-label={task.status === 'done' ? `Reabrir ${task.title}` : `Completar ${task.title}`}>
@@ -2299,7 +2176,15 @@ function TaskRow({
   )
 }
 
-function UpdateRow({ update, onOpenProject }: { update: Update; onOpenProject?: (projectId: ProjectId) => void }) {
+function UpdateRow({
+  update,
+  projects,
+  onOpenProject,
+}: {
+  update: Update
+  projects: Project[]
+  onOpenProject?: (projectId: ProjectId) => void
+}) {
   const member = getMember(update.authorId)
   const content = (
     <>
@@ -2307,7 +2192,7 @@ function UpdateRow({ update, onOpenProject }: { update: Update; onOpenProject?: 
       <span>
         <span className="update-meta"><strong>{member.name}</strong><small>{update.createdAt}</small>{update.kind !== 'message' && <b className={`kind-${update.kind}`}>{updateLabels[update.kind]}</b>}</span>
         <p>{update.body}</p>
-        {onOpenProject && <small>{getProject(update.projectId).name}</small>}
+        {onOpenProject && <small>{getProject(projects, update.projectId).name}</small>}
       </span>
     </>
   )

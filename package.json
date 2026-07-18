@@ -10,7 +10,8 @@
     "build:static": "vite build --config vite.static.config.ts",
     "postbuild": "node scripts/copy-hosting-config.mjs",
     "preview": "vinext start",
-    "supabase:bootstrap": "node scripts/bootstrap-supabase.mjs"
+    "supabase:bootstrap": "node scripts/bootstrap-supabase.mjs",
+    "supabase:reset-state": "node scripts/reset-hub-state.mjs"
   },
   "devDependencies": {
     "@types/react": "^19.2.17",
