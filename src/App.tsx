@@ -1,3 +1,5 @@
+"use client"
+
 import {
   AlertCircle,
   ArrowLeft,
@@ -26,7 +28,7 @@ import {
   Users,
   X,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { FormEvent, ReactNode } from 'react'
 
 type MemberId = 'juanma' | 'pancho' | 'gonzalo'
@@ -331,16 +333,18 @@ const updateLabels: Record<UpdateKind, string> = {
 }
 
 function usePersistentHubState() {
-  const [state, setState] = useState<HubState>(() => {
+  const [state, setState] = useState<HubState>(initialState)
+
+  useEffect(() => {
     const stored = localStorage.getItem('studio32-hub-v3')
-    if (!stored) return initialState
+    if (!stored) return
 
     try {
-      return { ...initialState, ...JSON.parse(stored) } as HubState
+      setState({ ...initialState, ...JSON.parse(stored) } as HubState)
     } catch {
-      return initialState
+      localStorage.removeItem('studio32-hub-v3')
     }
-  })
+  }, [])
 
   const updateState = (updater: (current: HubState) => HubState) => {
     setState((current) => {
@@ -379,10 +383,21 @@ async function hashDemoPin(memberId: MemberId, pin: string) {
 
 function App() {
   const [state, updateState] = usePersistentHubState()
-  const [activeMemberId, setActiveMemberId] = useState<MemberId | null>(() => {
+  const [activeMemberId, setActiveMemberId] = useState<MemberId | null>(null)
+
+  useEffect(() => {
     const stored = localStorage.getItem('studio32-current-member-v3')
-    return members.some((member) => member.id === stored) ? (stored as MemberId) : null
-  })
+    if (members.some((member) => member.id === stored)) {
+      setActiveMemberId(stored as MemberId)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!('serviceWorker' in navigator)) return
+    navigator.serviceWorker.register('/sw.js').catch(() => {
+      // The Hub still works when service workers are unavailable.
+    })
+  }, [])
   const [view, setView] = useState<MainView>('today')
   const [projectTab, setProjectTab] = useState<ProjectTab>('overview')
   const [captureOpen, setCaptureOpen] = useState(false)

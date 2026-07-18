@@ -2,8 +2,8 @@
 
 ## Arquitectura recomendada
 
-- **Aplicación web:** el frontend de Vite se publica en Vercel o Cloudflare Pages.
-- **Dominio:** `hub.studio32.es` apunta al proveedor mediante un registro CNAME.
+- **Aplicación web:** el frontend usa vinext sobre Vite y se publica como Worker mediante Sites.
+- **Dominio:** `www.hub.studio32.es` apunta al proveedor mediante un registro CNAME.
 - **Acceso:** Supabase Auth con enlace mágico por correo. No hay contraseñas que mantener.
 - **Datos compartidos:** Supabase Postgres con políticas que solo permiten entrar a miembros del workspace.
 - **Actualizaciones en directo:** Supabase Realtime para conversación, tareas e Inbox.
@@ -42,7 +42,7 @@ Todas las tablas operativas incluyen `workspace_id`. Las políticas RLS deben ex
 2. Añadir las variables de `.env.example` al entorno de despliegue.
 3. Sustituir la persistencia local por un repositorio Supabase con suscripciones en tiempo real.
 4. Invitar las tres cuentas y probar permisos con cada una.
-5. Publicar el frontend y conectar `hub.studio32.es`.
-6. Añadir `https://hub.studio32.es` a las URL permitidas de Supabase Auth.
+5. Publicar el frontend y conectar `www.hub.studio32.es`.
+6. Añadir `https://www.hub.studio32.es` a las URL permitidas de Supabase Auth.
 
-No se debe publicar la versión actual como sistema privado: el selector de perfil identifica al usuario en el prototipo, pero no lo autentica.
+La versión actual puede publicarse para revisar la interfaz, pero no debe tratarse todavía como un sistema privado: el selector de perfil identifica al usuario en el prototipo, pero no lo autentica frente a un servidor.

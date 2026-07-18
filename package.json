@@ -4,15 +4,20 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "dev:lan": "vite --host 0.0.0.0",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
+    "dev": "vinext dev",
+    "dev:lan": "vinext dev --hostname 0.0.0.0",
+    "build": "vinext build",
+    "postbuild": "node scripts/copy-hosting-config.mjs",
+    "preview": "vinext start"
   },
   "devDependencies": {
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "@vitejs/plugin-rsc": "^0.5.26",
+    "react-server-dom-webpack": "^19.2.7",
     "typescript": "~6.0.2",
+    "vinext": "^1.0.0-beta.2",
     "vite": "^8.1.1"
   },
   "dependencies": {

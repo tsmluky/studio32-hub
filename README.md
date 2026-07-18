@@ -33,6 +33,12 @@ npm install
 npm run dev
 ```
 
+El build de producción compatible con Workers se genera con:
+
+```bash
+npm run build
+```
+
 Para probarlo desde otro equipo de la misma red:
 
 ```bash
