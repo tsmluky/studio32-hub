@@ -45,6 +45,12 @@ El build de producción compatible con Workers se genera con:
 npm run build
 ```
 
+La compilación estática usada por el hosting público se genera con:
+
+```bash
+npm run build:static
+```
+
 Para probarlo desde otro equipo de la misma red:
 
 ```bash

@@ -7,6 +7,7 @@
     "dev": "vinext dev",
     "dev:lan": "vinext dev --hostname 0.0.0.0",
     "build": "vinext build",
+    "build:static": "vite build --config vite.static.config.ts",
     "postbuild": "node scripts/copy-hosting-config.mjs",
     "preview": "vinext start",
     "supabase:bootstrap": "node scripts/bootstrap-supabase.mjs"

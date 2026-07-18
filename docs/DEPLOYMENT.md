@@ -2,8 +2,8 @@
 
 ## Arquitectura desplegada
 
-- **Aplicación web:** el frontend usa vinext sobre Vite y se publica como Worker mediante Sites.
-- **Dominio:** `www.hub.studio32.es` apunta al proveedor mediante un registro CNAME.
+- **Aplicación web:** el frontend mantiene un build vinext y genera una salida estática con Vite para GitHub Pages.
+- **Dominio:** `www.hub.studio32.es` apunta a `tsmluky.github.io` mediante CNAME.
 - **Acceso:** Supabase Auth mediante las tres cuentas `@studio32.es`. El PIN visible se transforma en una contraseña fuerte antes de enviarse a Auth.
 - **Datos compartidos:** Supabase Postgres con políticas que solo permiten entrar a miembros del workspace.
 - **Actualizaciones en directo:** Supabase Realtime para conversación, tareas e Inbox.
@@ -38,3 +38,11 @@ Así, conocer la URL no concede acceso y no es necesario desarrollar un sistema 
 4. Entregar a cada miembro su PIN y pedir que lo cambie en su primera sesión.
 
 La migración SQL versionada está en `supabase/migrations`. La web pública no expone datos sin una sesión válida: RLS es la frontera de seguridad, no el selector de perfiles.
+
+## Publicación web
+
+1. Ejecutar `npm run build:static` con las variables públicas de Supabase.
+2. Publicar el contenido de `static-dist` en `tsmluky/studio32-hub-live`.
+3. GitHub Pages sirve la rama `main` desde la raíz.
+4. El archivo `public/CNAME` mantiene asociado `www.hub.studio32.es`.
+5. El repositorio de despliegue solo contiene artefactos compilados; el código fuente permanece en el repositorio privado.
