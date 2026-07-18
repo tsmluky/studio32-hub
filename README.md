@@ -14,7 +14,11 @@ La regla de producto es simple: menos ambicioso, más usado. El Hub no intenta r
 - Biblioteca de recursos, notas y decisiones.
 - Conversación persistente y pizarra dentro de cada proyecto.
 - Acceso por perfil y PIN de seis dígitos para Juanma, Pancho y Gonzalo.
+- Vista diaria con fecha real, foco editable de cada miembro y bloqueos visibles.
+- Agenda compartida editable y progreso de proyecto calculado desde las tareas.
 - Búsqueda global, persistencia local y manifest PWA.
+
+La propuesta para probarlo con el equipo durante una semana está en [docs/TEAM_PILOT.md](docs/TEAM_PILOT.md).
 
 ## Siguiente capa
 

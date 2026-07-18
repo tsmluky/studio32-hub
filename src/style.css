@@ -524,6 +524,15 @@ p {
   font-weight: 600;
 }
 
+button.team-capacity {
+  cursor: pointer;
+}
+
+button.team-capacity:hover {
+  border-color: #abc0ba;
+  background: #f9fbf9;
+}
+
 .daily-summary {
   display: grid;
   grid-template-columns: 150px 150px 150px minmax(260px, 1fr);
@@ -596,6 +605,90 @@ p {
   color: #ffffff;
   font-size: 12px;
   overflow-wrap: anywhere;
+}
+
+.team-today-surface {
+  margin-bottom: 18px;
+  overflow: hidden;
+}
+
+.team-focus-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.team-focus-item {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  align-items: start;
+  gap: 11px;
+  min-height: 116px;
+  padding: 17px 18px;
+  border-right: 1px solid #e8ebe6;
+}
+
+.team-focus-item:last-child {
+  border-right: 0;
+}
+
+.team-focus-content {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+
+.team-focus-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.team-focus-meta strong {
+  font-size: 11px;
+}
+
+.availability {
+  display: inline-flex;
+  align-items: center;
+  min-height: 19px;
+  padding: 0 6px;
+  border-radius: 4px;
+  font-size: 8px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.availability-focus {
+  color: var(--green);
+  background: var(--green-soft);
+}
+
+.availability-available {
+  color: var(--blue);
+  background: var(--blue-soft);
+}
+
+.availability-blocked {
+  color: var(--rose);
+  background: var(--rose-soft);
+}
+
+.availability-away {
+  color: #68736f;
+  background: #edf0ed;
+}
+
+.team-focus-content p {
+  color: #3f4d48;
+  font-size: 10px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.team-focus-content small {
+  color: #929b98;
+  font-size: 8px;
 }
 
 .today-grid {
@@ -810,7 +903,7 @@ p {
 
 .agenda-row {
   display: grid;
-  grid-template-columns: 47px minmax(0, 1fr);
+  grid-template-columns: 47px minmax(0, 1fr) 28px;
   gap: 12px;
   min-height: 62px;
   padding: 10px 0;
@@ -841,6 +934,24 @@ p {
 .agenda-row small {
   color: #8b9491;
   font-size: 9px;
+}
+
+.agenda-row > button {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  color: #9aa39f;
+  background: transparent;
+  border: 0;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.agenda-row > button:hover {
+  color: var(--rose);
+  background: var(--rose-soft);
 }
 
 .attention-surface {
@@ -2034,6 +2145,12 @@ button.update-row {
   gap: 7px;
 }
 
+.capture-task-fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
 .capture-dialog label > span {
   color: #52605b;
   font-size: 9px;
@@ -2077,6 +2194,60 @@ button.update-row {
   padding: 14px 20px;
   background: #fafbf9;
   border-top: 1px solid var(--line);
+}
+
+.availability-options {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.availability-options button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 6px;
+  color: #69746f;
+  background: #f4f6f3;
+  border: 1px solid #e3e7e2;
+  border-radius: 5px;
+  font-size: 9px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.availability-options button i {
+  width: 7px;
+  height: 7px;
+  background: #9aa39f;
+  border-radius: 50%;
+}
+
+.availability-options button.is-active {
+  color: var(--ink);
+  background: #ffffff;
+  border-color: #9eb7b0;
+  box-shadow: 0 1px 5px rgba(35, 48, 45, 0.08);
+}
+
+.availability-options button.availability-focus i {
+  background: var(--green);
+}
+
+.availability-options button.availability-available i {
+  background: var(--blue);
+}
+
+.availability-options button.availability-blocked i {
+  background: var(--rose);
+}
+
+.agenda-dialog-grid {
+  display: grid;
+  grid-template-columns: minmax(110px, 0.7fr) minmax(0, 1.3fr);
+  gap: 12px;
 }
 
 .access-screen {
@@ -2482,6 +2653,20 @@ button.update-row {
     grid-template-columns: 1fr;
   }
 
+  .team-focus-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .team-focus-item {
+    min-height: 96px;
+    border-right: 0;
+    border-bottom: 1px solid #e8ebe6;
+  }
+
+  .team-focus-item:last-child {
+    border-bottom: 0;
+  }
+
   .attention-surface,
   .movement-surface {
     grid-column: auto;
@@ -2577,6 +2762,18 @@ button.update-row {
   .capture-types button {
     padding: 0 4px;
     font-size: 8px;
+  }
+
+  .availability-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .agenda-dialog-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .capture-task-fields {
+    grid-template-columns: 1fr;
   }
 
   .access-screen {

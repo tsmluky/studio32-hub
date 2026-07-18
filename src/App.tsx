@@ -4,7 +4,6 @@ import {
   AlertCircle,
   ArrowLeft,
   ArrowRight,
-  Bell,
   CalendarDays,
   Check,
   CheckCircle2,
@@ -39,6 +38,7 @@ type TaskStatus = 'todo' | 'doing' | 'done'
 type CaptureType = 'task' | 'note' | 'decision' | 'link'
 type UpdateKind = 'message' | 'note' | 'decision'
 type BoardLane = 'ideas' | 'decided' | 'doing'
+type TeamAvailability = 'focus' | 'available' | 'blocked' | 'away'
 
 type Member = {
   id: MemberId
@@ -56,7 +56,6 @@ type Project = {
   status: string
   focus: string
   nextMilestone: string
-  health: number
   accent: string
 }
 
@@ -106,6 +105,30 @@ type BoardItem = {
   authorId: MemberId
 }
 
+type TeamCheckIn = {
+  memberId: MemberId
+  availability: TeamAvailability
+  focus: string
+  updatedAt: string
+}
+
+type AgendaEvent = {
+  id: string
+  time: string
+  title: string
+  meta: string
+}
+
+type CapturePayload = {
+  type: CaptureType
+  title: string
+  detail?: string
+  destination: 'inbox' | ProjectId
+  ownerId?: MemberId
+  due?: string
+  priority?: Task['priority']
+}
+
 type HubState = {
   selectedProjectId: ProjectId
   tasks: Task[]
@@ -113,6 +136,8 @@ type HubState = {
   resources: Resource[]
   inbox: InboxItem[]
   boardItems: BoardItem[]
+  teamCheckIns: TeamCheckIn[]
+  agendaEvents: AgendaEvent[]
 }
 
 const members: Member[] = [
@@ -129,7 +154,6 @@ const projects: Project[] = [
     status: 'En definición',
     focus: 'Convertir el Hub en el primer lugar de trabajo del día.',
     nextMilestone: 'Probar el flujo diario con los 3 miembros',
-    health: 78,
     accent: '#2f6f73',
   },
   {
@@ -139,7 +163,6 @@ const projects: Project[] = [
     status: 'En producción',
     focus: 'Cerrar referencias, entregables y calendario de revisión.',
     nextMilestone: 'Enviar preview antes del viernes',
-    health: 62,
     accent: '#486ca8',
   },
   {
@@ -149,7 +172,6 @@ const projects: Project[] = [
     status: 'Siempre abierto',
     focus: 'Guardar procesos y referencias que merece la pena reutilizar.',
     nextMilestone: 'Migrar 10 recursos clave',
-    health: 86,
     accent: '#9a5a32',
   },
 ]
@@ -211,6 +233,69 @@ const initialState: HubState = {
       ownerId: 'juanma',
       due: 'Esta semana',
       priority: 'Baja',
+    },
+    {
+      id: 't-7',
+      projectId: 'studio32',
+      title: 'Acordar el objetivo y el alcance inicial del Hub',
+      status: 'done',
+      ownerId: 'juanma',
+      due: 'Completada',
+      priority: 'Alta',
+    },
+    {
+      id: 't-8',
+      projectId: 'studio32',
+      title: 'Diseñar la estructura de navegación principal',
+      status: 'done',
+      ownerId: 'gonzalo',
+      due: 'Completada',
+      priority: 'Media',
+    },
+    {
+      id: 't-9',
+      projectId: 'atlas',
+      title: 'Aprobar el concepto creativo',
+      status: 'done',
+      ownerId: 'pancho',
+      due: 'Completada',
+      priority: 'Alta',
+    },
+    {
+      id: 't-10',
+      projectId: 'atlas',
+      title: 'Seleccionar la dirección de arte',
+      status: 'done',
+      ownerId: 'juanma',
+      due: 'Completada',
+      priority: 'Media',
+    },
+    {
+      id: 't-11',
+      projectId: 'atlas',
+      title: 'Entregar la primera ronda de piezas',
+      status: 'done',
+      ownerId: 'gonzalo',
+      due: 'Completada',
+      priority: 'Alta',
+    },
+    {
+      id: 't-12',
+      projectId: 'archivo',
+      title: 'Crear la estructura de la biblioteca',
+      status: 'done',
+      ownerId: 'gonzalo',
+      due: 'Completada',
+      priority: 'Media',
+    },
+    {
+      id: 't-13',
+      projectId: 'archivo',
+      title: 'Migrar las presentaciones de marca principales',
+      status: 'done',
+      ownerId: 'pancho',
+      due: 'Completada',
+      priority: 'Media',
     },
   ],
   updates: [
@@ -304,13 +389,17 @@ const initialState: HubState = {
     { id: 'b-3', projectId: 'studio32', title: 'Resumen automático de la semana', lane: 'ideas', authorId: 'pancho' },
     { id: 'b-4', projectId: 'atlas', title: 'Versión vertical de la campaña', lane: 'ideas', authorId: 'juanma' },
   ],
+  teamCheckIns: [
+    { memberId: 'juanma', availability: 'focus', focus: 'Definir la información imprescindible de la vista diaria', updatedAt: 'Hoy · 09:05' },
+    { memberId: 'pancho', availability: 'blocked', focus: 'Cerrar el orden de las piezas de Atlas con el cliente', updatedAt: 'Hoy · 09:18' },
+    { memberId: 'gonzalo', availability: 'available', focus: 'Preparar el PDF de la segunda ronda de Atlas', updatedAt: 'Hoy · 09:12' },
+  ],
+  agendaEvents: [
+    { id: 'a-1', time: '10:00', title: 'Puesta al día Studio32', meta: '30 min · Equipo' },
+    { id: 'a-2', time: '12:30', title: 'Revisión interna Atlas', meta: '45 min · Pancho y Gonzalo' },
+    { id: 'a-3', time: '17:00', title: 'Bloque de trabajo profundo', meta: '60 min · Sin reuniones' },
+  ],
 }
-
-const agenda = [
-  { time: '10:00', title: 'Puesta al día Studio32', meta: '30 min · Equipo' },
-  { time: '12:30', title: 'Revisión interna Atlas', meta: '45 min · Pancho y Gonzalo' },
-  { time: '17:00', title: 'Bloque de trabajo profundo', meta: '60 min · Sin reuniones' },
-]
 
 const navigation: Array<{ id: Exclude<MainView, 'project'>; label: string; icon: typeof Home }> = [
   { id: 'today', label: 'Hoy', icon: Home },
@@ -332,24 +421,31 @@ const updateLabels: Record<UpdateKind, string> = {
   decision: 'Decisión',
 }
 
+const availabilityLabels: Record<TeamAvailability, string> = {
+  focus: 'En foco',
+  available: 'Disponible',
+  blocked: 'Bloqueado',
+  away: 'Fuera',
+}
+
 function usePersistentHubState() {
   const [state, setState] = useState<HubState>(initialState)
 
   useEffect(() => {
-    const stored = localStorage.getItem('studio32-hub-v3')
+    const stored = localStorage.getItem('studio32-hub-v4')
     if (!stored) return
 
     try {
       setState({ ...initialState, ...JSON.parse(stored) } as HubState)
     } catch {
-      localStorage.removeItem('studio32-hub-v3')
+      localStorage.removeItem('studio32-hub-v4')
     }
   }, [])
 
   const updateState = (updater: (current: HubState) => HubState) => {
     setState((current) => {
       const next = updater(current)
-      localStorage.setItem('studio32-hub-v3', JSON.stringify(next))
+      localStorage.setItem('studio32-hub-v4', JSON.stringify(next))
       return next
     })
   }
@@ -363,6 +459,38 @@ function getMember(id: MemberId) {
 
 function getProject(id: ProjectId) {
   return projects.find((project) => project.id === id) ?? projects[0]
+}
+
+function getProjectProgress(state: HubState, projectId: ProjectId) {
+  const projectTasks = state.tasks.filter((task) => task.projectId === projectId)
+  if (!projectTasks.length) return 0
+  return Math.round((projectTasks.filter((task) => task.status === 'done').length / projectTasks.length) * 100)
+}
+
+function formatOpenTasks(count: number, short = false) {
+  if (short) return `${count} ${count === 1 ? 'abierta' : 'abiertas'}`
+  return `${count} ${count === 1 ? 'tarea abierta' : 'tareas abiertas'}`
+}
+
+function getTodayLabel() {
+  const formatted = new Intl.DateTimeFormat('es-ES', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    timeZone: 'Europe/Madrid',
+  }).format(new Date())
+  return formatted.charAt(0).toUpperCase() + formatted.slice(1)
+}
+
+function getGreeting() {
+  const hour = Number(new Intl.DateTimeFormat('es-ES', {
+    hour: '2-digit',
+    hourCycle: 'h23',
+    timeZone: 'Europe/Madrid',
+  }).format(new Date()))
+  if (hour < 14) return 'Buenos días'
+  if (hour < 20) return 'Buenas tardes'
+  return 'Buenas noches'
 }
 
 function makeId(prefix: string) {
@@ -466,6 +594,36 @@ function App() {
     }))
   }
 
+  const updateTeamCheckIn = (availability: TeamAvailability, focus: string) => {
+    if (!activeMemberId || !focus.trim()) return
+    updateState((current) => ({
+      ...current,
+      teamCheckIns: current.teamCheckIns.map((checkIn) =>
+        checkIn.memberId === activeMemberId
+          ? { ...checkIn, availability, focus: focus.trim(), updatedAt: 'Ahora' }
+          : checkIn,
+      ),
+    }))
+  }
+
+  const addAgendaEvent = (event: Omit<AgendaEvent, 'id'>) => {
+    if (!event.title.trim() || !event.time) return
+    updateState((current) => ({
+      ...current,
+      agendaEvents: [
+        ...current.agendaEvents,
+        { ...event, id: makeId('a'), title: event.title.trim(), meta: event.meta.trim() || 'Studio32' },
+      ].sort((a, b) => a.time.localeCompare(b.time)),
+    }))
+  }
+
+  const removeAgendaEvent = (eventId: string) => {
+    updateState((current) => ({
+      ...current,
+      agendaEvents: current.agendaEvents.filter((event) => event.id !== eventId),
+    }))
+  }
+
   const advanceBoardItem = (itemId: string) => {
     const laneOrder: BoardLane[] = ['ideas', 'decided', 'doing']
     updateState((current) => ({
@@ -478,12 +636,7 @@ function App() {
     }))
   }
 
-  const addCapture = (payload: {
-    type: CaptureType
-    title: string
-    detail?: string
-    destination: 'inbox' | ProjectId
-  }) => {
+  const addCapture = (payload: CapturePayload) => {
     if (!activeMemberId || !payload.title.trim()) return
     const title = payload.title.trim()
     const detail = payload.detail?.trim()
@@ -515,9 +668,9 @@ function App() {
               projectId: payload.destination,
               title,
               status: 'todo',
-              ownerId: activeMemberId,
-              due: 'Sin fecha',
-              priority: 'Media',
+              ownerId: payload.ownerId ?? activeMemberId,
+              due: payload.due ?? 'Sin fecha',
+              priority: payload.priority ?? 'Media',
             },
             ...current.tasks,
           ],
@@ -659,10 +812,6 @@ function App() {
             )}
           </label>
           <div className="topbar-actions">
-            <button className="icon-button" type="button" aria-label="Notificaciones">
-              <Bell size={18} />
-              <span className="notification-dot" />
-            </button>
             <button className="primary-action" type="button" onClick={() => setCaptureOpen(true)} data-testid="quick-capture" aria-label="Capturar">
               <Plus size={17} />
               <span>Capturar</span>
@@ -685,6 +834,9 @@ function App() {
               onToggleTask={toggleTask}
               onOpenProject={openProject}
               onOpenInbox={() => selectView('inbox')}
+              onUpdateCheckIn={updateTeamCheckIn}
+              onAddAgendaEvent={addAgendaEvent}
+              onRemoveAgendaEvent={removeAgendaEvent}
             />
           ) : view === 'projects' ? (
             <ProjectsView state={state} onOpenProject={openProject} />
@@ -718,6 +870,7 @@ function App() {
       {captureOpen && (
         <CaptureDialog
           selectedProjectId={view === 'project' ? state.selectedProjectId : undefined}
+          activeMemberId={activeMember.id}
           onClose={() => setCaptureOpen(false)}
           onSubmit={addCapture}
         />
@@ -839,7 +992,7 @@ function AccessScreen({ onSelect }: { onSelect: (memberId: MemberId) => void }) 
             <div className="access-copy pin-copy">
               <span className="eyebrow">{mode === 'setup' ? 'Primera entrada' : 'Acceso personal'}</span>
               <h1 id="access-title">{mode === 'setup' ? 'Crea tu PIN' : `Hola, ${selectedMember.name}`}</h1>
-              <p>{mode === 'setup' ? 'Elige un PIN de 6 dígitos para este prototipo.' : 'Introduce tu PIN de 6 dígitos.'}</p>
+              <p>{mode === 'setup' ? 'Elige un PIN de 6 dígitos para entrar desde este dispositivo.' : 'Introduce tu PIN de 6 dígitos.'}</p>
             </div>
             <form className="access-form" onSubmit={submit}>
               <label htmlFor="access-pin">PIN</label>
@@ -892,7 +1045,7 @@ function AccessScreen({ onSelect }: { onSelect: (memberId: MemberId) => void }) 
         )}
         <div className="access-foot">
           <span><Check size={14} /> Acceso privado de Studio32</span>
-          <span>Prototipo local</span>
+          <span>Studio32 · Uso interno</span>
         </div>
       </section>
     </main>
@@ -973,8 +1126,8 @@ function Sidebar({
       </div>
 
       <div className="sidebar-team">
-        <span>Equipo conectado</span>
-        <div className="avatar-stack" aria-label="Tres miembros conectados">
+        <span>Equipo Studio32</span>
+        <div className="avatar-stack" aria-label="Tres miembros del equipo">
           {members.map((member) => <Avatar key={member.id} member={member} />)}
         </div>
       </div>
@@ -999,42 +1152,83 @@ function TodayView({
   onToggleTask,
   onOpenProject,
   onOpenInbox,
+  onUpdateCheckIn,
+  onAddAgendaEvent,
+  onRemoveAgendaEvent,
 }: {
   member: Member
   state: HubState
   onToggleTask: (taskId: string) => void
   onOpenProject: (projectId: ProjectId) => void
   onOpenInbox: () => void
+  onUpdateCheckIn: (availability: TeamAvailability, focus: string) => void
+  onAddAgendaEvent: (event: Omit<AgendaEvent, 'id'>) => void
+  onRemoveAgendaEvent: (eventId: string) => void
 }) {
+  const [checkInOpen, setCheckInOpen] = useState(false)
+  const [agendaOpen, setAgendaOpen] = useState(false)
   const myTasks = state.tasks.filter((task) => task.ownerId === member.id && task.status !== 'done')
   const todayTasks = myTasks.filter((task) => task.due.startsWith('Hoy'))
   const attentionTasks = state.tasks.filter((task) => task.blocked)
   const openTasks = state.tasks.filter((task) => task.status !== 'done')
+  const currentCheckIn = state.teamCheckIns.find((checkIn) => checkIn.memberId === member.id)
+  const studioFocusTask = state.tasks.find((task) => task.status === 'doing' && !task.blocked) ?? openTasks[0]
 
   return (
     <div className="page today-page">
       <PageHeading
-        eyebrow="Jueves, 16 de julio"
-        title={`Buenos días, ${member.name}`}
-        description="Esto es lo que necesita atención hoy en Studio32."
+        eyebrow={getTodayLabel()}
+        title={`${getGreeting()}, ${member.name}`}
+        description="Prioridades, agenda y estado del equipo sin tener que buscar en cinco sitios."
+        meta={
+          <button className="team-capacity team-check-in-trigger" type="button" onClick={() => setCheckInOpen(true)} data-testid="update-check-in">
+            <Users size={16} /> Actualizar mi foco
+          </button>
+        }
       />
 
       <section className="daily-summary" aria-label="Resumen del día">
         <SummaryMetric value={todayTasks.length} label="tareas para hoy" tone="green" />
-        <SummaryMetric value={agenda.length} label="bloques en agenda" tone="blue" />
-        <SummaryMetric value={attentionTasks.length} label="bloqueo pendiente" tone="amber" />
+        <SummaryMetric value={state.agendaEvents.length} label="bloques en agenda" tone="blue" />
+        <SummaryMetric value={attentionTasks.length} label={attentionTasks.length === 1 ? 'bloqueo activo' : 'bloqueos activos'} tone="amber" />
         <div className="summary-focus">
           <Sparkles size={17} />
           <span>
-            <small>Foco del estudio</small>
-            <strong>Probar el nuevo flujo diario</strong>
+            <small>Siguiente movimiento</small>
+            <strong>{studioFocusTask?.title ?? 'Definir la prioridad principal del estudio'}</strong>
           </span>
+        </div>
+      </section>
+
+      <section className="surface team-today-surface">
+        <SectionHeader
+          icon={<Users size={18} />}
+          title="Equipo hoy"
+          action={<button type="button" onClick={() => setCheckInOpen(true)}><Plus size={14} /> Mi actualización</button>}
+        />
+        <div className="team-focus-grid">
+          {members.map((teamMember) => {
+            const checkIn = state.teamCheckIns.find((item) => item.memberId === teamMember.id)
+            return (
+              <article className="team-focus-item" key={teamMember.id}>
+                <Avatar member={teamMember} />
+                <span className="team-focus-content">
+                  <span className="team-focus-meta">
+                    <strong>{teamMember.name}</strong>
+                    {checkIn && <b className={`availability availability-${checkIn.availability}`}>{availabilityLabels[checkIn.availability]}</b>}
+                  </span>
+                  <p>{checkIn?.focus ?? 'Todavía no ha dejado su foco de hoy.'}</p>
+                  <small>{checkIn?.updatedAt ?? 'Sin actualizar'}</small>
+                </span>
+              </article>
+            )
+          })}
         </div>
       </section>
 
       <div className="today-grid">
         <section className="surface focus-surface">
-          <SectionHeader icon={<CheckCircle2 size={18} />} title="Tu foco" action={`${myTasks.length} abiertas`} />
+          <SectionHeader icon={<CheckCircle2 size={18} />} title="Tu foco" action={formatOpenTasks(myTasks.length, true)} />
           <div className="task-list">
             {myTasks.slice(0, 5).map((task) => (
               <TaskRow key={task.id} task={task} onToggle={onToggleTask} onOpenProject={onOpenProject} />
@@ -1043,15 +1237,16 @@ function TodayView({
         </section>
 
         <section className="surface agenda-surface">
-          <SectionHeader icon={<CalendarDays size={18} />} title="Agenda" action="Hoy" />
+          <SectionHeader icon={<CalendarDays size={18} />} title="Agenda compartida" action={<button type="button" onClick={() => setAgendaOpen(true)}><Plus size={14} /> Añadir</button>} />
           <div className="agenda-list">
-            {agenda.map((event) => (
-              <div className="agenda-row" key={event.time}>
+            {state.agendaEvents.map((event) => (
+              <div className="agenda-row" key={event.id}>
                 <time>{event.time}</time>
                 <span>
                   <strong>{event.title}</strong>
                   <small>{event.meta}</small>
                 </span>
+                <button type="button" onClick={() => onRemoveAgendaEvent(event.id)} aria-label={`Eliminar ${event.title}`} title="Eliminar bloque"><X size={15} /></button>
               </div>
             ))}
           </div>
@@ -1090,10 +1285,11 @@ function TodayView({
       </div>
 
       <section className="projects-overview">
-        <SectionHeader icon={<FolderKanban size={18} />} title="Pulso de proyectos" action={`${openTasks.length} tareas abiertas`} />
+        <SectionHeader icon={<FolderKanban size={18} />} title="Pulso de proyectos" action={formatOpenTasks(openTasks.length)} />
         <div className="project-pulse-grid">
           {projects.map((project) => {
             const projectTasks = state.tasks.filter((task) => task.projectId === project.id && task.status !== 'done')
+            const progress = getProjectProgress(state, project.id)
             return (
               <button className="project-pulse" key={project.id} type="button" onClick={() => onOpenProject(project.id)}>
                 <span className="project-line" style={{ background: project.accent }} />
@@ -1102,18 +1298,39 @@ function TodayView({
                     <small>{project.client}</small>
                     <strong>{project.name}</strong>
                   </span>
-                  <span className="health-value">{project.health}%</span>
+                  <span className="health-value">{progress}%</span>
                 </span>
-                <span className="progress-track"><i style={{ width: `${project.health}%`, background: project.accent }} /></span>
+                <span className="progress-track"><i style={{ width: `${progress}%`, background: project.accent }} /></span>
                 <span className="project-pulse-foot">
                   <span>{project.status}</span>
-                  <span>{projectTasks.length} abiertas</span>
+                  <span>{formatOpenTasks(projectTasks.length, true)}</span>
                 </span>
               </button>
             )
           })}
         </div>
       </section>
+
+      {checkInOpen && currentCheckIn && (
+        <CheckInDialog
+          member={member}
+          checkIn={currentCheckIn}
+          onClose={() => setCheckInOpen(false)}
+          onSubmit={(availability, focus) => {
+            onUpdateCheckIn(availability, focus)
+            setCheckInOpen(false)
+          }}
+        />
+      )}
+      {agendaOpen && (
+        <AgendaDialog
+          onClose={() => setAgendaOpen(false)}
+          onSubmit={(event) => {
+            onAddAgendaEvent(event)
+            setAgendaOpen(false)
+          }}
+        />
+      )}
     </div>
   )
 }
@@ -1138,6 +1355,7 @@ function ProjectsView({ state, onOpenProject }: { state: HubState; onOpenProject
         {projects.map((project) => {
           const projectTasks = state.tasks.filter((task) => task.projectId === project.id && task.status !== 'done')
           const owners = [...new Set(state.tasks.filter((task) => task.projectId === project.id).map((task) => task.ownerId))]
+          const progress = getProjectProgress(state, project.id)
           return (
             <button className="project-table-row" key={project.id} type="button" onClick={() => onOpenProject(project.id)}>
               <span className="project-name-cell">
@@ -1145,10 +1363,10 @@ function ProjectsView({ state, onOpenProject }: { state: HubState; onOpenProject
                 <span><strong>{project.name}</strong><small>{project.client}</small></span>
               </span>
               <span><StatusBadge>{project.status}</StatusBadge></span>
-              <span className="milestone-cell"><strong>{project.nextMilestone}</strong><small>{projectTasks.length} tareas abiertas</small></span>
+              <span className="milestone-cell"><strong>{project.nextMilestone}</strong><small>{formatOpenTasks(projectTasks.length)}</small></span>
               <span className="project-progress-cell">
-                <span><i style={{ width: `${project.health}%`, background: project.accent }} /></span>
-                <small>{project.health}%</small>
+                <span><i style={{ width: `${progress}%`, background: project.accent }} /></span>
+                <small>{progress}%</small>
               </span>
               <span className="project-owner-cell">
                 <span className="avatar-stack small">
@@ -1302,6 +1520,7 @@ function ProjectView({
   const boardItems = state.boardItems.filter((item) => item.projectId === project.id)
   const openTasks = tasks.filter((task) => task.status !== 'done')
   const decisions = updates.filter((update) => update.kind === 'decision')
+  const progress = getProjectProgress(state, project.id)
 
   const tabs: Array<{ id: ProjectTab; label: string }> = [
     { id: 'overview', label: 'Resumen' },
@@ -1322,7 +1541,7 @@ function ProjectView({
         </div>
         <div className="project-header-stats">
           <span><small>Estado</small><strong>{project.status}</strong></span>
-          <span><small>Salud</small><strong>{project.health}%</strong></span>
+          <span><small>Progreso</small><strong>{progress}%</strong></span>
           <span><small>Abiertas</small><strong>{openTasks.length}</strong></span>
         </div>
       </section>
@@ -1344,7 +1563,7 @@ function ProjectView({
       {activeTab === 'overview' && (
         <div className="project-overview-grid">
           <section className="surface">
-            <SectionHeader icon={<CheckCircle2 size={18} />} title="Siguiente trabajo" action={`${openTasks.length} abiertas`} />
+            <SectionHeader icon={<CheckCircle2 size={18} />} title="Siguiente trabajo" action={formatOpenTasks(openTasks.length, true)} />
             <div className="task-list">
               {openTasks.slice(0, 5).map((task) => <TaskRow key={task.id} task={task} onToggle={onToggleTask} />)}
             </div>
@@ -1526,7 +1745,7 @@ function SearchResults({
 
   return (
     <div className="page narrow-page search-page">
-      <PageHeading eyebrow="Búsqueda global" title={`Resultados para “${term}”`} description={`${count} coincidencias en el Hub.`} />
+      <PageHeading eyebrow="Búsqueda global" title={`Resultados para “${term}”`} description={`${count} ${count === 1 ? 'coincidencia' : 'coincidencias'} en el Hub.`} />
       {count === 0 ? (
         <section className="surface"><EmptyState icon={<Search size={24} />} title="Nada por aquí" body="Prueba con otro nombre, tarea o decisión." /></section>
       ) : (
@@ -1549,23 +1768,109 @@ function SearchResults({
   )
 }
 
+function CheckInDialog({
+  member,
+  checkIn,
+  onClose,
+  onSubmit,
+}: {
+  member: Member
+  checkIn: TeamCheckIn
+  onClose: () => void
+  onSubmit: (availability: TeamAvailability, focus: string) => void
+}) {
+  const [availability, setAvailability] = useState<TeamAvailability>(checkIn.availability)
+  const [focus, setFocus] = useState(checkIn.focus)
+
+  const submit = (event: FormEvent) => {
+    event.preventDefault()
+    onSubmit(availability, focus)
+  }
+
+  return (
+    <div className="dialog-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
+      <section className="capture-dialog check-in-dialog" role="dialog" aria-modal="true" aria-labelledby="check-in-title">
+        <header>
+          <span><Avatar member={member} /><span><strong id="check-in-title">¿En qué estás hoy?</strong><small>Una frase para que el equipo se sitúe.</small></span></span>
+          <button className="icon-button compact" type="button" onClick={onClose} aria-label="Cerrar"><X size={17} /></button>
+        </header>
+        <form onSubmit={submit}>
+          <div className="availability-options" role="group" aria-label="Disponibilidad">
+            {(Object.keys(availabilityLabels) as TeamAvailability[]).map((option) => (
+              <button key={option} type="button" className={availability === option ? `is-active availability-${option}` : ''} onClick={() => setAvailability(option)}>
+                <i /> {availabilityLabels[option]}
+              </button>
+            ))}
+          </div>
+          <label>
+            <span>Foco o bloqueo principal</span>
+            <textarea autoFocus value={focus} onChange={(event) => setFocus(event.target.value)} placeholder="Ej. Terminar la propuesta Atlas y enviarla antes de las 13:00" rows={3} data-testid="check-in-focus" />
+          </label>
+          <footer>
+            <button className="text-button" type="button" onClick={onClose}>Cancelar</button>
+            <button className="primary-action" type="submit" disabled={!focus.trim()}><Check size={16} /> Actualizar</button>
+          </footer>
+        </form>
+      </section>
+    </div>
+  )
+}
+
+function AgendaDialog({ onClose, onSubmit }: { onClose: () => void; onSubmit: (event: Omit<AgendaEvent, 'id'>) => void }) {
+  const [time, setTime] = useState('09:30')
+  const [title, setTitle] = useState('')
+  const [meta, setMeta] = useState('30 min · Equipo')
+
+  const submit = (event: FormEvent) => {
+    event.preventDefault()
+    onSubmit({ time, title, meta })
+  }
+
+  return (
+    <div className="dialog-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
+      <section className="capture-dialog agenda-dialog" role="dialog" aria-modal="true" aria-labelledby="agenda-dialog-title">
+        <header>
+          <span><span className="dialog-icon"><CalendarDays size={18} /></span><span><strong id="agenda-dialog-title">Añadir a la agenda</strong><small>Un bloque visible para todo el estudio.</small></span></span>
+          <button className="icon-button compact" type="button" onClick={onClose} aria-label="Cerrar"><X size={17} /></button>
+        </header>
+        <form onSubmit={submit}>
+          <div className="agenda-dialog-grid">
+            <label><span>Hora</span><input type="time" value={time} onChange={(event) => setTime(event.target.value)} /></label>
+            <label><span>Duración y asistentes</span><input value={meta} onChange={(event) => setMeta(event.target.value)} placeholder="30 min · Equipo" /></label>
+          </div>
+          <label><span>Qué va a ocurrir</span><input autoFocus value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Ej. Revisión interna de campaña" data-testid="agenda-title" /></label>
+          <footer>
+            <button className="text-button" type="button" onClick={onClose}>Cancelar</button>
+            <button className="primary-action" type="submit" disabled={!title.trim() || !time}><Check size={16} /> Añadir</button>
+          </footer>
+        </form>
+      </section>
+    </div>
+  )
+}
+
 function CaptureDialog({
   selectedProjectId,
+  activeMemberId,
   onClose,
   onSubmit,
 }: {
   selectedProjectId?: ProjectId
+  activeMemberId: MemberId
   onClose: () => void
-  onSubmit: (payload: { type: CaptureType; title: string; detail?: string; destination: 'inbox' | ProjectId }) => void
+  onSubmit: (payload: CapturePayload) => void
 }) {
   const [type, setType] = useState<CaptureType>('task')
   const [title, setTitle] = useState('')
   const [detail, setDetail] = useState('')
   const [destination, setDestination] = useState<'inbox' | ProjectId>(selectedProjectId ?? 'inbox')
+  const [ownerId, setOwnerId] = useState<MemberId>(activeMemberId)
+  const [due, setDue] = useState('Hoy')
+  const [priority, setPriority] = useState<Task['priority']>('Media')
 
   const submit = (event: FormEvent) => {
     event.preventDefault()
-    onSubmit({ type, title, detail, destination })
+    onSubmit({ type, title, detail, destination, ownerId, due, priority })
   }
 
   return (
@@ -1598,6 +1903,33 @@ function CaptureDialog({
               {projects.map((project) => <option value={project.id} key={project.id}>{project.name}</option>)}
             </select>
           </label>
+          {type === 'task' && destination !== 'inbox' && (
+            <div className="capture-task-fields">
+              <label>
+                <span>Responsable</span>
+                <select value={ownerId} onChange={(event) => setOwnerId(event.target.value as MemberId)}>
+                  {members.map((member) => <option value={member.id} key={member.id}>{member.name}</option>)}
+                </select>
+              </label>
+              <label>
+                <span>Cuándo</span>
+                <select value={due} onChange={(event) => setDue(event.target.value)}>
+                  <option value="Hoy">Hoy</option>
+                  <option value="Mañana">Mañana</option>
+                  <option value="Esta semana">Esta semana</option>
+                  <option value="Sin fecha">Sin fecha</option>
+                </select>
+              </label>
+              <label>
+                <span>Prioridad</span>
+                <select value={priority} onChange={(event) => setPriority(event.target.value as Task['priority'])}>
+                  <option value="Alta">Alta</option>
+                  <option value="Media">Media</option>
+                  <option value="Baja">Baja</option>
+                </select>
+              </label>
+            </div>
+          )}
           <footer>
             <button className="text-button" type="button" onClick={onClose}>Cancelar</button>
             <button className="primary-action" type="submit" disabled={!title.trim()}><Check size={16} /> Guardar</button>
