@@ -19,6 +19,9 @@ La regla de producto es simple: menos ambicioso, más usado. El Hub no intenta r
 - Búsqueda global y manifest PWA.
 - Autenticación real con Supabase Auth y cambio de PIN personal.
 - Datos compartidos con RLS, Realtime y control de cambios simultáneos.
+- Gestor completo de tareas con fechas reales, filtros, responsables, bloqueos, edición y eliminación.
+- Calendario mensual sincronizado con el calendario compartido de Studio32 mediante una Edge Function segura de Google Calendar.
+- Pizarras de proyecto con cuatro estados, contexto, responsables y edición de tarjetas.
 
 La propuesta para probarlo con el equipo durante una semana está en [docs/TEAM_PILOT.md](docs/TEAM_PILOT.md).
 

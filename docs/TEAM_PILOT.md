@@ -17,7 +17,7 @@ El Hub no intenta sustituir Drive, Calendar o Notion. Los conecta con el trabajo
 1. Entrar como Juanma, Pancho o Gonzalo.
 2. Mostrar `Equipo hoy` y actualizar el foco de una persona.
 3. Completar una tarea y comprobar cómo cambia el progreso del proyecto.
-4. Añadir un bloque a la agenda.
+4. Crear una cita en Calendario y comprobar que aparece en Google Calendar.
 5. Capturar una nota o decisión y enviarla a un proyecto.
 6. Abrir un proyecto para ver tareas, conversación, decisiones, pizarra y entregables juntos.
 
@@ -40,11 +40,10 @@ La demostración debe durar menos de cinco minutos. El mensaje no es "tenemos ot
 
 Si una sección no ayuda a tomar una decisión o avanzar trabajo durante el piloto, se simplifica o se elimina.
 
-## Lo siguiente para uso real
+## Acuerdo de uso
 
-La interfaz ya permite validar el hábito. Para convertirla en el sistema compartido definitivo hacen falta:
-
-1. Autenticación real para las tres cuentas `@studio32.es`.
-2. Base de datos compartida y actualizaciones en tiempo real.
-3. Sincronización de Calendar y enlaces de Drive.
-4. Copias de seguridad y registro básico de actividad.
+- Toda tarea debe tener proyecto, responsable, prioridad y una fecha o quedar explícitamente sin fecha.
+- Un bloqueo siempre debe incluir el motivo necesario para desbloquearlo.
+- Google Calendar es la única fuente de verdad para citas y reuniones.
+- La pizarra sirve para ordenar ideas y decisiones; el trabajo ejecutable se convierte en tarea.
+- Drive sigue siendo el almacén de archivos y el Hub conserva sus enlaces dentro del proyecto.

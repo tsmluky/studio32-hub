@@ -65,7 +65,7 @@ Al abrir un proyecto aparecen cinco pesta√±as internas:
 - **Resumen:** siguiente trabajo, decisiones, actividad y accesos rapidos.
 - **Tareas:** lista operativa del proyecto, con responsable, fecha y prioridad.
 - **Conversacion:** mensajes persistentes vinculados exclusivamente al proyecto.
-- **Pizarra:** ideas que pueden pasar por `Ideas`, `Decidido` y `En marcha`.
+- **Pizarra:** tarjetas con responsable y contexto que pasan por `Ideas`, `Decidido`, `En marcha` y `Cerrado`.
 - **Entregables:** enlaces a documentos, carpetas, PDF o recursos externos.
 
 ### Inbox
@@ -82,6 +82,24 @@ Es la memoria recuperable del estudio.
 - **Decisiones y notas:** contexto importante que no deberia perderse en una conversacion.
 
 La Biblioteca se alimenta automaticamente con lo que el equipo guarda en los proyectos; no hace falta duplicar la informacion.
+
+### Tareas
+
+Reune el trabajo accionable de cada persona y de todo el equipo. Cada tarea tiene proyecto, responsable, fecha real, prioridad, estado y, cuando corresponde, un motivo de bloqueo.
+
+- **Mis tareas:** muestra solo el trabajo asignado a la persona conectada.
+- **Todo el equipo:** permite entender carga y responsables.
+- **Hoy, Atrasadas y Bloqueadas:** separan lo que necesita atencion inmediata.
+- Pulsa el titulo o el lapiz para editar, reasignar, reprogramar, bloquear, completar o eliminar.
+
+### Calendario
+
+Muestra el calendario compartido de Google Calendar y las fechas de tareas del Hub en una vista mensual. Las citas se crean y editan directamente en Google; las tareas aparecen como entregas sin duplicarse como eventos.
+
+- Selecciona un dia para ver sus citas y tareas.
+- Usa **Nueva cita** para crear un evento con hora, ubicacion y descripcion.
+- Pulsa una cita para editarla o eliminarla.
+- Las reuniones se administran en Calendario; los resultados accionables se convierten en tareas.
 
 ## 4. Captura rapida
 
@@ -147,7 +165,7 @@ El valor no esta en rellenar todos los campos. Esta en reducir preguntas como ‚Ä
 
 La version actual incluye acceso privado, datos compartidos en tiempo real, proyectos, tareas, mensajes, pizarra, agenda manual, Inbox, enlaces y Biblioteca.
 
-Todavia no existe sincronizacion automatica con Google Calendar, Drive o Notion, ni subida directa de archivos. Por ahora se guardan enlaces a esos sistemas. Esta limitacion es deliberada: primero se comprobara que el flujo diario aporta valor y despues se integraran solo las herramientas que ahorren trabajo real.
+Google Calendar ya esta sincronizado para consultar, crear, editar y eliminar citas desde el Hub. Drive y Notion siguen funcionando mediante enlaces y tampoco hay subida directa de archivos. Esta limitacion es deliberada: se integraran nuevas herramientas solo cuando eliminen trabajo repetido de forma clara.
 
 ## 9. Primera semana de uso
 

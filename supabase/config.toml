@@ -1,0 +1,4 @@
+project_id = "studio32-hub"
+
+[functions.google-calendar]
+verify_jwt = true

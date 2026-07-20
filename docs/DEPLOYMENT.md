@@ -7,6 +7,7 @@
 - **Acceso:** Supabase Auth mediante las tres cuentas `@studio32.es`. El PIN visible se transforma en una contraseña fuerte antes de enviarse a Auth.
 - **Datos compartidos:** Supabase Postgres con políticas que solo permiten entrar a miembros del workspace.
 - **Actualizaciones en directo:** Supabase Realtime para conversación, tareas e Inbox.
+- **Calendario:** una Edge Function autenticada conecta el Hub con el calendario compartido de Google mediante una cuenta de servicio.
 - **Archivos:** Drive continúa siendo el almacén principal; el Hub guarda contexto y enlaces.
 
 ## Modelo de acceso
@@ -46,3 +47,23 @@ La migración SQL versionada está en `supabase/migrations`. La web pública no 
 3. GitHub Pages sirve la rama `main` desde la raíz.
 4. El archivo `public/CNAME` mantiene asociado `www.hub.studio32.es`.
 5. El repositorio de despliegue solo contiene artefactos compilados; el código fuente permanece en el repositorio privado.
+
+## Google Calendar
+
+El navegador nunca contiene la clave de Google. `supabase/functions/google-calendar` comprueba la sesión, verifica que el usuario pertenece a Studio32 y limita las operaciones al calendario configurado.
+
+Configuración necesaria en Supabase Edge Function Secrets:
+
+- `GOOGLE_CALENDAR_ID`: ID del calendario compartido Studio32.
+- `GOOGLE_SERVICE_ACCOUNT_JSON`: contenido completo de la clave JSON de `studio32-agent@studio32-500714.iam.gserviceaccount.com`.
+
+El calendario debe estar compartido con esa cuenta como **Modificar eventos** y Google Calendar API debe estar habilitada en el proyecto de Google Cloud.
+
+Despliegue de la función:
+
+```bash
+npx supabase login
+npx supabase functions deploy google-calendar --project-ref wwhinwxedcvpxprmcsta
+```
+
+Las citas creadas, modificadas o eliminadas desde el Hub se escriben directamente en Google Calendar. Las fechas de tareas permanecen en el Hub y se muestran superpuestas en la vista mensual.
