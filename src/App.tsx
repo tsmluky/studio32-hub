@@ -218,6 +218,12 @@ const navigation: Array<{ id: Exclude<MainView, 'project'>; label: string; icon:
   { id: 'library', label: 'Biblioteca', icon: LibraryBig },
 ]
 
+// Alta de asistente: página servida por el backend del agente (Railway). Se abre
+// en pestaña nueva desde el sidebar. Sobreescribible con VITE_ONBOARDING_URL.
+const ONBOARDING_URL =
+  (import.meta.env.VITE_ONBOARDING_URL as string | undefined) ??
+  'https://web-production-d722c.up.railway.app/onboarding'
+
 const captureLabels: Record<CaptureType, string> = {
   task: 'Tarea',
   note: 'Nota',
@@ -1487,6 +1493,15 @@ function Sidebar({
             </button>
           )
         })}
+        <button
+          type="button"
+          onClick={() => window.open(ONBOARDING_URL, '_blank', 'noopener,noreferrer')}
+          aria-label="Alta de asistente"
+          data-testid="nav-onboarding"
+        >
+          <Sparkles size={18} />
+          <span>Alta de asistente</span>
+        </button>
       </nav>
 
       <div className="sidebar-projects">
