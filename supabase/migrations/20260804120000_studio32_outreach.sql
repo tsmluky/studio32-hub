@@ -8,13 +8,22 @@
 -- Las políticas replican el modelo ya existente: solo miembros del workspace de
 -- Studio32, comprobado con public.is_workspace_member.
 
-create type public.outreach_status as enum (
-  'nuevo', 'contactado', 'respondido', 'reunion', 'cliente', 'descartado'
-);
+-- `create type` no acepta IF NOT EXISTS. Sin esta guarda, un segundo pase de la
+-- migración falla en la primera línea y deja el resto sin aplicar.
+do $$
+begin
+  if not exists (select 1 from pg_type where typname = 'outreach_status') then
+    create type public.outreach_status as enum (
+      'nuevo', 'contactado', 'respondido', 'reunion', 'cliente', 'descartado'
+    );
+  end if;
 
-create type public.outreach_message_status as enum (
-  'borrador', 'aprobado', 'enviando', 'enviado', 'fallido'
-);
+  if not exists (select 1 from pg_type where typname = 'outreach_message_status') then
+    create type public.outreach_message_status as enum (
+      'borrador', 'aprobado', 'enviando', 'enviado', 'fallido'
+    );
+  end if;
+end $$;
 
 -- ---------------------------------------------------------------------------
 -- Campañas
