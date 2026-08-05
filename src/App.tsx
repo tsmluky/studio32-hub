@@ -767,6 +767,54 @@ function useOutreach(enabled: boolean) {
   return { campaigns, leads, messages, status, error, reload, approveMessage, discardLead }
 }
 
+// Pulso para la portada. Deliberadamente NO reutiliza useOutreach: aquí solo
+// hace falta el contador, y "Hoy" es la pantalla que se abre todos los días.
+// Una consulta de cabecera (head: true) no trae filas, solo el total.
+function useOutreachPulse(enabled: boolean) {
+  const [pending, setPending] = useState(0)
+  const [campaign, setCampaign] = useState('')
+
+  useEffect(() => {
+    if (!supabase || !enabled) return
+    const client = supabase
+
+    let cancelled = false
+
+    const load = async () => {
+      const [pendingRows, campaignRows] = await Promise.all([
+        client
+          .from('outreach_messages')
+          .select('id', { count: 'exact', head: true })
+          .eq('workspace_id', 'studio32')
+          .eq('status', 'borrador'),
+        client
+          .from('outreach_campaigns')
+          .select('name')
+          .eq('workspace_id', 'studio32')
+          .eq('status', 'abierta')
+          .order('created_at', { ascending: false })
+          .limit(1),
+      ])
+
+      if (cancelled) return
+
+      // Si las tablas aún no existen, la portada se queda como estaba.
+      if (pendingRows.error) {
+        setPending(0)
+        return
+      }
+
+      setPending(pendingRows.count ?? 0)
+      setCampaign(campaignRows.data?.[0]?.name ?? '')
+    }
+
+    void load()
+    return () => { cancelled = true }
+  }, [enabled])
+
+  return { pending, campaign }
+}
+
 function getTodayLabel() {
   const formatted = new Intl.DateTimeFormat('es-ES', {
     weekday: 'long',
@@ -847,6 +895,7 @@ function App() {
   // Solo consulta cuando la vista está abierta: es un tablero de trabajo, no
   // algo que deba cargarse en cada arranque del Hub.
   const outreach = useOutreach(view === 'outreach')
+  const outreachPulse = useOutreachPulse(view === 'today')
 
   const activeMember = activeMemberId ? getMember(activeMemberId) : null
   const selectedProject = getProject(state.projects, state.selectedProjectId)
@@ -1282,6 +1331,9 @@ function App() {
               onOpenProject={openProject}
               onOpenInbox={() => selectView('inbox')}
               onOpenCalendar={() => selectView('calendar')}
+              onOpenOutreach={() => selectView('outreach')}
+              outreachPending={outreachPulse.pending}
+              outreachCampaign={outreachPulse.campaign}
               onUpdateCheckIn={updateTeamCheckIn}
             />
           ) : view === 'tasks' ? (
@@ -1730,6 +1782,9 @@ function TodayView({
   onOpenProject,
   onOpenInbox,
   onOpenCalendar,
+  onOpenOutreach,
+  outreachPending,
+  outreachCampaign,
   onUpdateCheckIn,
 }: {
   member: Member
@@ -1739,6 +1794,9 @@ function TodayView({
   onOpenProject: (projectId: ProjectId) => void
   onOpenInbox: () => void
   onOpenCalendar: () => void
+  onOpenOutreach: () => void
+  outreachPending: number
+  outreachCampaign: string
   onUpdateCheckIn: (availability: TeamAvailability, focus: string) => void
 }) {
   const [checkInOpen, setCheckInOpen] = useState(false)
@@ -1778,6 +1836,21 @@ function TodayView({
           </span>
         </div>
       </section>
+
+      {outreachPending > 0 && (
+        <button className="outreach-pulse" type="button" onClick={onOpenOutreach} data-testid="outreach-pulse">
+          <Send size={17} />
+          <span>
+            <strong>
+              {outreachPending === 1
+                ? '1 correo espera tu visto bueno'
+                : `${outreachPending} correos esperan tu visto bueno`}
+            </strong>
+            <small>{outreachCampaign || 'Prospección'}</small>
+          </span>
+          <ChevronRight size={16} />
+        </button>
+      )}
 
       <section className="surface team-today-surface">
         <SectionHeader
