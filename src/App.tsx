@@ -764,7 +764,19 @@ function useOutreach(enabled: boolean) {
     reload()
   }
 
-  return { campaigns, leads, messages, status, error, reload, approveMessage, discardLead }
+  // Enviar es lo único irreversible de todo el tablero. Va en tanda y no por
+  // lead: se revisa uno a uno con calma y se envía una vez, a conciencia.
+  // La función comprueba bajas, repeticiones y aprobación antes de disparar.
+  const sendApproved = async (messageIds: string[]) => {
+    if (!supabase) throw new Error('El envío necesita una sesión conectada.')
+    const { data, error: sendError } = await supabase.functions.invoke('outreach-send', { body: { messageIds } })
+    if (sendError) throw new Error('La función de envío todavía no está desplegada.')
+    if (data?.error) throw new Error(data.error)
+    reload()
+    return data as { enviados: number; total: number; resultados: Array<{ id: string; estado: string; motivo?: string }> }
+  }
+
+  return { campaigns, leads, messages, status, error, reload, approveMessage, discardLead, sendApproved }
 }
 
 // Pulso para la portada. Deliberadamente NO reutiliza useOutreach: aquí solo
@@ -1374,6 +1386,7 @@ function App() {
               onReload={outreach.reload}
               onApprove={(messageId) => void outreach.approveMessage(messageId)}
               onDiscard={(leadId) => void outreach.discardLead(leadId)}
+              onSend={outreach.sendApproved}
             />
           ) : (
             <ProjectView
@@ -2553,6 +2566,7 @@ function OutreachView({
   onReload,
   onApprove,
   onDiscard,
+  onSend,
 }: {
   campaigns: OutreachCampaign[]
   leads: OutreachLead[]
@@ -2562,9 +2576,13 @@ function OutreachView({
   onReload: () => void
   onApprove: (messageId: string) => void
   onDiscard: (leadId: string) => void
+  onSend: (messageIds: string[]) => Promise<{ enviados: number; total: number }>
 }) {
   const [campaignId, setCampaignId] = useState<string | 'all'>('all')
   const [filter, setFilter] = useState<'review' | 'approved' | 'sent' | 'weak'>('review')
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [enviando, setEnviando] = useState(false)
+  const [aviso, setAviso] = useState('')
 
   const latestMessageFor = (leadId: string) => messages.find((message) => message.lead_id === leadId)
 
@@ -2583,6 +2601,25 @@ function OutreachView({
   }
 
   const visibleLeads = scopedLeads.filter(matchesFilter)
+
+  const destinatarios = scopedLeads
+    .map((lead) => ({ lead, message: latestMessageFor(lead.id) }))
+    .filter((item) => item.message?.status === 'aprobado')
+    .map((item) => ({ id: item.message!.id, negocio: item.lead.business_name, email: item.message!.to_email }))
+
+  const enviar = async () => {
+    setEnviando(true)
+    setAviso('')
+    try {
+      const resultado = await onSend(destinatarios.map((destinatario) => destinatario.id))
+      setAviso(`Enviados ${resultado.enviados} de ${resultado.total}.`)
+      setConfirmOpen(false)
+    } catch (sendError) {
+      setAviso(sendError instanceof Error ? sendError.message : 'No se ha podido enviar.')
+    } finally {
+      setEnviando(false)
+    }
+  }
 
   const countFor = (id: typeof filter) => {
     return scopedLeads.filter((lead) => {
@@ -2639,6 +2676,20 @@ function OutreachView({
             </div>
           </section>
 
+          {destinatarios.length > 0 && (
+            <section className="outreach-send-bar">
+              <span>
+                <strong>{destinatarios.length === 1 ? '1 correo aprobado' : `${destinatarios.length} correos aprobados`}</strong>
+                <small>Revisados y listos. Salen cuando tú lo digas.</small>
+              </span>
+              <button className="primary-action" type="button" onClick={() => setConfirmOpen(true)}>
+                <Send size={16} /> Enviar
+              </button>
+            </section>
+          )}
+
+          {aviso && <p className="outreach-aviso">{aviso}</p>}
+
           <section className="surface outreach-list">
             <SectionHeader icon={<Send size={18} />} title="Cola de revisión" action={`${visibleLeads.length}`} />
             {visibleLeads.map((lead) => (
@@ -2659,6 +2710,15 @@ function OutreachView({
             )}
           </section>
         </>
+      )}
+
+      {confirmOpen && (
+        <SendConfirmDialog
+          destinatarios={destinatarios}
+          enviando={enviando}
+          onClose={() => setConfirmOpen(false)}
+          onConfirm={() => void enviar()}
+        />
       )}
     </div>
   )
@@ -2775,6 +2835,54 @@ function LeadStory({
         <button type="button" onClick={() => onDiscard(lead.id)}><X size={16} /> Descartar</button>
       </div>
     </article>
+  )
+}
+
+function SendConfirmDialog({
+  destinatarios,
+  enviando,
+  onClose,
+  onConfirm,
+}: {
+  destinatarios: Array<{ id: string; negocio: string; email: string }>
+  enviando: boolean
+  onClose: () => void
+  onConfirm: () => void
+}) {
+  return (
+    <div className="dialog-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && !enviando && onClose()}>
+      <section className="capture-dialog" role="dialog" aria-modal="true" aria-labelledby="send-dialog-title">
+        <header>
+          <span>
+            <span className="dialog-icon"><Send size={18} /></span>
+            <span>
+              <strong id="send-dialog-title">Enviar {destinatarios.length === 1 ? 'un correo' : `${destinatarios.length} correos`}</strong>
+              <small>Salen ahora mismo. No hay forma de recuperarlos.</small>
+            </span>
+          </span>
+          <button className="icon-button compact" type="button" onClick={onClose} aria-label="Cerrar" disabled={enviando}><X size={17} /></button>
+        </header>
+
+        <div className="send-recipients">
+          {destinatarios.map((destinatario) => (
+            <div key={destinatario.id}>
+              <strong>{destinatario.negocio}</strong>
+              <small>{destinatario.email}</small>
+            </div>
+          ))}
+        </div>
+
+        <footer className="task-dialog-footer">
+          <span />
+          <span>
+            <button className="text-button" type="button" onClick={onClose} disabled={enviando}>Cancelar</button>
+            <button className="primary-action" type="button" onClick={onConfirm} disabled={enviando}>
+              <Send size={16} /> {enviando ? 'Enviando…' : 'Enviar ahora'}
+            </button>
+          </span>
+        </footer>
+      </section>
+    </div>
   )
 }
 
