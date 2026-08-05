@@ -2585,8 +2585,6 @@ function OutreachView({
   const visibleLeads = scopedLeads.filter(matchesFilter)
 
   const countFor = (id: typeof filter) => {
-    const previous = filter
-    void previous
     return scopedLeads.filter((lead) => {
       const message = latestMessageFor(lead.id)
       if (id === 'weak') return (lead.huella?.confianza?.nivel ?? 'bajo') !== 'alto'
