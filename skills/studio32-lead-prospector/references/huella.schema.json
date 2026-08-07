@@ -1,0 +1,205 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "studio32/huella/v1",
+  "title": "Huella de negocio",
+  "description": "Retrato mínimo y verificable de un negocio, minado de su presencia pública. Sirve para dos cosas: redactar el correo de captación y, si el lead convierte, arrancar la configuración del tenant en studio32-agent.",
+  "type": "object",
+  "required": ["version", "negocio", "verificacion", "identidad", "voz", "dolor", "angulos"],
+  "additionalProperties": false,
+
+  "$defs": {
+    "observacion": {
+      "type": "object",
+      "description": "Toda afirmación sobre el negocio viaja con su evidencia. Sin evidencia no hay afirmación.",
+      "required": ["valor", "evidencia", "fuente", "confianza"],
+      "additionalProperties": false,
+      "properties": {
+        "valor": {
+          "type": "string",
+          "minLength": 3,
+          "description": "La afirmación, en una frase."
+        },
+        "evidencia": {
+          "type": "string",
+          "minLength": 10,
+          "description": "Qué lo respalda, concreto y comprobable. Cita literal si viene de reseña o de la web."
+        },
+        "fuente": {
+          "type": "string",
+          "enum": ["web", "google_maps", "resenas", "instagram", "prensa", "otro"],
+          "description": "De dónde salió. Solo fuentes efectivamente cargadas."
+        },
+        "confianza": {
+          "type": "string",
+          "enum": ["alta", "media", "baja"],
+          "description": "alta = dato literal de una fuente cargada. media = inferencia razonable a partir de fuente cargada. baja = conjetura. REGLA DURA: lo de confianza baja no puede citarse en el correo."
+        }
+      }
+    }
+  },
+
+  "properties": {
+    "version": { "const": "1" },
+
+    "negocio": {
+      "type": "object",
+      "description": "Hechos duros de identificación. Nada aquí se infiere.",
+      "required": ["nombre", "vertical", "ciudad", "web"],
+      "additionalProperties": false,
+      "properties": {
+        "nombre": { "type": "string", "minLength": 2 },
+        "vertical": {
+          "type": "string",
+          "enum": ["clinica_dental", "barberia", "restaurante", "otro"],
+          "description": "Alineado con studio32-agent/templates/. 'otro' significa que aún no existe arquetipo: el lead sigue siendo válido para captación, pero no hay reutilización directa si convierte."
+        },
+        "vertical_detalle": {
+          "type": "string",
+          "description": "Obligatorio de facto cuando vertical = 'otro'. Ej: 'centro de fisioterapia'."
+        },
+        "ciudad": { "type": "string", "minLength": 2 },
+        "web": {
+          "type": ["string", "null"],
+          "description": "URL real cargada, o null. null NO es un hueco: es la señal de oportunidad más fuerte que existe. Nunca inventar un dominio plausible."
+        },
+        "maps_url": { "type": ["string", "null"] },
+        "instagram": { "type": ["string", "null"] },
+        "telefono": { "type": ["string", "null"] },
+        "email": {
+          "type": ["string", "null"],
+          "description": "Email de contacto público del negocio. Sin esto el lead no puede entrar en la bandeja de correo."
+        },
+        "resenas": {
+          "type": ["object", "null"],
+          "required": ["total", "media"],
+          "additionalProperties": false,
+          "properties": {
+            "total": { "type": "integer", "minimum": 0 },
+            "media": { "type": "number", "minimum": 0, "maximum": 5 }
+          },
+          "description": "Números reales de places_search. No estimar."
+        }
+      }
+    },
+
+    "verificacion": {
+      "type": "object",
+      "description": "Qué se comprobó de verdad. Es lo que hace auditable el resto del documento y lo que decide si el lead puede subir al hub.",
+      "required": ["web_cargada", "resenas_leidas", "competencia_buscada"],
+      "additionalProperties": false,
+      "properties": {
+        "web_cargada": {
+          "type": "boolean",
+          "description": "true solo si se hizo web_fetch de verdad. Si es false, no puede haber observaciones con fuente 'web'."
+        },
+        "resenas_leidas": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Cuántas reseñas se leyeron realmente. 0 impide cualquier observación con fuente 'resenas'."
+        },
+        "competencia_buscada": { "type": "boolean" },
+        "notas": {
+          "type": "string",
+          "description": "Qué no se pudo comprobar y por qué. Ej: 'web caída en el momento de la consulta'."
+        }
+      }
+    },
+
+    "identidad": {
+      "type": "object",
+      "description": "Quién es este negocio. La parte que distingue a ESTE cliente del arquetipo genérico de su vertical.",
+      "required": ["como_se_describen", "que_venden"],
+      "additionalProperties": false,
+      "properties": {
+        "como_se_describen": { "$ref": "#/$defs/observacion" },
+        "que_venden": { "$ref": "#/$defs/observacion" },
+        "senas_de_ticket": {
+          "$ref": "#/$defs/observacion",
+          "description": "Observables de nivel de precio: zona, fotos del local, precios publicados, número de sedes."
+        },
+        "lema_o_promesa": {
+          "$ref": "#/$defs/observacion",
+          "description": "Si el negocio tiene un lema propio. Engancha directo con templates/<vertical>/tone.md, que ya dice 'si la clínica tiene un lema o una promesa, hazla tuya'."
+        }
+      }
+    },
+
+    "voz": {
+      "type": "object",
+      "description": "El hallazgo central: el dueño no sabe describir su propia alma, pero sus clientes ya la describieron en las reseñas.",
+      "required": ["como_les_hablan_sus_clientes"],
+      "additionalProperties": false,
+      "properties": {
+        "como_hablan_ellos": {
+          "$ref": "#/$defs/observacion",
+          "description": "Registro con el que el negocio se dirige al público en su web/redes."
+        },
+        "como_les_hablan_sus_clientes": {
+          "$ref": "#/$defs/observacion",
+          "description": "Qué valoran y con qué palabras, según las reseñas. Esto es lo que de verdad define el tono."
+        },
+        "palabras_de_clientes": {
+          "type": "array",
+          "maxItems": 12,
+          "items": { "type": "string", "maxLength": 80 },
+          "description": "Literales cortos sacados de reseñas. Léxico real, no parafraseado. Alimenta el vocabulario del bot si convierte."
+        }
+      }
+    },
+
+    "momento": {
+      "type": "object",
+      "description": "En qué punto está el negocio. Cambia por completo qué duele y, por tanto, qué correo tiene sentido.",
+      "required": ["fase", "evidencia"],
+      "additionalProperties": false,
+      "properties": {
+        "fase": {
+          "type": "string",
+          "enum": ["recien_abierto", "creciendo", "consolidado", "expandiendo", "estancado"]
+        },
+        "evidencia": { "type": "string", "minLength": 10 }
+      }
+    },
+
+    "lo_que_ya_funciona": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/observacion" },
+      "description": "Lo que el negocio ya hace bien. Existe para NO proponérselo y para no pisarlo en el correo. Proponer algo que ya tienen es la forma más rápida de demostrar que no miraste."
+    },
+
+    "dolor": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Qué le está costando dinero o clientes, con evidencia. Sin al menos un dolor de confianza alta o media, el lead NO sube al hub.",
+      "items": {
+        "type": "object",
+        "required": ["dolor", "evidencia", "confianza"],
+        "additionalProperties": false,
+        "properties": {
+          "dolor": { "type": "string", "minLength": 10 },
+          "evidencia": { "type": "string", "minLength": 10 },
+          "confianza": { "type": "string", "enum": ["alta", "media", "baja"] }
+        }
+      }
+    },
+
+    "angulos": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Ángulos de approach redactables en una frase. Si no puedes escribirlos, no hay lead.",
+      "items": {
+        "type": "object",
+        "required": ["angulo", "apoyado_en"],
+        "additionalProperties": false,
+        "properties": {
+          "angulo": { "type": "string", "minLength": 10 },
+          "apoyado_en": {
+            "type": "string",
+            "minLength": 10,
+            "description": "Qué dolor u observación concreta lo sostiene."
+          }
+        }
+      }
+    }
+  }
+}

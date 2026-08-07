@@ -15,6 +15,14 @@ dist-ssr
 .vinext
 *.local
 
+# ── Secretos ──
+# Este repo maneja la service_role de Supabase y, en los scripts de envío,
+# App Passwords de correo. Nada de esto entra en git jamás.
+.env
+.env.*
+!.env.example
+credentials.json
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -25,3 +33,12 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# ── Herramientas de agente / sesiones locales ──
+# `.claude/*` y no `.claude/`: git no re-incluye un archivo si su directorio padre
+# está excluido. Con `/*` la excepción de abajo sí funciona.
+.claude/*
+# Excepción: la config compartida SÍ va al repo — es lo que sincroniza los hooks
+# entre portátil y sobremesa.
+!.claude/settings.json
+.hermes/
