@@ -29,10 +29,15 @@ Estado por piezas:
 | Esquema de huella (`skills/.../references/huella.*`) | Hecho |
 | Modo C de la skill (tanda para el hub) | Hecho |
 | Convención `.ai/` en este repo | Hecho |
-| Tabla `leads` en Supabase + RLS | **Pendiente — siguiente paso** |
-| Script de subida de tanda | Pendiente |
+| Migración `leads` escrita | Hecho — **sin aplicar todavía** |
+| Script de subida de tanda | **Pendiente — siguiente paso** |
 | Vista "Prospección" en el hub | Pendiente |
 | Script local de envío por SMTP | Pendiente |
+
+> **Acción pendiente de una persona:** aplicar
+> `supabase/migrations/20260807160000_leads.sql` en el editor SQL de Supabase.
+> En este repo las migraciones **no se aplican solas** — `supabase:bootstrap` solo
+> crea usuarios y membresías. Hasta que se pegue ese SQL, no hay tabla `leads`.
 
 ### Lo que hay que saber antes de seguir
 

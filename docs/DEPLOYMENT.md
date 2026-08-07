@@ -28,6 +28,12 @@ Así, conocer la URL no concede acceso y no es necesario desarrollar un sistema 
 - `workspaces`: el espacio privado de Studio32.
 - `workspace_members`: relación entre cuentas y workspace.
 - `hub_states`: documento operativo compartido con tareas, agenda, conversación, recursos, Inbox y pizarra.
+- `leads`: bandeja de prospección. Cada fila es un negocio con su huella, el porqué y el correo ya redactado, a la espera de aprobación. Tabla aparte y no dentro de `hub_states` a propósito: ese documento se reescribe entero en cada guardado.
+
+Los leads solo entran por el script local de subida, que usa la `service_role`. No hay
+política de `insert` para miembros: nada aparece en la bandeja sin pasar por la skill.
+Desde el hub se puede decidir y editar el correo, pero no alterar la huella ni el
+porqué — la evidencia que justificó el envío tiene que seguir siendo auditable.
 
 `hub_states` incluye revisión y auditoría. Las escrituras usan control optimista para reintentar sobre la última revisión si dos miembros actualizan el Hub al mismo tiempo.
 
