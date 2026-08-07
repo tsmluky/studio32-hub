@@ -34,10 +34,15 @@ Estado por piezas:
 | Vista "Prospección" en el hub | Pendiente |
 | Script local de envío por SMTP | Pendiente |
 
-> **Acción pendiente de una persona:** aplicar
-> `supabase/migrations/20260807160000_leads.sql` en el editor SQL de Supabase.
-> En este repo las migraciones **no se aplican solas** — `supabase:bootstrap` solo
-> crea usuarios y membresías. Hasta que se pegue ese SQL, no hay tabla `leads`.
+> **Acción pendiente de una persona:** pegar `SUPABASE_DB_URL` en el `.env` local
+> (Supabase → Project Settings → Database → Connection string, puerto 5432).
+> Después, `npm run supabase:migrate` aplica todas las migraciones. Hasta entonces
+> no existe la tabla `leads`.
+>
+> Antes las migraciones no se aplicaban solas y había que pegar el SQL a mano en el
+> editor de Supabase. Ahora lo hace `scripts/apply-migrations.mjs`, sin depender de
+> la CLI de Supabase. Todas las migraciones del repo son idempotentes: se pueden
+> volver a ejecutar sin romper nada.
 
 ### Lo que hay que saber antes de seguir
 
