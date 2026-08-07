@@ -139,6 +139,35 @@ Por cada lead que pasa la puerta:
 
 El `porque` no es un resumen del correo. Es el argumento para que un humano decida en quince segundos, y debe apoyarse en evidencia citable.
 
+### 5. Formato de entrega
+
+Un único archivo JSON con esta forma. Los datos del negocio **no se repiten**: se leen de `huella.negocio`.
+
+```json
+{
+  "tanda": "2026-08-07-dentistas-guadalajara",
+  "leads": [
+    {
+      "sender_id": "juanma",
+      "porque": "...",
+      "asunto": "...",
+      "cuerpo": "...",
+      "digital_score": 32,
+      "opportunity_score": 84,
+      "scores_desglose": { },
+      "huella": { }
+    }
+  ]
+}
+```
+
+Se sube con `npm run leads:subir -- <archivo.json>`, que revisa sin escribir nada y
+vuelve a aplicar la puerta por su cuenta. Añadir `--confirmar` para subir de verdad.
+
+El script bloquea, además, los antipatrones que `outreach-guidelines.md` marca como
+"nunca": emojis, promesas numéricas, "espero que estés bien" y lenguaje de agencia.
+No los avisa — los rechaza. Si un lead tuyo cae ahí, el correo estaba mal escrito.
+
 ---
 
 ## Scoring (con rúbrica obligatoria)

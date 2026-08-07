@@ -12,13 +12,15 @@
     "preview": "vinext start",
     "supabase:bootstrap": "node scripts/bootstrap-supabase.mjs",
     "supabase:reset-state": "node scripts/reset-hub-state.mjs",
-    "supabase:migrate": "node --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/apply-migrations.mjs"
+    "supabase:migrate": "node --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/apply-migrations.mjs",
+    "leads:subir": "node --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/subir-tanda.mjs"
   },
   "devDependencies": {
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
     "@vitejs/plugin-rsc": "^0.5.26",
+    "ajv": "^8.20.0",
     "pg": "^8.22.0",
     "react-server-dom-webpack": "^19.2.7",
     "typescript": "~6.0.2",

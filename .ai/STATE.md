@@ -30,8 +30,9 @@ Estado por piezas:
 | Modo C de la skill (tanda para el hub) | Hecho |
 | Convención `.ai/` en este repo | Hecho |
 | Migración `leads` escrita | Hecho — **sin aplicar todavía** |
-| Script de subida de tanda | **Pendiente — siguiente paso** |
-| Vista "Prospección" en el hub | Pendiente |
+| `npm run supabase:migrate` (aplica migraciones) | Hecho |
+| `npm run leads:subir` (revisa y sube tandas) | Hecho — probado en seco, sin escribir aún |
+| Vista "Prospección" en el hub | **Pendiente — siguiente paso** |
 | Script local de envío por SMTP | Pendiente |
 
 > **Acción pendiente de una persona:** pegar `SUPABASE_DB_URL` en el `.env` local
