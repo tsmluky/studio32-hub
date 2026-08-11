@@ -84,8 +84,16 @@ async function requireStudio32Member(request: Request) {
 }
 
 function bajaTexto(token: string) {
-  const base = Deno.env.get('OUTREACH_UNSUBSCRIBE_BASE')
-  if (base) return `${base}${base.includes('?') ? '&' : '?'}t=${token}`
+  const base = Deno.env.get('OUTREACH_UNSUBSCRIBE_BASE')?.trim()
+  // Solo vale si es una URL http(s) de verdad.
+  //
+  // Sin esta comprobacion, cualquier cosa que haya en el secreto se concatena y sale
+  // en el correo. Paso: el valor quedo puesto a la palabra "opcional" y los primeros
+  // envios llevaron un pie que decia "opcional?t=20d1d8d8-...". El correo se entrego
+  // igual, y por eso no lo canto nada: un pie de baja roto no falla, solo queda mal
+  // delante del prospecto y deja sin salida a quien quiera darse de baja.
+  const esUrl = base ? /^https?:\/\/[^\s]+$/i.test(base) : false
+  if (base && esUrl) return `${base}${base.includes('?') ? '&' : '?'}t=${token}`
   const mailto = Deno.env.get('OUTREACH_UNSUBSCRIBE_MAILTO') ?? 'bajas@studio32.es'
   return `mailto:${mailto}?subject=Baja%20${token}`
 }
