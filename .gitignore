@@ -42,3 +42,6 @@ credentials.json
 # entre portátil y sobremesa.
 !.claude/settings.json
 .hermes/
+
+# Restos del empaquetador de la CLI de Supabase.
+supabase/.temp/
