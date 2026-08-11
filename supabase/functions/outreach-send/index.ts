@@ -202,16 +202,20 @@ Deno.serve(async (request) => {
         connection: { hostname: smtpHost, port: smtpPort, tls: smtpPort === 465, auth: { username: smtpUser, password: smtpPass } },
       })
 
-      await smtp.send({
-        from: remitente,
-        to: mensaje.to_email,
-        replyTo: mensaje.reply_to || remitente,
-        subject: mensaje.subject,
-        content: componerCuerpo(mensaje.body, enlaceBaja),
-        headers: { 'List-Unsubscribe': `<${enlaceBaja}>` },
-      })
-
-      await smtp.close()
+      try {
+        await smtp.send({
+          from: remitente,
+          to: mensaje.to_email,
+          replyTo: mensaje.reply_to || remitente,
+          subject: mensaje.subject,
+          content: componerCuerpo(mensaje.body, enlaceBaja),
+          headers: { 'List-Unsubscribe': `<${enlaceBaja}>` },
+        })
+      } finally {
+        // Cerrar siempre, tambien si el envio revienta: un socket abierto mantiene
+        // vivo el isolate y se arrastra al resto de la tanda.
+        await smtp.close().catch(() => {})
+      }
 
       await admin
         .from('outreach_messages')
