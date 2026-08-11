@@ -73,4 +73,6 @@ for (const [i, c] of campanas.entries()) {
 console.log(`${'─'.repeat(72)}`)
 console.log('\nCuando la skill termine, súbelo con:')
 console.log('  npm run outreach:import -- <archivo.json>')
-console.log('\nEl importador revisa sin escribir. Añade --confirmar para subir de verdad.')
+console.log('\nOjo: el importador ESCRIBE al lanzarlo, no tiene modo de revisión.')
+console.log('Lo que suba aparece en la bandeja del Hub como borrador, así que nada')
+console.log('sale sin aprobar — pero repasa el JSON antes.')

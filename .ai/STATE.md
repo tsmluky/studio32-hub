@@ -74,6 +74,23 @@ intentos. `git branch -r` y una consulta al esquema de Supabase cuestan un minut
 local falla en este portátil (busca un `output.eszip` que no genera) y además ensucia el
 repo con `doc/` y `supabase/.temp/`.
 
+## Agujero conocido: la firma y quién manda
+
+Al fusionar se quedó a medias algo que conviene decidir antes de la primera tanda real:
+
+- **El remitente es por CAMPAÑA, no por quien aprueba.** Lo fija `campaign.from_email`
+  en el JSON que importa `scripts/import-outreach.mjs`. El botón "lo envío yo" que se
+  diseñó para la tabla `leads` no existe aquí.
+- **Nadie compone la firma.** `outreach-send` solo añade el pie de baja. La firma la
+  tiene que escribir la skill dentro del cuerpo, y `SKILL.md` ya lo dice así.
+- **`src/remitentes.json` es referencia, no código.** Ningún módulo lo importa: quedó
+  huérfano al borrarse la ruta de `leads`. Sirve para que la skill sepa qué dirección
+  usar al firmar.
+
+Si se quiere el comportamiento "firma quien aprueba", hay que cambiar `outreach-send`
+para que componga la firma desde `remitentes.json` según el `from_email` del mensaje, y
+dejar de escribirla en el cuerpo. No es mucho, pero no está hecho.
+
 ## Lo que sigue sin resolver
 
 - **Nadie lee el buzón.** Si un negocio responde BAJA, esa respuesta llega a Hostinger y

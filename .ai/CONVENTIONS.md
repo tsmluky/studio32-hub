@@ -20,13 +20,17 @@ npm run supabase:bootstrap   # crea tablas y miembros. Necesita SERVICE_ROLE_KEY
 npm run supabase:reset-state # limpia el estado del hub
 npm run supabase:migrate     # aplica supabase/migrations/. Necesita SUPABASE_DB_URL
 
-npm run leads:subir -- tanda.json   # revisa una tanda de prospección (no escribe)
-npm run leads:enviar               # muestra qué correos saldrían (no envía)
+npm run outreach:pendientes         # que campanas hay pedidas desde el Hub
+npm run outreach:import -- tanda.json   # sube una tanda. ESCRIBE al lanzarlo
+npm run outreach:probar -- --para x@y.z # siembra un lead de prueba
+npm run fn:deploy                   # despliega la Edge Function de envio
 ```
 
-Los dos scripts de `leads` **revisan por defecto y no hacen nada**. Se añade
-`--confirmar` para que actúen de verdad. Es a propósito: lo que suben acaba delante de
-un socio, y lo que envían son correos a personas reales que no se deshacen.
+**`outreach:import` no tiene modo de revisión: escribe en cuanto se lanza.** Lo que
+sube entra como borrador y nada sale sin que alguien lo apruebe en el Hub, pero el JSON
+hay que repasarlo antes, no después.
+
+`fn:deploy` lleva `--use-api` porque el empaquetado local falla en el portátil.
 
 ## Arquitectura del estado
 

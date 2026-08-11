@@ -120,11 +120,22 @@ Los descartados se reportan aparte con su motivo en una línea. Son información
 
 Cada lead lleva un `sender_id` (`juanma`, `gonzalo` o `pancho`). El correo se redacta **en la voz de esa persona** — no genérico para asignárselo a alguien después.
 
-**Pero el cuerpo NO lleva firma.** El cierre ("Un saludo,") sí es parte de la voz y se escribe. El bloque de nombre, estudio y web se añade solo en el envío, desde `src/remitentes.json`, según el `sender_id` que tenga el lead en ese momento.
+**El cuerpo SÍ lleva firma, y hay que escribirla.** Nada la compone después: el envío
+solo añade el pie de baja. Un cuerpo sin firma sale sin firma.
 
-Es así porque en el hub quien aprueba puede quedarse el envío: si Gonzalo aprueba un correo que subió a nombre de Juanma, pulsa "lo envío yo" y el remitente cambia. Si la firma viniera dentro del texto, saldría un correo firmado por quien no es. El `sender_id` que subes es una **sugerencia razonada**, no una asignación definitiva.
+Usa la dirección que corresponda al remitente de la campaña, de `src/remitentes.json`:
 
-El script de subida rechaza los cuerpos que traen firma incrustada.
+```
+Un saludo,
+
+Juanma
+Studio32 · Digital Systems
+studio32.es
+```
+
+Ojo: el remitente es **de la campaña entera**, no por lead — lo fija `from_email` en el
+JSON que se importa. Todos los correos de una tanda salen de la misma persona, así que
+la firma es la misma en toda la tanda.
 
 Solo se puede citar material de confianza `alta` o `media`. Lo de confianza `baja` orienta el ángulo, pero no aparece en el texto.
 
@@ -167,8 +178,12 @@ Un único archivo JSON con esta forma. Los datos del negocio **no se repiten**: 
 }
 ```
 
-Se sube con `npm run leads:subir -- <archivo.json>`, que revisa sin escribir nada y
-vuelve a aplicar la puerta por su cuenta. Añadir `--confirmar` para subir de verdad.
+Se sube con `npm run outreach:import -- <archivo.json>`.
+
+**Ese script escribe en cuanto se lanza: no hay modo de revisión.** La puerta de calidad
+se aplica AQUÍ, al generar, no al subir. Lo que suba entra como borrador y nadie lo
+recibe sin que se apruebe en el Hub, pero un lead flojo que llegue a la bandeja ya ha
+gastado la confianza de quien la abre.
 
 El script bloquea, además, los antipatrones que `outreach-guidelines.md` marca como
 "nunca": emojis, promesas numéricas, "espero que estés bien" y lenguaje de agencia.
