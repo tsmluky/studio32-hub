@@ -10,80 +10,102 @@ se edita a mano**.
 
 ## Dónde está ahora
 
-- Auth y estado en Supabase. Tablas: `workspaces`, `workspace_members`, `hub_states`, `leads`.
 - Vistas: Hoy, Tareas, Calendario, Proyectos, Inbox, Biblioteca y **Herramientas**.
-- Existe un repo hermano `studio32-hub-agent` (bot de Telegram del hub, en Railway).
+- Tablas: `workspaces`, `workspace_members`, `hub_states` y `outreach_*` (4).
+- Repo hermano `studio32-hub-agent` (bot de Telegram, en Railway).
 
-## Herramientas · Prospección — el ciclo completo
+## Aviso: esto se construyó tres veces
 
-Herramienta interna de captación, y la primera dentro de "Herramientas". La idea: en
-vez de que el equipo busque a quién escribir, la skill sube leads **con el correo ya
-redactado y su porqué**, y en el hub solo se lee y se decide.
+Hubo dos implementaciones paralelas de la prospección, hechas en máquinas distintas sin
+saber la una de la otra: `feat/prospeccion-email` (sobremesa, 04/08, esquema
+`outreach_*` ya aplicado en producción) y la tabla `leads` de `main` (portátil, 07/08,
+nunca aplicada). El 11/08 se fusionaron: **gana `outreach_*`**.
 
-El ciclo, de punta a punta:
+**Antes de tocar prospección, mira si ya existe.** El coste de no hacerlo ya son tres
+intentos. `git branch -r` y una consulta al esquema de Supabase cuestan un minuto.
 
-1. **Local** — la skill `studio32-lead-prospector` (Modo C) busca, mina la huella y
-   redacta un correo por lead. Salida: un JSON de tanda.
-2. **Local** — `npm run leads:subir -- tanda.json` aplica la puerta (evidencia,
-   antipatrones, dedupe) y sube lo que pasa. Sin `--confirmar` solo revisa.
-3. **Hub** — Herramientas › Prospección. Se lee el porqué, se ajusta el correo si hace
-   falta, y se aprueba o se rechaza. Quien aprueba puede quedarse el envío.
-4. **Local** — `npm run leads:enviar` manda los aprobados por SMTP desde el buzón real
-   de cada uno. Sin `--confirmar` solo muestra qué saldría.
-5. **Hub** — tras el envío, se marca a mano si respondió o no le interesa.
+## Herramientas · Prospección — el ciclo
 
-Estado por piezas: **todas hechas**. Skill, esquema de huella, tabla `leads`, script de
-subida, vista del hub y script de envío.
+1. **Hub** — Herramientas › Prospección › "Pedir campaña": sector, zona, oferta,
+   cantidad y notas. Nace en estado `pedida`, sin leads.
+2. **Local** — `npm run outreach:pendientes` lista los encargos y escupe el prompt
+   listo para pegar en Claude Code. Corre con la **suscripción**, no por API: es la
+   razón de que este paso sea local y no un worker en la nube.
+3. **Local** — `npm run outreach:import -- tanda.json` sube leads y borradores; la
+   campaña pasa a `abierta`.
+4. **Hub** — se revisa el correo con su evidencia y se aprueba.
+5. **Edge Function `outreach-send`** — envía por SMTP de Hostinger.
 
-> **Acción pendiente de una persona:** pegar `SUPABASE_DB_URL` en el `.env` local
-> (Supabase → Project Settings → Database → Connection string, puerto 5432) y ejecutar
-> `npm run supabase:migrate`. **Hasta entonces la tabla `leads` no existe** y la vista
-> de Prospección muestra el aviso de que no puede leer la bandeja.
->
-> Después, quien vaya a enviar añade su App Password a su `.env` (ver `.env.example`).
+## Lo que hay que saber antes de tocarlo
 
-### Lo que hay que saber antes de tocarlo
-
-- **Los leads NO van en `hub_states.payload`.** Ese blob se reescribe entero en cada
-  cambio. Tabla propia, con RLS por `is_workspace_member`.
-- **El hub nunca guarda credenciales de envío.** Solo `sender_id`. Las App Passwords
-  viven en el `.env` local de quien ejecuta el script, fuera de git.
-- **El cuerpo se guarda sin firma.** La compone el envío desde `src/remitentes.json`,
-  que es fuente única compartida entre el hub (previsualizar) y el script (enviar).
-  Por eso "lo envío yo" puede reasignar remitente sin romper el correo.
-- **La huella, el porqué y los scores no se editan desde el hub.** El `grant` de la
-  tabla solo deja tocar estado, motivo, asunto, cuerpo y remitente: la evidencia es lo
-  que justifica que el correo se enviara y tiene que seguir siendo auditable.
-- **Solo el script puede marcar 'enviado'.** El trigger `guard_lead_state` se lo
-  prohíbe al hub, para que un fallo de interfaz no dé por enviado algo que no salió.
+- **Una sola cuenta de correo.** `info@studio32.es` en Hostinger, con alias
+  `juanma@`, `gonzalo@` y `francisco@`. El SMTP se autentica como la cuenta real y
+  pone el alias en `From:`.
+- **Pancho es `francisco@`.** Su id interno es `pancho` (login del Hub,
+  `owner_member_id`), su correo es `francisco@studio32.es`. El cruce vive solo en
+  `src/remitentes.json`.
+- **Railway no sirve para enviar.** El plan Hobby bloquea SMTP saliente (25/465/587);
+  se abre a partir de Pro. Por eso el envío vive en una Edge Function.
+- **Solo la Edge Function marca 'enviado'.** Las políticas se lo prohíben al cliente,
+  para que un fallo de interfaz no dé por enviado algo que no salió.
+- **Tres fronteras en el envío:** aprobación humana explícita, lista de bajas, y no
+  escribir dos veces a la misma dirección en 60 días.
 - **La huella es esquema compartido con `studio32-agent`.** Si un lead convierte,
-  alimenta `templates/<vertical>/`. Cambiarla afecta a los dos lados.
+  alimenta `templates/<vertical>/`.
 
-### Cabos sueltos conocidos
+## Qué está probado (11/08) y qué no
 
-- **No hay seguimientos.** Un negocio se contacta una vez y su email/dominio queda
-  ocupado para siempre. Añadir una segunda tanda al mismo negocio pediría un concepto
-  de paso/secuencia que hoy no existe. Fue decisión consciente: es donde más fácil se
-  cruza la línea de ser pesado.
-- **El envío no es inmediato.** Depende de que alguien ejecute `leads:enviar`. Si el
-  retraso entre aprobar y enviar molesta, la salida es un worker, y entonces con OAuth
-  `gmail.send` en vez de App Password (ver DECISIONS 2026-08-07).
-- **Un lead solo lo puede enviar quien tenga esas credenciales.** Los de otros
-  remitentes quedan aprobados esperando; el script los lista como bloqueados.
+| | Estado |
+|---|---|
+| Tablas `outreach_*`, incluida la de campañas pedidas | aplicadas |
+| Secretos SMTP en Supabase | puestos |
+| `outreach-send` con SMTP de Hostinger | desplegada y **probada con envíos reales** |
+| Deno deja salir el 465 | ✅ verificado |
+| Hostinger acepta el alias en `From:` | ✅ verificado — llega como `juanma@studio32.es` |
+| Las respuestas vuelven al buzón real | ✅ verificado, se respondió y llegó |
+| Aprobar → enviar desde el Hub | ✅ verificado end-to-end |
+| Baja bloquea el envío | ✅ verificado: se reaprobó a propósito y salió `Enviados 0 de 1` |
+| Llega a Recibidos, no a Spam | ✅ un envío. Un dato, no una conclusión |
+| `outreach:pendientes` contra la base | ✅ responde |
+| Pedir campaña desde el Hub | construido, **el ciclo completo nunca se ha ejecutado** |
+| Importador `import-outreach.mjs` | de la rama del sobremesa, **sin repasar** |
+
+**Desplegar la función:** `npm run fn:deploy`. Lleva `--use-api` porque el empaquetado
+local falla en este portátil (busca un `output.eszip` que no genera) y además ensucia el
+repo con `doc/` y `supabase/.temp/`.
+
+## Lo que sigue sin resolver
+
+- **Nadie lee el buzón.** Si un negocio responde BAJA, esa respuesta llega a Hostinger y
+  se queda ahí: una persona tiene que verla y pulsar "No escribir más" en el Hub.
+  Automatizarlo pide IMAP, y eso es meter las credenciales del buzón en otro sitio.
+- **No hay página de bajas.** El pie del correo pide responder BAJA. La tabla ya tiene
+  `unsubscribe_token` por lead, así que una página que reciba el token y escriba la baja
+  sola cerraría el ciclo. Es lo más barato que queda por hacer.
+- **La interfaz está sin pulir.** Es lo siguiente que se va a tocar.
+
+## Ojo con esto
+
+Hay un correo real preparado para **Clínica Dental Dr. Garcés** (`cdentaldrgarces@gmail.com`)
+desde los datos semilla del 04/08. Estuvo marcado como `aprobado` sin que nadie lo hubiera
+revisado, y una tanda de envío lo habría mandado. Se devolvió a `borrador` el 11/08.
+
+**Antes de pulsar Enviar, mirar siempre qué hay en la cola de aprobados.** El diálogo de
+confirmación lista los destinatarios: leerlo, no darle a aceptar.
 
 ## Riesgo abierto
 
-`src/App.tsx` sigue en ~3.000 líneas. Prospección y Herramientas se hicieron fuera
-(`src/ProspectingView.tsx`, `src/ToolsView.tsx`, `src/leads.ts`, `src/ui.tsx`).
-Mantener la regla: vista nueva, archivo nuevo.
+`src/App.tsx` está en ~3.100 líneas. Prospección ya vive fuera
+(`OutreachView.tsx`, `CampaignRequest.tsx`, `outreach.ts`, `ui.tsx`, `types.ts`).
 
 ## Bloqueadores
 
-Ninguno técnico. El de contexto: la regla de congelación de scope (cero features
-nuevas hasta que gh-dent esté vivo en producción) sigue vigente y esto la roza. Se
-avanza por ser captación, no producto, pero el reloj del primer cliente sigue parado.
+El de contexto: la congelación de scope (cero features nuevas hasta que gh-dent esté
+vivo en producción) sigue vigente y esto la roza. Se avanza por ser captación, no
+producto, pero el reloj del primer cliente sigue parado.
 
 ## Al terminar cualquier tarea aquí
 
-`git pull --rebase` al empezar, y commit + push de `.ai/` al cerrar. Este repo se
-trabaja desde portátil y sobremesa: si te lo saltas, `STATE.md` entra en conflicto.
+`git pull --rebase` al empezar, y commit + push de `.ai/` al cerrar. Y **antes de
+empezar, `git branch -r`**: este repo se trabaja desde dos máquinas y ya ha costado
+caro no mirarlo.

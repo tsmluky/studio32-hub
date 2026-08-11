@@ -171,3 +171,119 @@ marcar nada como `enviado`: eso solo lo hace quien realmente envió.
 Dos vistas en archivos distintos no pueden importarlas de `App.tsx` sin crear un ciclo,
 porque `App.tsx` importa las vistas. Se extrae lo que se toca, no más: el resto de
 `App.tsx` se queda donde está hasta que haga falta tocarlo.
+
+---
+
+## 2026-08-11 · Gana outreach_*, y la leccion de por que hubo dos
+
+Se construyo la misma funcionalidad dos veces, en dos maquinas, sin que ninguna
+supiera de la otra. La rama `feat/prospeccion-email` (sobremesa) tenia el esquema
+mejor y ya aplicado en produccion; `main` (portatil) tenia la puerta de evidencia y
+el envio propio. Se fusionan: gana el esquema, se conserva la disciplina.
+
+Gana `outreach_*` porque separa mensajes de leads —lo que permite seguimientos—, y
+porque la lista de bajas, el corte de 60 dias y los duplicados blandos ya estaban
+resueltos alli.
+
+**La leccion, y por eso esto esta escrito aqui:** `STATE.md` avisaba de que ya habia
+habido una tentativa fallida por perder el hilo entre maquinas, y aun asi paso otra
+vez. Lo que fallo no fue la documentacion: fue no mirar `git branch -r` ni el esquema
+real de Supabase antes de empezar. Un minuto de comprobacion contra dos dias de
+trabajo duplicado.
+
+---
+
+## 2026-08-11 · La campana se pide desde el Hub y se genera en local
+
+El cuello de botella no era generar leads: era que solo una persona podia decidir a
+quien atacar, porque era la unica que sabia ejecutar la skill.
+
+Ahora la campana nace en estado `pedida` desde un formulario del Hub —sector, zona,
+oferta, cantidad, notas— y `npm run outreach:pendientes` la recoge en local y compone
+el prompt. Juanma y Gonzalo piden desde el movil sin saber ejecutar nada.
+
+**Por que la generacion no se automatiza en la nube:** correria por API y facturaria
+por token. En local corre con la suscripcion de Claude Code y cuesta cero. Ademas, la
+calidad de estos correos es justo lo que no conviene dejar sin que nadie mire.
+
+**Por que el Hub no puede lanzarlo solo:** es un sitio estatico y no alcanza el
+portatil. La conexion solo va en un sentido, asi que el encargo se deja en la mesa.
+
+---
+
+## 2026-08-11 · Envio por SMTP de Hostinger desde una Edge Function, no Resend ni Railway
+
+Studio32 tiene UNA cuenta real, `info@studio32.es`, con alias por socio. El SMTP se
+autentica como la cuenta y pone el alias en `From:`, igual que hace el webmail. Sale
+del dominio propio, las respuestas caen en la bandeja real y no hay proveedor
+intermedio.
+
+Se descarto Resend (que era lo que traia la rama) por decision del usuario: no querer
+depender de una suscripcion de terceros para algo que el dominio propio ya hace.
+
+Se descarto Railway pese a estar elegido inicialmente: **el plan Hobby bloquea el SMTP
+saliente** (25/465/587), que solo se abre en Pro. Se comprobo el plan antes de
+construir nada. La Edge Function de Supabase si permite el 465 con TLS.
+
+Queda sin verificar que Hostinger acepte por SMTP el `From:` con alias. En el webmail
+si. Si no lo aceptara, se envia todo desde `info@` con el nombre del socio visible.
+
+---
+
+## 2026-08-11 · Pancho por dentro, Francisco por fuera
+
+El id interno es `pancho` (login del Hub, `outreach_leads.owner_member_id`, el tipo
+`MemberId`) pero su direccion real es `francisco@studio32.es`. No existe alias
+`pancho@`.
+
+Se deja asi en vez de unificar: cambiar el id obliga a migrar el login y los datos ya
+guardados, y no gana nada. El cruce vive en un solo sitio, `src/remitentes.json`.
+
+---
+
+## 2026-08-11 · CORS: se permite cualquier localhost, y por que no afloja nada
+
+`allowedOrigins` enumeraba los puertos del dev server a mano y el 5175 no estaba. El
+preflight se rechazaba, el navegador ni llegaba a mandar el POST, y en el Hub parecia
+que la funcion no estaba desplegada: el mensaje se quedaba en 'aprobado' sin rastro de
+error. Costo una prueba entera de diagnostico.
+
+Ahora se acepta cualquier `http://localhost:PUERTO`. **CORS decide que pagina puede leer
+la respuesta, no quien puede enviar**: quien envia sigue necesitando una sesion valida
+de miembro del workspace, y eso lo comprueba `requireStudio32Member`. Confundir las dos
+cosas es lo que lleva a listas de origenes que solo estorban.
+
+---
+
+## 2026-08-11 · La baja se registra por direccion, no por lead
+
+`outreach_suppressions` existia desde el primer dia y el envio ya la comprobaba, pero no
+habia forma de meter a nadie sin ir a la base de datos. Ahora hay boton en la tarjeta.
+
+**Por que por direccion y no por lead:** descartar un lead lo saca de esta campana, pero
+el mismo buzon puede volver manana dentro de otro negocio —una gestoria, una cadena, el
+mismo sitio con otro nombre—. La baja tiene que sobrevivir a eso.
+
+Pide confirmacion y no se deshace desde la interfaz. Deliberado: el error caro es el
+contrario, volver a escribir a quien pidio que no.
+
+Probado de verdad: se dio de baja, se reaprobo el mensaje a proposito, y el envio lo
+rechazo con "La direccion esta dada de baja".
+
+---
+
+## 2026-08-11 · Dos fallos que enmascaraban el resultado del envio
+
+Los dos hacian que el sistema **mintiera sobre lo que habia pasado**, que es peor que
+fallar, y por eso quedan escritos:
+
+1. `smtp.close()` de denomailer devuelve `void`, no una promesa. El `.catch()`
+   encadenado lanzaba dentro del `finally` justo DESPUES de un envio correcto, y el
+   mensaje quedaba marcado como `fallido` habiendo salido de verdad. Se descubrio porque
+   llegaron dos correos cuando la base decia que ninguno.
+
+2. `OUTREACH_UNSUBSCRIBE_BASE` valia literalmente la palabra "opcional", copiada de la
+   plantilla del `.env.example`, que la escribia pegada al nombre como si fuera el valor.
+   Los primeros correos reales salieron con un pie que decia "opcional?t=<token>". No lo
+   canto nada porque no falla: el correo se entrega igual. Solo deja sin salida a quien
+   quiera darse de baja. Ahora la base solo se usa si es una URL http(s) completa.

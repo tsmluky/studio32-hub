@@ -32,3 +32,16 @@ export function PageHeading({
 export function EmptyState({ icon, title, body }: { icon: ReactNode; title: string; body: string }) {
   return <div className="empty-state">{icon}<strong>{title}</strong><p>{body}</p></div>
 }
+
+export function SectionHeader({ icon, title, action }: { icon: ReactNode; title: string; action?: ReactNode }) {
+  return (
+    <header className="section-header">
+      <span>{icon}<strong>{title}</strong></span>
+      {action && <span className="section-action">{action}</span>}
+    </header>
+  )
+}
+
+export function StatusBadge({ children }: { children: string }) {
+  return <span className="status-badge" data-status={children}>{children}</span>
+}

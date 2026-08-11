@@ -13,8 +13,10 @@
     "supabase:bootstrap": "node scripts/bootstrap-supabase.mjs",
     "supabase:reset-state": "node scripts/reset-hub-state.mjs",
     "supabase:migrate": "node --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/apply-migrations.mjs",
-    "leads:subir": "node --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/subir-tanda.mjs",
-    "leads:enviar": "node --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/enviar-aprobados.mjs"
+    "outreach:pendientes": "node --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/outreach-pendientes.mjs",
+    "outreach:import": "node --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/import-outreach.mjs",
+    "fn:deploy": "supabase functions deploy outreach-send --project-ref wwhinwxedcvpxprmcsta --use-api",
+    "outreach:probar": "node --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/probar-envio.mjs"
   },
   "devDependencies": {
     "@types/react": "^19.2.17",
@@ -24,6 +26,7 @@
     "ajv": "^8.20.0",
     "pg": "^8.22.0",
     "react-server-dom-webpack": "^19.2.7",
+    "supabase": "^2.113.0",
     "typescript": "~6.0.2",
     "vinext": "^1.0.0-beta.2",
     "vite": "^8.1.1"

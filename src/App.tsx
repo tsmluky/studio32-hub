@@ -34,13 +34,15 @@ import {
   X,
 } from 'lucide-react'
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
-import type { FormEvent, ReactNode } from 'react'
+import type { FormEvent } from 'react'
 import { isSupabaseConfigured, pinToPassword, supabase } from './supabase'
-import { EmptyState, PageHeading } from './ui'
-import ProspectingView from './ProspectingView'
+import { EmptyState, PageHeading, SectionHeader, StatusBadge } from './ui'
 import ToolsView, { type ToolId, tools } from './ToolsView'
+import OutreachView from './OutreachView'
+import { useOutreach, useOutreachPulse } from './outreach'
+import type { HubSyncStatus, MemberId } from './types'
 
-type MemberId = 'juanma' | 'pancho' | 'gonzalo'
+
 type ProjectId = string
 type MainView = 'today' | 'tasks' | 'calendar' | 'projects' | 'inbox' | 'library' | 'tools' | ToolId | 'project'
 type ProjectTab = 'overview' | 'tasks' | 'conversation' | 'board' | 'files'
@@ -179,7 +181,7 @@ type HubState = {
   agendaEvents: AgendaEvent[]
 }
 
-type HubSyncStatus = 'idle' | 'loading' | 'ready' | 'error'
+
 
 const members: Member[] = [
   { id: 'juanma', name: 'Juanma', initials: 'JM', role: 'Equipo Studio32', email: 'juanma@studio32.es', color: '#2f6f73' },
@@ -222,6 +224,7 @@ const navigation: Array<{ id: Exclude<MainView, 'project'>; label: string; icon:
   { id: 'library', label: 'Biblioteca', icon: LibraryBig },
   // Contenedor de las herramientas internas. En escritorio el sidebar además lista
   // las herramientas debajo; en móvil solo cabe esta entrada, que lleva al índice.
+  // Prospección cuelga de aquí: es una herramienta, no una vista del día a día.
   { id: 'tools', label: 'Herramientas', icon: Wrench },
 ]
 
@@ -620,6 +623,7 @@ function useGoogleCalendarEvents(timeMin: string, timeMax: string) {
   return { events, status, error, reload: () => setRevision((current) => current + 1) }
 }
 
+
 function getTodayLabel() {
   const formatted = new Intl.DateTimeFormat('es-ES', {
     weekday: 'long',
@@ -696,6 +700,11 @@ function App() {
   const [pinChangeOpen, setPinChangeOpen] = useState(false)
   const [mobileAccountOpen, setMobileAccountOpen] = useState(false)
   const [search, setSearch] = useState('')
+
+  // Solo consulta cuando la vista está abierta: es un tablero de trabajo, no
+  // algo que deba cargarse en cada arranque del Hub.
+  const outreach = useOutreach(view === 'prospecting')
+  const outreachPulse = useOutreachPulse(view === 'today')
 
   const activeMember = activeMemberId ? getMember(activeMemberId) : null
   const selectedProject = getProject(state.projects, state.selectedProjectId)
@@ -1131,6 +1140,9 @@ function App() {
               onOpenProject={openProject}
               onOpenInbox={() => selectView('inbox')}
               onOpenCalendar={() => selectView('calendar')}
+              onOpenOutreach={() => selectView('prospecting')}
+              outreachPending={outreachPulse.pending}
+              outreachCampaign={outreachPulse.campaign}
               onUpdateCheckIn={updateTeamCheckIn}
             />
           ) : view === 'tasks' ? (
@@ -1164,7 +1176,17 @@ function App() {
           ) : view === 'tools' ? (
             <ToolsView onOpenTool={(tool) => selectView(tool)} />
           ) : view === 'prospecting' ? (
-            <ProspectingView activeMemberId={activeMember.id} />
+            <OutreachView
+              campaigns={outreach.campaigns}
+              leads={outreach.leads}
+              messages={outreach.messages}
+              status={outreach.status}
+              error={outreach.error}
+              onReload={outreach.reload}
+              onApprove={(messageId) => void outreach.approveMessage(messageId)}
+              onDiscard={(leadId) => void outreach.discardLead(leadId)}
+              onSend={outreach.sendApproved}
+            />
           ) : (
             <ProjectView
               project={selectedProject}
@@ -1601,6 +1623,9 @@ function TodayView({
   onOpenProject,
   onOpenInbox,
   onOpenCalendar,
+  onOpenOutreach,
+  outreachPending,
+  outreachCampaign,
   onUpdateCheckIn,
 }: {
   member: Member
@@ -1610,6 +1635,9 @@ function TodayView({
   onOpenProject: (projectId: ProjectId) => void
   onOpenInbox: () => void
   onOpenCalendar: () => void
+  onOpenOutreach: () => void
+  outreachPending: number
+  outreachCampaign: string
   onUpdateCheckIn: (availability: TeamAvailability, focus: string) => void
 }) {
   const [checkInOpen, setCheckInOpen] = useState(false)
@@ -1649,6 +1677,21 @@ function TodayView({
           </span>
         </div>
       </section>
+
+      {outreachPending > 0 && (
+        <button className="outreach-pulse" type="button" onClick={onOpenOutreach} data-testid="outreach-pulse">
+          <Send size={17} />
+          <span>
+            <strong>
+              {outreachPending === 1
+                ? '1 correo espera tu visto bueno'
+                : `${outreachPending} correos esperan tu visto bueno`}
+            </strong>
+            <small>{outreachCampaign || 'Prospección'}</small>
+          </span>
+          <ChevronRight size={16} />
+        </button>
+      )}
 
       <section className="surface team-today-surface">
         <SectionHeader
@@ -3054,25 +3097,12 @@ function UpdateRow({
   return onOpenProject ? <button className="update-row" type="button" onClick={() => onOpenProject(update.projectId)}>{content}</button> : <article className="update-row">{content}</article>
 }
 
-function SectionHeader({ icon, title, action }: { icon: ReactNode; title: string; action?: ReactNode }) {
-  return (
-    <header className="section-header">
-      <span>{icon}<strong>{title}</strong></span>
-      {action && <span className="section-action">{action}</span>}
-    </header>
-  )
-}
-
 function SummaryMetric({ value, label, tone }: { value: number; label: string; tone: string }) {
   return <div className={`summary-metric tone-${tone}`}><strong>{value}</strong><span>{label}</span></div>
 }
 
 function Avatar({ member, size }: { member: Member; size?: 'large' }) {
   return <span className={`avatar ${size === 'large' ? 'avatar-large' : ''}`} style={{ background: member.color }} title={member.name}>{member.initials}</span>
-}
-
-function StatusBadge({ children }: { children: string }) {
-  return <span className="status-badge" data-status={children}>{children}</span>
 }
 
 export default App
