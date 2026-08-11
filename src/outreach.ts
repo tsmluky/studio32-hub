@@ -257,3 +257,36 @@ export async function pedirCampana(pedido: PedidoCampana) {
   })
   if (error) throw new Error(error.message)
 }
+
+/**
+ * Lista de bajas: nadie de aquí vuelve a recibir un correo, pase lo que pase.
+ *
+ * Es por DIRECCIÓN y no por lead a propósito. Descartar un lead lo saca de esta
+ * campaña, pero no impide que el mismo buzón vuelva a entrar mañana dentro de otro
+ * negocio — una gestoría, una cadena, o el mismo sitio con otro nombre. La baja tiene
+ * que sobrevivir a eso, y por eso vive en su propia tabla y la comprueba el envío.
+ *
+ * De momento se rellena a mano: cuando alguien responde BAJA, esa respuesta llega al
+ * buzón de Hostinger y una persona la pasa aquí. No hay nada leyendo el correo.
+ */
+export async function darDeBaja(email: string, motivo = 'baja solicitada') {
+  if (!supabase) throw new Error('Supabase no está configurado')
+  const limpio = email.trim().toLowerCase()
+  if (!limpio) throw new Error('Sin dirección no hay baja que registrar')
+  const { error } = await supabase
+    .from('outreach_suppressions')
+    // Repetir una baja no es un error: si ya estaba, sigue estando.
+    .upsert({ workspace_id: 'studio32', email: limpio, reason: motivo }, { onConflict: 'workspace_id,email' })
+  if (error) throw new Error(error.message)
+}
+
+export async function fetchBajas(): Promise<Array<{ email: string; reason: string; created_at: string }>> {
+  if (!supabase) return []
+  const { data, error } = await supabase
+    .from('outreach_suppressions')
+    .select('email, reason, created_at')
+    .eq('workspace_id', 'studio32')
+    .order('created_at', { ascending: false })
+  if (error) throw new Error(error.message)
+  return data ?? []
+}

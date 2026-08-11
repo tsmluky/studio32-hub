@@ -5,9 +5,10 @@
 // Function, que es la única que puede marcar un mensaje como enviado.
 
 import { useState } from 'react'
-import { AlertCircle, ArrowRight, Check, CheckCircle2, ChevronRight, Clock3, Send, X, Sparkles } from 'lucide-react'
+import { AlertCircle, ArrowRight, Check, CheckCircle2, ChevronRight, Clock3, Send, X, Sparkles, Ban } from 'lucide-react'
 import { EmptyState, PageHeading, SectionHeader, StatusBadge } from './ui'
 import CampaignRequest from './CampaignRequest'
+import { darDeBaja } from './outreach'
 import type { OutreachCampaign, OutreachLead, OutreachMessage } from './outreach'
 import type { HubSyncStatus } from './types'
 
@@ -229,6 +230,29 @@ function LeadStory({
   onDiscard: (leadId: string) => void
 }) {
   const [open, setOpen] = useState(false)
+  const [bajando, setBajando] = useState(false)
+  const [bajaHecha, setBajaHecha] = useState(false)
+  const [bajaError, setBajaError] = useState('')
+
+  // Se pide confirmación porque no hay vuelta atrás desde aquí: para sacar a alguien
+  // de la lista de bajas hay que ir a la base de datos. Y es correcto que cueste —
+  // el error caro es el contrario, volver a escribir a quien pidió que no.
+  const darBaja = async () => {
+    if (!lead.email) return
+    if (!window.confirm(`No volver a escribir nunca a ${lead.email}.\n\nEsto vale para cualquier campaña futura, no solo esta. ¿Seguro?`)) return
+    setBajando(true)
+    setBajaError('')
+    try {
+      await darDeBaja(lead.email)
+      setBajaHecha(true)
+      onDiscard(lead.id)
+    } catch (e) {
+      setBajaError(e instanceof Error ? e.message : 'No se ha podido registrar la baja.')
+    } finally {
+      setBajando(false)
+    }
+  }
+
   const huella = lead.huella ?? {}
   const confianza = huella.confianza?.nivel ?? 'bajo'
   const elogios = huella.voz_del_cliente?.elogios_recurrentes ?? []
@@ -326,7 +350,19 @@ function LeadStory({
           <Check size={16} /> {message?.status === 'aprobado' ? 'Aprobado' : 'Aprobar'}
         </button>
         <button type="button" onClick={() => onDiscard(lead.id)}><X size={16} /> Descartar</button>
+        {/* Descartar saca al lead de esta campaña. La baja es otra cosa: bloquea la
+            dirección para siempre, aunque mañana vuelva dentro de otro negocio. */}
+        <button
+          type="button"
+          className="outreach-baja"
+          disabled={!lead.email || bajando}
+          title={lead.email ? `No volver a escribir a ${lead.email}` : 'Este lead no tiene correo'}
+          onClick={() => void darBaja()}
+        >
+          <Ban size={16} /> {bajaHecha ? 'En la lista de bajas' : 'No escribir más'}
+        </button>
       </div>
+      {bajaError && <p className="outreach-baja-error"><AlertCircle size={14} /> {bajaError}</p>}
     </article>
   )
 }

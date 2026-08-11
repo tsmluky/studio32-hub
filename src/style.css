@@ -4923,3 +4923,42 @@ button.update-row {
     justify-content: center;
   }
 }
+
+/* Baja: sacar una direccion de la lista para siempre. Se pinta distinto del resto
+   de acciones porque no se deshace desde la interfaz. */
+.outreach-baja {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 0 14px;
+  color: var(--rose);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.outreach-baja:hover:not(:disabled) {
+  background: var(--rose-soft);
+  border-color: var(--rose);
+}
+
+.outreach-baja:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.outreach-baja-error {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 9px 0 0;
+  padding: 9px 11px;
+  color: var(--rose);
+  background: var(--rose-soft);
+  border-radius: 8px;
+  font-size: 12.5px;
+}
