@@ -46,6 +46,31 @@ const esquema = JSON.parse(
 )
 const validarHuella = new Ajv2020({ allErrors: true, strict: false }).compile(esquema)
 
+// Misma fuente que usa el envío. Aquí solo se necesitan los nombres, para detectar
+// cuerpos que vienen ya firmados.
+const { remitentes } = JSON.parse(await readFile(path.join(root, 'src/remitentes.json'), 'utf8'))
+const NOMBRES_REMITENTE = Object.values(remitentes).map((r) => r.nombre.toLowerCase())
+
+// ── Dominio propio: la clave real de "un negocio, un correo" ──
+//
+// El índice único por email no impide escribir a info@ y a citas@ de la misma
+// clínica. El dominio sí — pero solo si es suyo. Dos negocios distintos pueden usar
+// los dos gmail.com, así que en los proveedores gratuitos el dominio no identifica
+// nada y se deja a null: esas filas se deduplican solo por email.
+const PROVEEDORES_GENERICOS = new Set([
+  'gmail.com', 'googlemail.com', 'hotmail.com', 'hotmail.es', 'outlook.com',
+  'outlook.es', 'live.com', 'live.es', 'msn.com', 'yahoo.com', 'yahoo.es',
+  'icloud.com', 'me.com', 'aol.com', 'terra.es', 'telefonica.net', 'movistar.es',
+])
+
+function dominioPropio(email) {
+  const d = email?.split('@')[1]?.trim().toLowerCase()
+  if (!d || PROVEEDORES_GENERICOS.has(d)) return null
+  // Sin el www. y sin subdominio de correo, para que mail.clinica.es y clinica.es
+  // no cuenten como dos negocios.
+  return d.replace(/^(www|mail|correo)\./, '')
+}
+
 const entrada = JSON.parse(await readFile(path.resolve(archivo), 'utf8'))
 const tanda = entrada.tanda ?? path.basename(archivo, '.json')
 const leads = entrada.leads ?? []
@@ -134,6 +159,25 @@ function revisar(lead, i) {
   const texto = `${lead.asunto ?? ''} ${lead.cuerpo ?? ''}`
   for (const [re, motivo] of ANTIPATRONES) if (re.test(texto)) errores.push(`el correo ${motivo}`)
 
+  // Puerta 6 — el cuerpo no lleva firma
+  //
+  // La firma la compone el script de envío desde src/remitentes.json, con el
+  // sender_id que tenga el lead en ese momento. Si la firma viniera incrustada en el
+  // texto, reasignar remitente en el hub mandaría un correo firmado por quien no es
+  // — y ese es justamente el caso que hace falta que funcione.
+  //
+  // El cierre ("Un saludo,") sí es parte de la voz y se queda. Lo que sobra es el
+  // bloque de nombre y datos de contacto.
+  const cuerpo = (lead.cuerpo ?? '').trim()
+  if (/studio32\.es|Digital Systems/i.test(cuerpo)) {
+    errores.push('el cuerpo lleva bloque de firma: la firma la compone el envío')
+  } else {
+    const ultima = cuerpo.split('\n').filter((l) => l.trim()).pop()?.trim().toLowerCase()
+    if (ultima && NOMBRES_REMITENTE.includes(ultima.replace(/[.,]$/, ''))) {
+      errores.push(`el cuerpo termina firmado ("${ultima}"): la firma la compone el envío`)
+    }
+  }
+
   // El test de la guía: si el nombre del negocio no aparece, probablemente sirve
   // para cualquier otro negocio — y entonces es plantilla.
   if (h.negocio?.nombre && !texto.toLowerCase().includes(h.negocio.nombre.toLowerCase().split(' ')[0])) {
@@ -206,6 +250,7 @@ for (const { lead } of pasan) {
     maps_url: n.maps_url ?? null,
     telefono: n.telefono ?? null,
     instagram: n.instagram ?? null,
+    dominio: dominioPropio(n.email),
     huella: lead.huella,
     porque: lead.porque,
     sender_id: lead.sender_id,
@@ -220,9 +265,16 @@ for (const { lead } of pasan) {
   if (!error) {
     subidos += 1
   } else if (error.code === '23505') {
-    // Índice único por email: ya se le escribió, se rechazó o pidió la baja.
+    // Ya se le escribió, se rechazó o pidió la baja. Distinguir qué índice saltó
+    // importa: por dominio significa que ya hay OTRO contacto de este mismo negocio
+    // en la bandeja, que es el caso que no se veía antes.
     repetidos += 1
-    console.log(`  ya existía  ${n.nombre} (${n.email})`)
+    const porDominio = /leads_dominio_unico/.test(error.message)
+    console.log(
+      porDominio
+        ? `  ya existía  ${n.nombre} — ya hay un contacto de ${dominioPropio(n.email)} en la bandeja`
+        : `  ya existía  ${n.nombre} (${n.email})`,
+    )
   } else {
     fallidos += 1
     console.error(`  FALLO       ${n.nombre}: ${error.message}`)

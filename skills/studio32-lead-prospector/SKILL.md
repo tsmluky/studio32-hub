@@ -118,7 +118,13 @@ Los descartados se reportan aparte con su motivo en una línea. Son información
 
 ### 3. El correo se escribe para un remitente concreto
 
-Cada lead lleva un `sender_id` (`juanma`, `gonzalo` o `pancho`). El correo se redacta **en la voz de esa persona y firmado por ella** — no se redacta genérico para firmarlo después.
+Cada lead lleva un `sender_id` (`juanma`, `gonzalo` o `pancho`). El correo se redacta **en la voz de esa persona** — no genérico para asignárselo a alguien después.
+
+**Pero el cuerpo NO lleva firma.** El cierre ("Un saludo,") sí es parte de la voz y se escribe. El bloque de nombre, estudio y web se añade solo en el envío, desde `src/remitentes.json`, según el `sender_id` que tenga el lead en ese momento.
+
+Es así porque en el hub quien aprueba puede quedarse el envío: si Gonzalo aprueba un correo que subió a nombre de Juanma, pulsa "lo envío yo" y el remitente cambia. Si la firma viniera dentro del texto, saldría un correo firmado por quien no es. El `sender_id` que subes es una **sugerencia razonada**, no una asignación definitiva.
+
+El script de subida rechaza los cuerpos que traen firma incrustada.
 
 Solo se puede citar material de confianza `alta` o `media`. Lo de confianza `baja` orienta el ángulo, pero no aparece en el texto.
 
@@ -132,9 +138,9 @@ Por cada lead que pasa la puerta:
 |---|---|
 | `huella` | JSON válido contra el esquema |
 | `porque` | 3-5 líneas: por qué este negocio y por qué ahora. **Es lo que Juanma lee primero** |
-| `sender_id` | Quién firma |
+| `sender_id` | Quién lo firmaría (sugerencia; el hub puede cambiarlo) |
 | `asunto` | 4-7 palabras, concreto. Nunca "Propuesta" ni "Colaboración" |
-| `cuerpo` | 80-120 palabras, en la voz del remitente |
+| `cuerpo` | 80-120 palabras, en la voz del remitente, **sin bloque de firma** |
 | `scores` | Digital Presence y Opportunity, con desglose |
 
 El `porque` no es un resumen del correo. Es el argumento para que un humano decida en quince segundos, y debe apoyarse en evidencia citable.
@@ -167,6 +173,12 @@ vuelve a aplicar la puerta por su cuenta. Añadir `--confirmar` para subir de ve
 El script bloquea, además, los antipatrones que `outreach-guidelines.md` marca como
 "nunca": emojis, promesas numéricas, "espero que estés bien" y lenguaje de agencia.
 No los avisa — los rechaza. Si un lead tuyo cae ahí, el correo estaba mal escrito.
+También rechaza los cuerpos que traen firma: la firma la compone el envío.
+
+Un negocio, un correo: el script deduplica por email y también por dominio propio,
+así que `info@clinica.es` y `citas@clinica.es` no pueden recibir dos correos. Si un
+lead se marcó como baja, rechazado o ya enviado, su negocio queda ocupado para
+siempre — es justo lo que impide volver a escribirle.
 
 ---
 

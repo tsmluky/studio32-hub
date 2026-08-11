@@ -18,7 +18,15 @@ npm run build            # build de la app
 npm run build:static     # build estático -> static-dist/ (lo que se publica)
 npm run supabase:bootstrap   # crea tablas y miembros. Necesita SERVICE_ROLE_KEY
 npm run supabase:reset-state # limpia el estado del hub
+npm run supabase:migrate     # aplica supabase/migrations/. Necesita SUPABASE_DB_URL
+
+npm run leads:subir -- tanda.json   # revisa una tanda de prospección (no escribe)
+npm run leads:enviar               # muestra qué correos saldrían (no envía)
 ```
+
+Los dos scripts de `leads` **revisan por defecto y no hacen nada**. Se añade
+`--confirmar` para que actúen de verdad. Es a propósito: lo que suben acaba delante de
+un socio, y lo que envían son correos a personas reales que no se deshacen.
 
 ## Arquitectura del estado
 
@@ -47,6 +55,14 @@ no está terminada.
 `src/App.tsx` acumula demasiado (~3.000 líneas). **No añadir vistas nuevas dentro.**
 Cada vista nueva va a su propio archivo en `src/` y se importa. Lo existente se
 extrae cuando se toque, no en una refactorización aparte.
+
+Las piezas de presentación compartidas viven en `src/ui.tsx` (`PageHeading`,
+`EmptyState`). Importarlas desde ahí, no desde `App.tsx`: `App.tsx` importa las
+vistas, así que una vista que le importe algo a él crea un ciclo.
+
+Herramienta nueva de la sección Herramientas = una entrada en `tools`
+(`src/ToolsView.tsx`) + su vista en archivo propio + su caso en el switch de
+`App.tsx`. Nada más.
 
 ## Deploy
 

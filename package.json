@@ -13,7 +13,8 @@
     "supabase:bootstrap": "node scripts/bootstrap-supabase.mjs",
     "supabase:reset-state": "node scripts/reset-hub-state.mjs",
     "supabase:migrate": "node --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/apply-migrations.mjs",
-    "leads:subir": "node --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/subir-tanda.mjs"
+    "leads:subir": "node --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/subir-tanda.mjs",
+    "leads:enviar": "node --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/enviar-aprobados.mjs"
   },
   "devDependencies": {
     "@types/react": "^19.2.17",
@@ -30,6 +31,7 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.110.7",
     "lucide-react": "^1.24.0",
+    "nodemailer": "^6.10.1",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"
   }

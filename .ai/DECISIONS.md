@@ -100,3 +100,74 @@ realmente se verificó.
 **Por qué es una puerta y no un consejo:** el valor de la bandeja depende por completo
 de que Juanma se fíe de ella. En cuanto tenga relleno, dejará de abrirla, y la
 herramienta se acaba. Seis leads sólidos valen más que veinte con ruido.
+
+---
+
+## 2026-08-11 · "Herramientas" es una sección propia, no una vista suelta
+
+Prospección iba a ser una entrada más del menú. Se convierte en la primera herramienta
+dentro de un contenedor "Herramientas", porque van a venir más y el menú principal es
+para las vistas del día a día (Hoy, Tareas, Calendario...), no para utilidades internas.
+
+En escritorio el sidebar lista las herramientas bajo su título. En móvil el sidebar es
+una barra inferior de iconos y no cabe un submenú: por eso existe además una pantalla
+índice. Una entrada en el menú, una pantalla, y dentro la lista. Añadir una herramienta
+nueva es añadir una entrada a `tools` en `src/ToolsView.tsx`.
+
+---
+
+## 2026-08-11 · El cuerpo del correo no lleva firma: se compone al enviar
+
+Corrige la decisión del 2026-08-07 ("el sender_id se fija al redactar"). Aquella decía
+que elegir remitente al enviar obligaría a reescribir la firma sobre la marcha. La
+salida es no meter la firma en el texto.
+
+El `sender_id` que sube la skill pasa a ser una **sugerencia razonada**: el correo se
+redacta en la voz de esa persona, con su cierre. Pero el bloque de nombre y contacto lo
+compone el envío desde `src/remitentes.json`, con el `sender_id` que tenga el lead en
+ese momento. Reasignar remitente en el hub es entonces una operación segura.
+
+**Por qué importa que quien aprueba pueda quedárselo:** la respuesta cae en el buzón de
+quien firma. Si Gonzalo aprueba y el correo sale de Juanma, la conversación arranca en
+un buzón que no es el de quien decidió seguirla. El botón "lo envío yo" lo arregla en un
+toque, y por defecto se respeta el remitente sugerido.
+
+`src/remitentes.json` es fuente única: lo leen el hub (para previsualizar) y el script
+de envío (para enviar). Si divergieran, lo que se aprueba dejaría de ser lo que sale.
+
+---
+
+## 2026-08-11 · Deduplicar por dominio propio, no solo por email
+
+El índice único por email no impedía escribir a `info@clinica.es` y a `citas@clinica.es`:
+dos correos al mismo negocio, que es exactamente lo que hace que a uno lo marquen como
+spam.
+
+Se añade `leads.dominio` con índice único parcial. Lo calcula el script de subida, no la
+base de datos, porque solo cuenta cuando el dominio es propio: dos negocios distintos
+pueden usar los dos `gmail.com`. En proveedores gratuitos queda a null y esas filas se
+deduplican solo por email, como antes.
+
+---
+
+## 2026-08-11 · Cerrar el ciclo a mano: 'respondido' y 'no_interesa'
+
+Las respuestas llegan al Gmail personal de quien firmó, no al hub. Sin una forma de
+marcar qué pasó, la bandeja se quedaba en 'enviado' para siempre y no había manera de
+saber a quién ya se le hizo caso.
+
+Se descartó leer el buzón por IMAP para detectarlo solo: obligaría a que el hub tuviera
+acceso de lectura a los correos personales de los socios, que es mucho más de lo que
+esta herramienta necesita. Dos botones en la tarjeta cuestan un segundo y no piden
+ningún permiso nuevo.
+
+`fallido` pasa a poder volver a `aprobado` para reintentar. El hub sigue sin poder
+marcar nada como `enviado`: eso solo lo hace quien realmente envió.
+
+---
+
+## 2026-08-11 · PageHeading y EmptyState salen de App.tsx a src/ui.tsx
+
+Dos vistas en archivos distintos no pueden importarlas de `App.tsx` sin crear un ciclo,
+porque `App.tsx` importa las vistas. Se extrae lo que se toca, no más: el resto de
+`App.tsx` se queda donde está hasta que haga falta tocarlo.

@@ -1,0 +1,32 @@
+{
+  "_nota": "Fuente unica de los remitentes de captacion. La lee el hub (para previsualizar el correo firmado) y scripts/enviar-aprobados.mjs (para componer el envio real). El cuerpo que sube la skill NO lleva firma: se compone aqui, y por eso reasignar remitente en el hub es seguro. Si cambia una direccion, se cambia aqui y punto.",
+  "remitentes": {
+    "juanma": {
+      "nombre": "Juanma",
+      "email": "juanma@studio32.es",
+      "firma": [
+        "Juanma",
+        "Studio32 · Digital Systems",
+        "studio32.es"
+      ]
+    },
+    "pancho": {
+      "nombre": "Pancho",
+      "email": "pancho@studio32.es",
+      "firma": [
+        "Pancho",
+        "Studio32 · Digital Systems",
+        "studio32.es"
+      ]
+    },
+    "gonzalo": {
+      "nombre": "Gonzalo",
+      "email": "gonzalo@studio32.es",
+      "firma": [
+        "Gonzalo",
+        "Studio32 · Digital Systems",
+        "studio32.es"
+      ]
+    }
+  }
+}

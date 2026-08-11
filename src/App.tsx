@@ -30,15 +30,19 @@ import {
   Sparkles,
   Tags,
   Users,
+  Wrench,
   X,
 } from 'lucide-react'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import type { FormEvent, ReactNode } from 'react'
 import { isSupabaseConfigured, pinToPassword, supabase } from './supabase'
+import { EmptyState, PageHeading } from './ui'
+import ProspectingView from './ProspectingView'
+import ToolsView, { type ToolId, tools } from './ToolsView'
 
 type MemberId = 'juanma' | 'pancho' | 'gonzalo'
 type ProjectId = string
-type MainView = 'today' | 'tasks' | 'calendar' | 'projects' | 'inbox' | 'library' | 'project'
+type MainView = 'today' | 'tasks' | 'calendar' | 'projects' | 'inbox' | 'library' | 'tools' | ToolId | 'project'
 type ProjectTab = 'overview' | 'tasks' | 'conversation' | 'board' | 'files'
 type TaskStatus = 'todo' | 'doing' | 'done'
 type CaptureType = 'task' | 'note' | 'decision' | 'link'
@@ -216,6 +220,9 @@ const navigation: Array<{ id: Exclude<MainView, 'project'>; label: string; icon:
   { id: 'projects', label: 'Proyectos', icon: FolderKanban },
   { id: 'inbox', label: 'Inbox', icon: Inbox },
   { id: 'library', label: 'Biblioteca', icon: LibraryBig },
+  // Contenedor de las herramientas internas. En escritorio el sidebar además lista
+  // las herramientas debajo; en móvil solo cabe esta entrada, que lleva al índice.
+  { id: 'tools', label: 'Herramientas', icon: Wrench },
 ]
 
 // Alta de asistente: página servida por el backend del agente (Railway). Se abre
@@ -1154,6 +1161,10 @@ function App() {
             />
           ) : view === 'library' ? (
             <LibraryView state={state} onOpenProject={openProject} />
+          ) : view === 'tools' ? (
+            <ToolsView onOpenTool={(tool) => selectView(tool)} />
+          ) : view === 'prospecting' ? (
+            <ProspectingView activeMemberId={activeMember.id} />
           ) : (
             <ProjectView
               project={selectedProject}
@@ -1477,20 +1488,49 @@ function Sidebar({
       <nav className="main-navigation">
         {navigation.map((item) => {
           const Icon = item.icon
-          const isActive = item.id === activeView || (item.id === 'projects' && activeView === 'project')
+          const isActive =
+            item.id === activeView ||
+            (item.id === 'projects' && activeView === 'project') ||
+            (item.id === 'tools' && tools.some((tool) => tool.id === activeView))
           return (
-            <button
-              key={item.id}
-              type="button"
-              className={isActive ? 'is-active' : ''}
-              onClick={() => onNavigate(item.id)}
-              data-testid={`nav-${item.id}`}
-              aria-label={item.label}
-            >
-              <Icon size={18} />
-              <span>{item.label}</span>
-              {item.id === 'inbox' && inboxCount > 0 && <b>{inboxCount}</b>}
-            </button>
+            <Fragment key={item.id}>
+              <button
+                type="button"
+                className={isActive ? 'is-active' : ''}
+                onClick={() => onNavigate(item.id)}
+                data-testid={`nav-${item.id}`}
+                aria-label={item.label}
+              >
+                <Icon size={18} />
+                <span>{item.label}</span>
+                {item.id === 'inbox' && inboxCount > 0 && <b>{inboxCount}</b>}
+              </button>
+
+              {/* Submenú colgando de "Herramientas": va aquí dentro para quedar
+                  pegado a su entrada, no al final del menú. No lleva título propio
+                  porque lo daría la entrada de arriba. Se oculta en móvil, donde el
+                  sidebar es una barra de iconos: ahí la entrada abre el índice. */}
+              {item.id === 'tools' && (
+                <div className="sidebar-tools">
+                  {tools.map((tool) => {
+                    const ToolIcon = tool.icon
+                    return (
+                      <button
+                        key={tool.id}
+                        type="button"
+                        className={activeView === tool.id ? 'is-active' : ''}
+                        onClick={() => onNavigate(tool.id)}
+                        data-testid={`nav-tool-${tool.id}`}
+                        aria-label={tool.label}
+                      >
+                        <ToolIcon size={15} />
+                        <span>{tool.label}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
+            </Fragment>
           )
         })}
         <button
@@ -3014,29 +3054,6 @@ function UpdateRow({
   return onOpenProject ? <button className="update-row" type="button" onClick={() => onOpenProject(update.projectId)}>{content}</button> : <article className="update-row">{content}</article>
 }
 
-function PageHeading({
-  eyebrow,
-  title,
-  description,
-  meta,
-}: {
-  eyebrow: string
-  title: string
-  description: string
-  meta?: ReactNode
-}) {
-  return (
-    <header className="page-heading">
-      <span>
-        <span className="eyebrow">{eyebrow}</span>
-        <h1>{title}</h1>
-        <p>{description}</p>
-      </span>
-      {meta && <div className="page-heading-meta">{meta}</div>}
-    </header>
-  )
-}
-
 function SectionHeader({ icon, title, action }: { icon: ReactNode; title: string; action?: ReactNode }) {
   return (
     <header className="section-header">
@@ -3056,10 +3073,6 @@ function Avatar({ member, size }: { member: Member; size?: 'large' }) {
 
 function StatusBadge({ children }: { children: string }) {
   return <span className="status-badge" data-status={children}>{children}</span>
-}
-
-function EmptyState({ icon, title, body }: { icon: ReactNode; title: string; body: string }) {
-  return <div className="empty-state">{icon}<strong>{title}</strong><p>{body}</p></div>
 }
 
 export default App
