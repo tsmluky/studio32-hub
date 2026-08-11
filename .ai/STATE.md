@@ -53,28 +53,45 @@ intentos. `git branch -r` y una consulta al esquema de Supabase cuestan un minut
 - **La huella es esquema compartido con `studio32-agent`.** Si un lead convierte,
   alimenta `templates/<vertical>/`.
 
-## Qué falta para operarlo
+## Qué está probado (11/08) y qué no
 
 | | Estado |
 |---|---|
-| Tablas `outreach_*` | aplicadas, incluida la de campañas pedidas |
-| Vista en el Hub + pedir campaña | hecho |
-| `outreach:pendientes` | hecho, **sin probar contra la base** |
-| Importador | de la rama, **sin repasar** |
-| `outreach-send` con SMTP | reescrita, **sin desplegar y sin probar** |
-| Secretos SMTP en Supabase | **pendientes** |
+| Tablas `outreach_*`, incluida la de campañas pedidas | aplicadas |
+| Secretos SMTP en Supabase | puestos |
+| `outreach-send` con SMTP de Hostinger | desplegada y **probada con envíos reales** |
+| Deno deja salir el 465 | ✅ verificado |
+| Hostinger acepta el alias en `From:` | ✅ verificado — llega como `juanma@studio32.es` |
+| Las respuestas vuelven al buzón real | ✅ verificado, se respondió y llegó |
+| Aprobar → enviar desde el Hub | ✅ verificado end-to-end |
+| Baja bloquea el envío | ✅ verificado: se reaprobó a propósito y salió `Enviados 0 de 1` |
+| Llega a Recibidos, no a Spam | ✅ un envío. Un dato, no una conclusión |
+| `outreach:pendientes` contra la base | ✅ responde |
+| Pedir campaña desde el Hub | construido, **el ciclo completo nunca se ha ejecutado** |
+| Importador `import-outreach.mjs` | de la rama del sobremesa, **sin repasar** |
 
-> **Acción pendiente de una persona:** poner los secretos SMTP en Supabase → Edge
-> Functions → Secrets (ver `docs/PROSPECCION.md`), desplegar la función, y hacer la
-> prueba a una dirección propia antes de escribir a nadie real.
+**Desplegar la función:** `npm run fn:deploy`. Lleva `--use-api` porque el empaquetado
+local falla en este portátil (busca un `output.eszip` que no genera) y además ensucia el
+repo con `doc/` y `supabase/.temp/`.
 
-**Riesgo abierto sin resolver:** nadie ha comprobado todavía que el SMTP de Hostinger
-acepte enviar con `From:` un alias autenticándose como `info@`. En el webmail funciona;
-por SMTP es lo normal, pero no está verificado. Si fallara, la salida es enviar todo
-desde `info@` y poner el nombre del socio en el `From:` visible.
+## Lo que sigue sin resolver
 
-**Segundo riesgo:** que Deno Deploy no deje salir el 465. Hay indicios de que sí, pero
-no está probado. Si fallara: Railway Pro (~20€/mes) o volver a un script local.
+- **Nadie lee el buzón.** Si un negocio responde BAJA, esa respuesta llega a Hostinger y
+  se queda ahí: una persona tiene que verla y pulsar "No escribir más" en el Hub.
+  Automatizarlo pide IMAP, y eso es meter las credenciales del buzón en otro sitio.
+- **No hay página de bajas.** El pie del correo pide responder BAJA. La tabla ya tiene
+  `unsubscribe_token` por lead, así que una página que reciba el token y escriba la baja
+  sola cerraría el ciclo. Es lo más barato que queda por hacer.
+- **La interfaz está sin pulir.** Es lo siguiente que se va a tocar.
+
+## Ojo con esto
+
+Hay un correo real preparado para **Clínica Dental Dr. Garcés** (`cdentaldrgarces@gmail.com`)
+desde los datos semilla del 04/08. Estuvo marcado como `aprobado` sin que nadie lo hubiera
+revisado, y una tanda de envío lo habría mandado. Se devolvió a `borrador` el 11/08.
+
+**Antes de pulsar Enviar, mirar siempre qué hay en la cola de aprobados.** El diálogo de
+confirmación lista los destinatarios: leerlo, no darle a aceptar.
 
 ## Riesgo abierto
 

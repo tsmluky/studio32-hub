@@ -238,3 +238,52 @@ El id interno es `pancho` (login del Hub, `outreach_leads.owner_member_id`, el t
 
 Se deja asi en vez de unificar: cambiar el id obliga a migrar el login y los datos ya
 guardados, y no gana nada. El cruce vive en un solo sitio, `src/remitentes.json`.
+
+---
+
+## 2026-08-11 · CORS: se permite cualquier localhost, y por que no afloja nada
+
+`allowedOrigins` enumeraba los puertos del dev server a mano y el 5175 no estaba. El
+preflight se rechazaba, el navegador ni llegaba a mandar el POST, y en el Hub parecia
+que la funcion no estaba desplegada: el mensaje se quedaba en 'aprobado' sin rastro de
+error. Costo una prueba entera de diagnostico.
+
+Ahora se acepta cualquier `http://localhost:PUERTO`. **CORS decide que pagina puede leer
+la respuesta, no quien puede enviar**: quien envia sigue necesitando una sesion valida
+de miembro del workspace, y eso lo comprueba `requireStudio32Member`. Confundir las dos
+cosas es lo que lleva a listas de origenes que solo estorban.
+
+---
+
+## 2026-08-11 · La baja se registra por direccion, no por lead
+
+`outreach_suppressions` existia desde el primer dia y el envio ya la comprobaba, pero no
+habia forma de meter a nadie sin ir a la base de datos. Ahora hay boton en la tarjeta.
+
+**Por que por direccion y no por lead:** descartar un lead lo saca de esta campana, pero
+el mismo buzon puede volver manana dentro de otro negocio —una gestoria, una cadena, el
+mismo sitio con otro nombre—. La baja tiene que sobrevivir a eso.
+
+Pide confirmacion y no se deshace desde la interfaz. Deliberado: el error caro es el
+contrario, volver a escribir a quien pidio que no.
+
+Probado de verdad: se dio de baja, se reaprobo el mensaje a proposito, y el envio lo
+rechazo con "La direccion esta dada de baja".
+
+---
+
+## 2026-08-11 · Dos fallos que enmascaraban el resultado del envio
+
+Los dos hacian que el sistema **mintiera sobre lo que habia pasado**, que es peor que
+fallar, y por eso quedan escritos:
+
+1. `smtp.close()` de denomailer devuelve `void`, no una promesa. El `.catch()`
+   encadenado lanzaba dentro del `finally` justo DESPUES de un envio correcto, y el
+   mensaje quedaba marcado como `fallido` habiendo salido de verdad. Se descubrio porque
+   llegaron dos correos cuando la base decia que ninguno.
+
+2. `OUTREACH_UNSUBSCRIBE_BASE` valia literalmente la palabra "opcional", copiada de la
+   plantilla del `.env.example`, que la escribia pegada al nombre como si fuera el valor.
+   Los primeros correos reales salieron con un pie que decia "opcional?t=<token>". No lo
+   canto nada porque no falla: el correo se entrega igual. Solo deja sin salida a quien
+   quiera darse de baja. Ahora la base solo se usa si es una URL http(s) completa.
