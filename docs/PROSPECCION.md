@@ -9,16 +9,29 @@ El cuello de botella de Studio32 es la distribución, no el producto. Esta caden
 para que **una persona prepare el trabajo y otra solo tenga que revisarlo y enviarlo**.
 
 ```
-Claude Code, en local          →   archivo JSON de campaña
-  skill prospeccion                 (campaña + leads + huella + borradores)
-  skill huella-negocio
-  skill redactor-outreach
+EL HUB                      ESTA MAQUINA                    EL HUB
+Herramientas → Prospección
+"Pedir campaña"
+  sector · zona · oferta
         │
-        │  npm run outreach:import
-        ▼
-    Supabase   ────────────────→   el Hub, sección Prospección
-                                     revisar → aprobar → enviar
+        └─ campaña 'pedida' ──►  npm run outreach:pendientes
+                                   lista los encargos y escupe
+                                   el prompt listo para pegar
+                                         │
+                                   Claude Code + las 3 skills
+                                   (suscripción, no API)
+                                         │
+                                   npm run outreach:import
+                                         │
+                                         └─ 'abierta' ──►  revisar
+                                                           aprobar
+                                                              │
+                                              Edge Function outreach-send
+                                              SMTP de Hostinger
 ```
+
+Quien decide a quién atacar ya no tiene que ser quien sabe ejecutar la skill.
+Juanma rellena cuatro campos desde el móvil; el encargo espera en la cola.
 
 La generación corre en local con la suscripción de Claude. **Supabase es la costura**: la
 skill escribe filas, el Hub las lee. Si algún día hace falta que la generación corra sola
@@ -94,9 +107,30 @@ npx supabase functions deploy outreach-send --project-ref wwhinwxedcvpxprmcsta
 
 Secretos necesarios en Supabase → Edge Functions → Secrets:
 
-- `RESEND_API_KEY` — la clave de Resend. El dominio ya está verificado ahí desde julio.
-- `OUTREACH_FROM` — `Studio32 <hola@studio32.es>`.
+- `SMTP_HOST` — `smtp.hostinger.com`
+- `SMTP_PORT` — `465`
+- `SMTP_USER` — `info@studio32.es`. **La cuenta real, no un alias.**
+- `SMTP_PASS` — la contraseña de esa cuenta.
+- `OUTREACH_FROM` — `Studio32 <info@studio32.es>`.
 - `OUTREACH_UNSUBSCRIBE_BASE` — opcional. Sin él, el pie del correo pide responder BAJA.
+
+## Por qué SMTP y no una API de correo
+
+Studio32 tiene **una sola cuenta** en Hostinger, `info@studio32.es`, con alias para
+cada socio: `juanma@`, `gonzalo@` y `francisco@`. El SMTP se autentica siempre como la
+cuenta real y pone en `From:` el alias que toque — exactamente lo que hace el webmail.
+
+Así el correo sale del dominio propio, las respuestas caen en la bandeja real donde se
+sigue el hilo, y no hay proveedor intermedio del que depender.
+
+**Cuidado con Pancho:** su identificador interno es `pancho` (así está en el login del
+Hub y en `outreach_leads.owner_member_id`) pero su dirección de correo es
+`francisco@studio32.es`. El mapeo vive en `src/remitentes.json` y es el único sitio
+donde se cruzan las dos cosas.
+
+**Por qué no Railway:** el plan Hobby bloquea el SMTP saliente (puertos 25, 465 y 587);
+solo se abre a partir de Pro. Por eso el envío vive en una Edge Function de Supabase,
+donde el 465 con TLS sí sale.
 
 Para el importador hace falta además `.env.local` con `SUPABASE_URL` y
 `SUPABASE_SERVICE_ROLE_KEY`. Ese archivo está ignorado por git.

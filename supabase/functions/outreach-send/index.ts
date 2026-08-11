@@ -11,14 +11,22 @@
 //      cortesía, aunque sean leads distintos.
 //
 // Secretos necesarios en Supabase:
-//   RESEND_API_KEY                 clave de la API de Resend
+//   SMTP_HOST / SMTP_PORT          servidor de Hostinger (smtp.hostinger.com : 465)
+//   SMTP_USER / SMTP_PASS          la cuenta real: info@studio32.es y su contrasena
 //   OUTREACH_FROM                  remitente por defecto, alias del dominio propio
 //   OUTREACH_UNSUBSCRIBE_BASE      opcional: base del enlace de baja
 //   OUTREACH_UNSUBSCRIBE_MAILTO    opcional: buzón de bajas, si no hay enlace
 
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { SMTPClient } from 'https://deno.land/x/denomailer@1.6.0/mod.ts'
 
-const RESEND_API = 'https://api.resend.com/emails'
+// Se envia por SMTP del propio Hostinger y no por una API de terceros.
+//
+// Studio32 tiene UNA cuenta (info@studio32.es) con alias para cada socio. El SMTP
+// se autentica siempre como esa cuenta y pone en `From:` el alias que toque, que es
+// exactamente lo que hace el webmail. Asi el correo sale del dominio propio, las
+// respuestas caen en la bandeja real y no hay un proveedor intermedio que dependa
+// de una suscripcion ni de verificar el dominio en otro sitio.
 const DIAS_DE_CORTESIA = 60
 const MAXIMO_POR_TANDA = 25
 
@@ -88,8 +96,13 @@ Deno.serve(async (request) => {
   const user = await requireStudio32Member(request)
   if (!user) return json(request, { error: 'No tienes acceso a la prospección de Studio32.' }, 403)
 
-  const resendKey = Deno.env.get('RESEND_API_KEY')
-  if (!resendKey) return json(request, { error: 'Falta configurar RESEND_API_KEY.' }, 503)
+  const smtpHost = Deno.env.get('SMTP_HOST') ?? 'smtp.hostinger.com'
+  const smtpPort = Number(Deno.env.get('SMTP_PORT') ?? 465)
+  const smtpUser = Deno.env.get('SMTP_USER')
+  const smtpPass = Deno.env.get('SMTP_PASS')
+  if (!smtpUser || !smtpPass) {
+    return json(request, { error: 'Faltan SMTP_USER y SMTP_PASS en los secretos de la funcion.' }, 503)
+  }
 
   const remitentePorDefecto = Deno.env.get('OUTREACH_FROM') ?? ''
 
@@ -182,31 +195,27 @@ Deno.serve(async (request) => {
     }
 
     try {
-      const respuesta = await fetch(RESEND_API, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          from: remitente,
-          to: [mensaje.to_email],
-          reply_to: mensaje.reply_to || remitente,
-          subject: mensaje.subject,
-          text: componerCuerpo(mensaje.body, enlaceBaja),
-          headers: { 'List-Unsubscribe': `<${enlaceBaja}>` },
-        }),
+      // Una conexion por mensaje. Son 25 como mucho y con pausa entre ellos: no
+      // compensa mantener el socket abierto y arriesgarse a que Hostinger lo corte
+      // a mitad de tanda.
+      const smtp = new SMTPClient({
+        connection: { hostname: smtpHost, port: smtpPort, tls: smtpPort === 465, auth: { username: smtpUser, password: smtpPass } },
       })
 
-      const cuerpo = await respuesta.json().catch(() => ({}))
+      await smtp.send({
+        from: remitente,
+        to: mensaje.to_email,
+        replyTo: mensaje.reply_to || remitente,
+        subject: mensaje.subject,
+        content: componerCuerpo(mensaje.body, enlaceBaja),
+        headers: { 'List-Unsubscribe': `<${enlaceBaja}>` },
+      })
 
-      if (!respuesta.ok) {
-        const motivo = cuerpo?.message ?? `Resend ha respondido ${respuesta.status}.`
-        await admin.from('outreach_messages').update({ status: 'fallido', error: motivo }).eq('id', id)
-        resultados.push({ id, estado: 'fallido', motivo })
-        continue
-      }
+      await smtp.close()
 
       await admin
         .from('outreach_messages')
-        .update({ status: 'enviado', provider_message_id: cuerpo?.id ?? null, sent_at: new Date().toISOString(), error: '' })
+        .update({ status: 'enviado', provider: 'hostinger-smtp', sent_at: new Date().toISOString(), error: '' })
         .eq('id', id)
 
       await admin

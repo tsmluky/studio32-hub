@@ -34,7 +34,12 @@ export type OutreachCampaign = {
   sector: string
   city: string
   oferta: string
-  status: 'abierta' | 'enviando' | 'cerrada'
+  // 'pedida' = encolada desde el Hub y todavía sin leads. La skill corre en local,
+  // así que el Hub solo puede dejar el encargo puesto.
+  status: 'pedida' | 'abierta' | 'enviando' | 'cerrada'
+  cantidad: number
+  notas: string
+  created_at: string
 }
 
 export type OutreachLead = {
@@ -84,7 +89,7 @@ export function useOutreach(enabled: boolean) {
       const [campaignRows, leadRows, messageRows] = await Promise.all([
         client
           .from('outreach_campaigns')
-          .select('id, name, sector, city, oferta, status')
+          .select('id, name, sector, city, oferta, status, cantidad, notas, created_at')
           .eq('workspace_id', 'studio32')
           .order('created_at', { ascending: false }),
         client
@@ -218,4 +223,37 @@ export function useOutreachPulse(enabled: boolean) {
   }, [enabled])
 
   return { pending, campaign }
+}
+
+/**
+ * Encarga una campaña desde el Hub.
+ *
+ * Nace vacía y en 'pedida'. El Hub no puede generar los leads: la skill corre en
+ * local con la suscripción de Claude, y un sitio estático no alcanza ese portátil.
+ * Lo que sí puede es dejar el encargo hecho para que local lo recoja — y eso es lo
+ * que permite que Juanma o Gonzalo pidan trabajo sin saber ejecutar nada.
+ */
+export type PedidoCampana = {
+  sector: string
+  city: string
+  oferta: string
+  cantidad: number
+  notas: string
+}
+
+export async function pedirCampana(pedido: PedidoCampana) {
+  if (!supabase) throw new Error('Supabase no está configurado')
+  const { error } = await supabase.from('outreach_campaigns').insert({
+    workspace_id: 'studio32',
+    // El nombre se compone solo: es lo que se lee en la cola y en el selector, y
+    // pedir que además lo escriban es una fricción sin contrapartida.
+    name: `${pedido.sector} · ${pedido.city}`,
+    sector: pedido.sector.trim(),
+    city: pedido.city.trim(),
+    oferta: pedido.oferta.trim(),
+    cantidad: pedido.cantidad,
+    notas: pedido.notas.trim(),
+    status: 'pedida',
+  })
+  if (error) throw new Error(error.message)
 }

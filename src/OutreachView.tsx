@@ -5,8 +5,9 @@
 // Function, que es la única que puede marcar un mensaje como enviado.
 
 import { useState } from 'react'
-import { AlertCircle, ArrowRight, Check, CheckCircle2, ChevronRight, Clock3, Send, X } from 'lucide-react'
+import { AlertCircle, ArrowRight, Check, CheckCircle2, ChevronRight, Clock3, Send, X, Sparkles } from 'lucide-react'
 import { EmptyState, PageHeading, SectionHeader, StatusBadge } from './ui'
+import CampaignRequest from './CampaignRequest'
 import type { OutreachCampaign, OutreachLead, OutreachMessage } from './outreach'
 import type { HubSyncStatus } from './types'
 
@@ -31,11 +32,16 @@ export default function OutreachView({
   onDiscard: (leadId: string) => void
   onSend: (messageIds: string[]) => Promise<{ enviados: number; total: number }>
 }) {
+  const [pedirOpen, setPedirOpen] = useState(false)
   const [campaignId, setCampaignId] = useState<string | 'all'>('all')
   const [filter, setFilter] = useState<'review' | 'approved' | 'sent' | 'weak'>('review')
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [enviando, setEnviando] = useState(false)
   const [aviso, setAviso] = useState('')
+
+  // Lo encargado y aun sin leads: no entra en los filtros de revision porque
+  // todavia no hay nada que revisar.
+  const pedidas = campaigns.filter((campana) => campana.status === 'pedida')
 
   const latestMessageFor = (leadId: string) => messages.find((message) => message.lead_id === leadId)
 
@@ -98,8 +104,42 @@ export default function OutreachView({
         eyebrow="Distribución"
         title="Prospección"
         description="Cada correo trae la evidencia que lo sostiene, para revisarlo sin tener que fiarse."
-        meta={<button className="secondary-action" type="button" onClick={onReload}><ArrowRight size={16} /> Actualizar</button>}
+        meta={
+          <>
+            <button className="secondary-action" type="button" onClick={onReload}><ArrowRight size={16} /> Actualizar</button>
+            <button className="primary-action" type="button" onClick={() => setPedirOpen(true)}>
+              <Sparkles size={16} /> Pedir campaña
+            </button>
+          </>
+        }
       />
+
+      {/* Lo encargado y todavía sin generar. Va arriba del todo a propósito: es la
+          única parte del tablero que espera a una persona concreta, y si no se ve,
+          quien lo pidió no sabe si se le ha hecho caso. */}
+      {pedidas.length > 0 && (
+        <section className="surface campaign-queue">
+          <SectionHeader icon={<Clock3 size={17} />} title="Encargadas, pendientes de generar" />
+          {pedidas.map((campana) => (
+            <article key={campana.id}>
+              <span>
+                <strong>{campana.name}</strong>
+                <small>
+                  {campana.cantidad} leads
+                  {campana.oferta ? ` · ${campana.oferta}` : ''}
+                </small>
+                {campana.notas && <small className="campaign-queue-note">{campana.notas}</small>}
+              </span>
+              <StatusBadge>pedida</StatusBadge>
+            </article>
+          ))}
+          <p className="campaign-queue-foot">
+            Se generan en local con la skill. Cuando la tanda suba, aparecen aquí abajo con sus correos.
+          </p>
+        </section>
+      )}
+
+      {pedirOpen && <CampaignRequest onClose={() => setPedirOpen(false)} onDone={onReload} />}
 
       {status === 'error' ? (
         <section className="surface">
