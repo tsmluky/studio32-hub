@@ -67,8 +67,9 @@ intentos. `git branch -r` y una consulta al esquema de Supabase cuestan un minut
 | Baja bloquea el envío | ✅ verificado: se reaprobó a propósito y salió `Enviados 0 de 1` |
 | Llega a Recibidos, no a Spam | ✅ un envío. Un dato, no una conclusión |
 | `outreach:pendientes` contra la base | ✅ responde |
-| Pedir campaña desde el Hub | construido, **el ciclo completo nunca se ha ejecutado** |
-| Importador `import-outreach.mjs` | de la rama del sobremesa, **sin repasar** |
+| Pedir campaña desde el Hub | ✅ verificado: hay un pedido real esperando |
+| `import-outreach.mjs` | ✅ probado con `scripts/outreach-ejemplo.json` |
+| Generar la tanda con la skill | **lo único de la cadena sin ejecutar nunca** |
 
 **Desplegar la función:** `npm run fn:deploy`. Lleva `--use-api` porque el empaquetado
 local falla en este portátil (busca un `output.eszip` que no genera) y además ensucia el
@@ -109,6 +110,12 @@ revisado, y una tanda de envío lo habría mandado. Se devolvió a `borrador` el
 
 **Antes de pulsar Enviar, mirar siempre qué hay en la cola de aprobados.** El diálogo de
 confirmación lista los destinatarios: leerlo, no darle a aceptar.
+
+**`from_email` tiene que ser un alias que exista en Hostinger.** Los que hay:
+`info`, `citas`, `contacto`, `francisco`, `gonzalo`, `hello`, `juanma`, `kikos`,
+`support`. **No existe `hola@`** — y sin embargo era lo que traían el seed del 04/08 y
+`scripts/outreach-ejemplo.json`. Corregido en los dos el 11/08, pero es el tipo de error
+que no se ve hasta que un envío falla.
 
 ## Riesgo abierto
 

@@ -1,12 +1,12 @@
 {
-  "_": "Formato que espera npm run outreach:import. Este archivo es solo el contrato: el negocio es ficticio. Las campañas reales no se versionan aquí, porque este repositorio es público.",
+  "_": "Formato que espera npm run outreach:import. Este archivo es solo el contrato: el negocio es ficticio. Las campañas reales no se versionan aquí, porque este repositorio es público. OJO con from_email: tiene que ser un alias que exista de verdad en Hostinger (info, citas, contacto, francisco, gonzalo, hello, juanma, kikos, support). No existe hola@.",
   "campaign": {
     "name": "Nombre de la campaña",
     "sector": "Clínicas dentales",
     "city": "Getafe",
     "oferta": "Agente de IA en WhatsApp que atiende y da cita sobre la agenda real",
-    "from_email": "hola@studio32.es",
-    "reply_to": "hola@studio32.es"
+    "from_email": "Juanma · Studio32 <juanma@studio32.es>",
+    "reply_to": "juanma@studio32.es"
   },
   "leads": [
     {
