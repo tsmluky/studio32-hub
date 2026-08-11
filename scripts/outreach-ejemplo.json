@@ -1,0 +1,55 @@
+{
+  "_": "Formato que espera npm run outreach:import. Este archivo es solo el contrato: el negocio es ficticio. Las campañas reales no se versionan aquí, porque este repositorio es público.",
+  "campaign": {
+    "name": "Nombre de la campaña",
+    "sector": "Clínicas dentales",
+    "city": "Getafe",
+    "oferta": "Agente de IA en WhatsApp que atiende y da cita sobre la agenda real",
+    "from_email": "hola@studio32.es",
+    "reply_to": "hola@studio32.es"
+  },
+  "leads": [
+    {
+      "business_name": "Clínica Ejemplo",
+      "address": "Calle Inventada 1",
+      "postal_code": "28901",
+      "website": "https://ejemplo.invalid/",
+      "email": "contacto@ejemplo.invalid",
+      "phone": "900 000 000",
+      "maps_url": "",
+      "score": 88,
+      "digital_level": "bajo",
+      "has_whatsapp": false,
+      "has_online_booking": false,
+      "rating": 4.1,
+      "reviews": 40,
+      "problems": ["Sin WhatsApp", "Sin reserva online"],
+      "owner_member_id": "juanma",
+      "huella": {
+        "detalle_ancla": {
+          "detalle": "El detalle concreto y verificable que justifica escribirles.",
+          "por_que_importa": "Por qué ese detalle abre la conversación.",
+          "fuente": "De dónde sale"
+        },
+        "voz_del_cliente": {
+          "elogios_recurrentes": [
+            { "patron": "Qué elogian siempre", "cita": "Cita literal de una reseña.", "fuente": "Autor · directorio", "veces": 7 }
+          ],
+          "quejas_recurrentes": [
+            { "patron": "Qué falla siempre", "cita": "Cita literal.", "fuente": "Autor · directorio", "veces": 3 }
+          ],
+          "palabras_que_usan": ["cómo llama el cliente a lo que compra"]
+        },
+        "huecos_digitales": ["Sin WhatsApp", "Sin reserva online"],
+        "confianza": { "nivel": "alto", "no_encontrado": ["Lo que no se pudo verificar"] }
+      },
+      "message": {
+        "subject": "Asunto corto y concreto",
+        "body": "Cuerpo del correo. Se apoya en el detalle ancla y en las palabras del cliente. No cita nunca las quejas.",
+        "evidencia": [
+          { "afirmacion": "La frase del correo que hace una afirmación", "cita": "La cita literal que la sostiene.", "fuente": "Autor · directorio" }
+        ]
+      }
+    }
+  ]
+}

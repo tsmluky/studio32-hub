@@ -37,7 +37,6 @@ import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import type { FormEvent, ReactNode } from 'react'
 import { isSupabaseConfigured, pinToPassword, supabase } from './supabase'
 import { EmptyState, PageHeading } from './ui'
-import ProspectingView from './ProspectingView'
 import ToolsView, { type ToolId, tools } from './ToolsView'
 
 type MemberId = 'juanma' | 'pancho' | 'gonzalo'
@@ -222,6 +221,7 @@ const navigation: Array<{ id: Exclude<MainView, 'project'>; label: string; icon:
   { id: 'library', label: 'Biblioteca', icon: LibraryBig },
   // Contenedor de las herramientas internas. En escritorio el sidebar además lista
   // las herramientas debajo; en móvil solo cabe esta entrada, que lleva al índice.
+  // Prospección cuelga de aquí: es una herramienta, no una vista del día a día.
   { id: 'tools', label: 'Herramientas', icon: Wrench },
 ]
 
@@ -620,6 +620,219 @@ function useGoogleCalendarEvents(timeMin: string, timeMax: string) {
   return { events, status, error, reload: () => setRevision((current) => current + 1) }
 }
 
+// Prospección. Vive en tablas propias y NO en hub_states: la lista de leads
+// crece sin techo y el registro de envíos es append-only, así que se carga y se
+// escribe de forma granular, igual que el calendario.
+
+type OutreachStatus = 'nuevo' | 'contactado' | 'respondido' | 'reunion' | 'cliente' | 'descartado'
+type OutreachMessageStatus = 'borrador' | 'aprobado' | 'enviando' | 'enviado' | 'fallido'
+type ConfianzaNivel = 'alto' | 'medio' | 'bajo'
+
+type HuellaPatron = { patron: string; cita: string; fuente: string; veces: number }
+
+type Huella = {
+  detalle_ancla?: { detalle?: string; por_que_importa?: string; fuente?: string }
+  voz_del_cliente?: {
+    elogios_recurrentes?: HuellaPatron[]
+    quejas_recurrentes?: HuellaPatron[]
+    palabras_que_usan?: string[]
+  }
+  huecos_digitales?: string[]
+  confianza?: { nivel?: ConfianzaNivel; no_encontrado?: string[] }
+}
+
+type OutreachCampaign = {
+  id: string
+  name: string
+  sector: string
+  city: string
+  oferta: string
+  status: 'abierta' | 'enviando' | 'cerrada'
+}
+
+type OutreachLead = {
+  id: string
+  campaign_id: string | null
+  business_name: string
+  city: string
+  website: string
+  email: string
+  phone: string
+  score: number
+  digital_level: 'bajo' | 'medio' | 'alto'
+  status: OutreachStatus
+  owner_member_id: MemberId | null
+  huella: Huella | null
+}
+
+type OutreachEvidencia = { afirmacion: string; cita: string; fuente: string }
+
+type OutreachMessage = {
+  id: string
+  lead_id: string
+  subject: string
+  body: string
+  to_email: string
+  status: OutreachMessageStatus
+  evidencia: OutreachEvidencia[] | null
+}
+
+function useOutreach(enabled: boolean) {
+  const [campaigns, setCampaigns] = useState<OutreachCampaign[]>([])
+  const [leads, setLeads] = useState<OutreachLead[]>([])
+  const [messages, setMessages] = useState<OutreachMessage[]>([])
+  const [status, setStatus] = useState<HubSyncStatus>('idle')
+  const [error, setError] = useState('')
+  const [revision, setRevision] = useState(0)
+
+  useEffect(() => {
+    if (!supabase || !enabled) return
+    const client = supabase
+
+    let cancelled = false
+    setStatus('loading')
+    setError('')
+
+    const load = async () => {
+      const [campaignRows, leadRows, messageRows] = await Promise.all([
+        client
+          .from('outreach_campaigns')
+          .select('id, name, sector, city, oferta, status')
+          .eq('workspace_id', 'studio32')
+          .order('created_at', { ascending: false }),
+        client
+          .from('outreach_leads')
+          .select('id, campaign_id, business_name, city, website, email, phone, score, digital_level, status, owner_member_id, huella')
+          .eq('workspace_id', 'studio32')
+          .order('score', { ascending: false }),
+        client
+          .from('outreach_messages')
+          .select('id, lead_id, subject, body, to_email, status, evidencia')
+          .eq('workspace_id', 'studio32')
+          .order('created_at', { ascending: false }),
+      ])
+
+      if (cancelled) return
+
+      const failure = campaignRows.error ?? leadRows.error ?? messageRows.error
+      if (failure) {
+        // La migración puede no estar aplicada todavía; el resto del Hub no se rompe.
+        setError('No se ha podido cargar la prospección. Puede que las tablas aún no existan.')
+        setStatus('error')
+        return
+      }
+
+      setCampaigns((campaignRows.data ?? []) as OutreachCampaign[])
+      setLeads((leadRows.data ?? []) as OutreachLead[])
+      setMessages((messageRows.data ?? []) as OutreachMessage[])
+      setStatus('ready')
+    }
+
+    void load()
+    return () => { cancelled = true }
+  }, [enabled, revision])
+
+  // La suscripción va en su propio efecto para no reabrir el canal en cada recarga.
+  useEffect(() => {
+    if (!supabase || !enabled) return
+    const client = supabase
+    const channel = client
+      .channel('studio32-outreach')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'outreach_leads' }, () => setRevision((current) => current + 1))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'outreach_messages' }, () => setRevision((current) => current + 1))
+      .subscribe()
+
+    return () => { void client.removeChannel(channel) }
+  }, [enabled])
+
+  const reload = () => setRevision((current) => current + 1)
+
+  // Aprobar no envía. La transición a 'enviado' solo la hace la Edge Function
+  // con la clave de servicio; las políticas del cliente no lo permiten.
+  const approveMessage = async (messageId: string) => {
+    if (!supabase) return
+    const { data } = await supabase.auth.getUser()
+    const { error: approveError } = await supabase
+      .from('outreach_messages')
+      .update({ status: 'aprobado', approved_by: data.user?.id ?? null, approved_at: new Date().toISOString() })
+      .eq('id', messageId)
+    if (approveError) setError('No se ha podido aprobar el mensaje.')
+    reload()
+  }
+
+  const discardLead = async (leadId: string) => {
+    if (!supabase) return
+    const { error: discardError } = await supabase
+      .from('outreach_leads')
+      .update({ status: 'descartado' })
+      .eq('id', leadId)
+    if (discardError) setError('No se ha podido descartar el lead.')
+    reload()
+  }
+
+  // Enviar es lo único irreversible de todo el tablero. Va en tanda y no por
+  // lead: se revisa uno a uno con calma y se envía una vez, a conciencia.
+  // La función comprueba bajas, repeticiones y aprobación antes de disparar.
+  const sendApproved = async (messageIds: string[]) => {
+    if (!supabase) throw new Error('El envío necesita una sesión conectada.')
+    const { data, error: sendError } = await supabase.functions.invoke('outreach-send', { body: { messageIds } })
+    if (sendError) throw new Error('La función de envío todavía no está desplegada.')
+    if (data?.error) throw new Error(data.error)
+    reload()
+    return data as { enviados: number; total: number; resultados: Array<{ id: string; estado: string; motivo?: string }> }
+  }
+
+  return { campaigns, leads, messages, status, error, reload, approveMessage, discardLead, sendApproved }
+}
+
+// Pulso para la portada. Deliberadamente NO reutiliza useOutreach: aquí solo
+// hace falta el contador, y "Hoy" es la pantalla que se abre todos los días.
+// Una consulta de cabecera (head: true) no trae filas, solo el total.
+function useOutreachPulse(enabled: boolean) {
+  const [pending, setPending] = useState(0)
+  const [campaign, setCampaign] = useState('')
+
+  useEffect(() => {
+    if (!supabase || !enabled) return
+    const client = supabase
+
+    let cancelled = false
+
+    const load = async () => {
+      const [pendingRows, campaignRows] = await Promise.all([
+        client
+          .from('outreach_messages')
+          .select('id', { count: 'exact', head: true })
+          .eq('workspace_id', 'studio32')
+          .eq('status', 'borrador'),
+        client
+          .from('outreach_campaigns')
+          .select('name')
+          .eq('workspace_id', 'studio32')
+          .eq('status', 'abierta')
+          .order('created_at', { ascending: false })
+          .limit(1),
+      ])
+
+      if (cancelled) return
+
+      // Si las tablas aún no existen, la portada se queda como estaba.
+      if (pendingRows.error) {
+        setPending(0)
+        return
+      }
+
+      setPending(pendingRows.count ?? 0)
+      setCampaign(campaignRows.data?.[0]?.name ?? '')
+    }
+
+    void load()
+    return () => { cancelled = true }
+  }, [enabled])
+
+  return { pending, campaign }
+}
+
 function getTodayLabel() {
   const formatted = new Intl.DateTimeFormat('es-ES', {
     weekday: 'long',
@@ -696,6 +909,11 @@ function App() {
   const [pinChangeOpen, setPinChangeOpen] = useState(false)
   const [mobileAccountOpen, setMobileAccountOpen] = useState(false)
   const [search, setSearch] = useState('')
+
+  // Solo consulta cuando la vista está abierta: es un tablero de trabajo, no
+  // algo que deba cargarse en cada arranque del Hub.
+  const outreach = useOutreach(view === 'prospecting')
+  const outreachPulse = useOutreachPulse(view === 'today')
 
   const activeMember = activeMemberId ? getMember(activeMemberId) : null
   const selectedProject = getProject(state.projects, state.selectedProjectId)
@@ -1131,6 +1349,9 @@ function App() {
               onOpenProject={openProject}
               onOpenInbox={() => selectView('inbox')}
               onOpenCalendar={() => selectView('calendar')}
+              onOpenOutreach={() => selectView('prospecting')}
+              outreachPending={outreachPulse.pending}
+              outreachCampaign={outreachPulse.campaign}
               onUpdateCheckIn={updateTeamCheckIn}
             />
           ) : view === 'tasks' ? (
@@ -1164,7 +1385,17 @@ function App() {
           ) : view === 'tools' ? (
             <ToolsView onOpenTool={(tool) => selectView(tool)} />
           ) : view === 'prospecting' ? (
-            <ProspectingView activeMemberId={activeMember.id} />
+            <OutreachView
+              campaigns={outreach.campaigns}
+              leads={outreach.leads}
+              messages={outreach.messages}
+              status={outreach.status}
+              error={outreach.error}
+              onReload={outreach.reload}
+              onApprove={(messageId) => void outreach.approveMessage(messageId)}
+              onDiscard={(leadId) => void outreach.discardLead(leadId)}
+              onSend={outreach.sendApproved}
+            />
           ) : (
             <ProjectView
               project={selectedProject}
@@ -1601,6 +1832,9 @@ function TodayView({
   onOpenProject,
   onOpenInbox,
   onOpenCalendar,
+  onOpenOutreach,
+  outreachPending,
+  outreachCampaign,
   onUpdateCheckIn,
 }: {
   member: Member
@@ -1610,6 +1844,9 @@ function TodayView({
   onOpenProject: (projectId: ProjectId) => void
   onOpenInbox: () => void
   onOpenCalendar: () => void
+  onOpenOutreach: () => void
+  outreachPending: number
+  outreachCampaign: string
   onUpdateCheckIn: (availability: TeamAvailability, focus: string) => void
 }) {
   const [checkInOpen, setCheckInOpen] = useState(false)
@@ -1649,6 +1886,21 @@ function TodayView({
           </span>
         </div>
       </section>
+
+      {outreachPending > 0 && (
+        <button className="outreach-pulse" type="button" onClick={onOpenOutreach} data-testid="outreach-pulse">
+          <Send size={17} />
+          <span>
+            <strong>
+              {outreachPending === 1
+                ? '1 correo espera tu visto bueno'
+                : `${outreachPending} correos esperan tu visto bueno`}
+            </strong>
+            <small>{outreachCampaign || 'Prospección'}</small>
+          </span>
+          <ChevronRight size={16} />
+        </button>
+      )}
 
       <section className="surface team-today-surface">
         <SectionHeader
@@ -2338,6 +2590,335 @@ function SearchResults({
           ))}
         </section>
       )}
+    </div>
+  )
+}
+
+function OutreachView({
+  campaigns,
+  leads,
+  messages,
+  status,
+  error,
+  onReload,
+  onApprove,
+  onDiscard,
+  onSend,
+}: {
+  campaigns: OutreachCampaign[]
+  leads: OutreachLead[]
+  messages: OutreachMessage[]
+  status: HubSyncStatus
+  error: string
+  onReload: () => void
+  onApprove: (messageId: string) => void
+  onDiscard: (leadId: string) => void
+  onSend: (messageIds: string[]) => Promise<{ enviados: number; total: number }>
+}) {
+  const [campaignId, setCampaignId] = useState<string | 'all'>('all')
+  const [filter, setFilter] = useState<'review' | 'approved' | 'sent' | 'weak'>('review')
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [enviando, setEnviando] = useState(false)
+  const [aviso, setAviso] = useState('')
+
+  const latestMessageFor = (leadId: string) => messages.find((message) => message.lead_id === leadId)
+
+  const scopedLeads = leads.filter((lead) => {
+    if (lead.status === 'descartado') return false
+    return campaignId === 'all' || lead.campaign_id === campaignId
+  })
+
+  const matchesFilter = (lead: OutreachLead) => {
+    const message = latestMessageFor(lead.id)
+    if (filter === 'weak') return (lead.huella?.confianza?.nivel ?? 'bajo') !== 'alto'
+    if (!message) return false
+    if (filter === 'review') return message.status === 'borrador'
+    if (filter === 'approved') return message.status === 'aprobado'
+    return message.status === 'enviado' || message.status === 'enviando'
+  }
+
+  const visibleLeads = scopedLeads.filter(matchesFilter)
+
+  const destinatarios = scopedLeads
+    .map((lead) => ({ lead, message: latestMessageFor(lead.id) }))
+    .filter((item) => item.message?.status === 'aprobado')
+    .map((item) => ({ id: item.message!.id, negocio: item.lead.business_name, email: item.message!.to_email }))
+
+  const enviar = async () => {
+    setEnviando(true)
+    setAviso('')
+    try {
+      const resultado = await onSend(destinatarios.map((destinatario) => destinatario.id))
+      setAviso(`Enviados ${resultado.enviados} de ${resultado.total}.`)
+      setConfirmOpen(false)
+    } catch (sendError) {
+      setAviso(sendError instanceof Error ? sendError.message : 'No se ha podido enviar.')
+    } finally {
+      setEnviando(false)
+    }
+  }
+
+  const countFor = (id: typeof filter) => {
+    return scopedLeads.filter((lead) => {
+      const message = latestMessageFor(lead.id)
+      if (id === 'weak') return (lead.huella?.confianza?.nivel ?? 'bajo') !== 'alto'
+      if (!message) return false
+      if (id === 'review') return message.status === 'borrador'
+      if (id === 'approved') return message.status === 'aprobado'
+      return message.status === 'enviado' || message.status === 'enviando'
+    }).length
+  }
+
+  const filters: Array<{ id: typeof filter; label: string; count: number }> = [
+    { id: 'review', label: 'Por revisar', count: countFor('review') },
+    { id: 'approved', label: 'Aprobados', count: countFor('approved') },
+    { id: 'sent', label: 'Enviados', count: countFor('sent') },
+    { id: 'weak', label: 'Evidencia floja', count: countFor('weak') },
+  ]
+
+  return (
+    <div className="page outreach-page">
+      <PageHeading
+        eyebrow="Distribución"
+        title="Prospección"
+        description="Cada correo trae la evidencia que lo sostiene, para revisarlo sin tener que fiarse."
+        meta={<button className="secondary-action" type="button" onClick={onReload}><ArrowRight size={16} /> Actualizar</button>}
+      />
+
+      {status === 'error' ? (
+        <section className="surface">
+          <EmptyState icon={<AlertCircle size={24} />} title="La prospección no está disponible" body={error} />
+        </section>
+      ) : status === 'loading' ? (
+        <section className="surface">
+          <EmptyState icon={<Clock3 size={24} />} title="Cargando" body="Trayendo campañas, leads y borradores." />
+        </section>
+      ) : (
+        <>
+          <section className="task-command-bar surface">
+            <div className="segmented-control" aria-label="Campaña">
+              <button type="button" className={campaignId === 'all' ? 'is-active' : ''} onClick={() => setCampaignId('all')}>Todas</button>
+              {campaigns.map((campaign) => (
+                <button key={campaign.id} type="button" className={campaignId === campaign.id ? 'is-active' : ''} onClick={() => setCampaignId(campaign.id)}>
+                  {campaign.name}
+                </button>
+              ))}
+            </div>
+            <div className="task-filter-tabs" role="tablist" aria-label="Filtrar correos">
+              {filters.map((item) => (
+                <button key={item.id} type="button" role="tab" aria-selected={filter === item.id} className={filter === item.id ? 'is-active' : ''} onClick={() => setFilter(item.id)}>
+                  {item.label}<b>{item.count}</b>
+                </button>
+              ))}
+            </div>
+          </section>
+
+          {destinatarios.length > 0 && (
+            <section className="outreach-send-bar">
+              <span>
+                <strong>{destinatarios.length === 1 ? '1 correo aprobado' : `${destinatarios.length} correos aprobados`}</strong>
+                <small>Revisados y listos. Salen cuando tú lo digas.</small>
+              </span>
+              <button className="primary-action" type="button" onClick={() => setConfirmOpen(true)}>
+                <Send size={16} /> Enviar
+              </button>
+            </section>
+          )}
+
+          {aviso && <p className="outreach-aviso">{aviso}</p>}
+
+          <section className="surface outreach-list">
+            <SectionHeader icon={<Send size={18} />} title="Cola de revisión" action={`${visibleLeads.length}`} />
+            {visibleLeads.map((lead) => (
+              <LeadStory
+                key={lead.id}
+                lead={lead}
+                message={latestMessageFor(lead.id)}
+                onApprove={onApprove}
+                onDiscard={onDiscard}
+              />
+            ))}
+            {!visibleLeads.length && (
+              <EmptyState
+                icon={<CheckCircle2 size={24} />}
+                title="Nada en esta vista"
+                body="Cambia el filtro o la campaña. Los borradores los genera la skill de prospección."
+              />
+            )}
+          </section>
+        </>
+      )}
+
+      {confirmOpen && (
+        <SendConfirmDialog
+          destinatarios={destinatarios}
+          enviando={enviando}
+          onClose={() => setConfirmOpen(false)}
+          onConfirm={() => void enviar()}
+        />
+      )}
+    </div>
+  )
+}
+
+function LeadStory({
+  lead,
+  message,
+  onApprove,
+  onDiscard,
+}: {
+  lead: OutreachLead
+  message?: OutreachMessage
+  onApprove: (messageId: string) => void
+  onDiscard: (leadId: string) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const huella = lead.huella ?? {}
+  const confianza = huella.confianza?.nivel ?? 'bajo'
+  const elogios = huella.voz_del_cliente?.elogios_recurrentes ?? []
+  const quejas = huella.voz_del_cliente?.quejas_recurrentes ?? []
+  const ancla = huella.detalle_ancla?.detalle ?? ''
+
+  return (
+    <article className="outreach-lead" data-confianza={confianza}>
+      <header className="outreach-lead-head">
+        <span>
+          <strong>{lead.business_name}</strong>
+          <small>{[lead.city, lead.website].filter(Boolean).join(' · ')}</small>
+        </span>
+        <span className="outreach-badges">
+          <b className="outreach-score">{lead.score}</b>
+          <StatusBadge>{confianza === 'alto' ? 'Evidencia alta' : confianza === 'medio' ? 'Evidencia media' : 'Evidencia floja'}</StatusBadge>
+        </span>
+      </header>
+
+      {ancla && (
+        <p className="outreach-anchor">{ancla}</p>
+      )}
+
+      {confianza !== 'alto' && (
+        <p className="outreach-warning">
+          <AlertCircle size={15} /> La huella no se pudo verificar del todo. Lee el correo con calma antes de aprobarlo.
+        </p>
+      )}
+
+      {message ? (
+        <div className="outreach-draft">
+          <span className="outreach-subject">{message.subject}</span>
+          <p>{message.body}</p>
+        </div>
+      ) : (
+        <p className="outreach-empty-draft">Sin borrador todavía.</p>
+      )}
+
+      <button className="outreach-toggle" type="button" onClick={() => setOpen((current) => !current)} aria-expanded={open}>
+        <ChevronRight size={15} />
+        {open ? 'Ocultar de dónde sale' : 'Ver de dónde sale'}
+      </button>
+
+      {open && (
+        <div className="outreach-evidence">
+          {message?.evidencia?.length ? (
+            <div className="outreach-quotes">
+              {message.evidencia.map((item, index) => (
+                <div className="outreach-quote" key={index}>
+                  <small>{item.afirmacion}</small>
+                  <blockquote>{item.cita}</blockquote>
+                  <small>{item.fuente}</small>
+                </div>
+              ))}
+            </div>
+          ) : null}
+
+          {elogios.length > 0 && (
+            <div className="outreach-quotes">
+              {elogios.map((item, index) => (
+                <div className="outreach-quote" key={index}>
+                  <small>{item.patron} · {item.veces} reseñas</small>
+                  <blockquote>{item.cita}</blockquote>
+                  <small>{item.fuente}</small>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {quejas.length > 0 && (
+            <div className="outreach-quotes">
+              {quejas.filter((item) => item.cita).map((item, index) => (
+                <div className="outreach-quote is-complaint" key={index}>
+                  <small>{item.patron} · no se menciona en el correo</small>
+                  <blockquote>{item.cita}</blockquote>
+                  <small>{item.fuente}</small>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {(huella.huecos_digitales?.length ?? 0) > 0 && (
+            <p className="outreach-gaps">{huella.huecos_digitales?.join(' · ')}</p>
+          )}
+        </div>
+      )}
+
+      <div className="outreach-actions">
+        <button
+          type="button"
+          className="secondary-action"
+          disabled={!message || message.status !== 'borrador'}
+          onClick={() => message && onApprove(message.id)}
+        >
+          <Check size={16} /> {message?.status === 'aprobado' ? 'Aprobado' : 'Aprobar'}
+        </button>
+        <button type="button" onClick={() => onDiscard(lead.id)}><X size={16} /> Descartar</button>
+      </div>
+    </article>
+  )
+}
+
+function SendConfirmDialog({
+  destinatarios,
+  enviando,
+  onClose,
+  onConfirm,
+}: {
+  destinatarios: Array<{ id: string; negocio: string; email: string }>
+  enviando: boolean
+  onClose: () => void
+  onConfirm: () => void
+}) {
+  return (
+    <div className="dialog-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && !enviando && onClose()}>
+      <section className="capture-dialog" role="dialog" aria-modal="true" aria-labelledby="send-dialog-title">
+        <header>
+          <span>
+            <span className="dialog-icon"><Send size={18} /></span>
+            <span>
+              <strong id="send-dialog-title">Enviar {destinatarios.length === 1 ? 'un correo' : `${destinatarios.length} correos`}</strong>
+              <small>Salen ahora mismo. No hay forma de recuperarlos.</small>
+            </span>
+          </span>
+          <button className="icon-button compact" type="button" onClick={onClose} aria-label="Cerrar" disabled={enviando}><X size={17} /></button>
+        </header>
+
+        <div className="send-recipients">
+          {destinatarios.map((destinatario) => (
+            <div key={destinatario.id}>
+              <strong>{destinatario.negocio}</strong>
+              <small>{destinatario.email}</small>
+            </div>
+          ))}
+        </div>
+
+        <footer className="task-dialog-footer">
+          <span />
+          <span>
+            <button className="text-button" type="button" onClick={onClose} disabled={enviando}>Cancelar</button>
+            <button className="primary-action" type="button" onClick={onConfirm} disabled={enviando}>
+              <Send size={16} /> {enviando ? 'Enviando…' : 'Enviar ahora'}
+            </button>
+          </span>
+        </footer>
+      </section>
     </div>
   )
 }

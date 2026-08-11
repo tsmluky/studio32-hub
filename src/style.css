@@ -4972,6 +4972,140 @@ button.update-row {
   min-height: 36px;
   padding: 0 14px;
   border-radius: 8px;
+.outreach-list {
+  overflow: hidden;
+}
+
+.outreach-lead {
+  padding: 18px 22px;
+  border-bottom: 1px solid #eef1ec;
+}
+
+.outreach-lead:last-child {
+  border-bottom: none;
+}
+
+.outreach-lead-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.outreach-lead-head > span:first-child {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.outreach-lead-head strong {
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.outreach-lead-head small {
+  font-size: 12px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.outreach-badges {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex-shrink: 0;
+}
+
+.outreach-score {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 9px;
+  color: var(--amber);
+  background: var(--amber-soft);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.outreach-lead[data-confianza='alto'] .status-badge {
+  color: #43615b;
+  background: var(--green-soft);
+}
+
+.outreach-lead[data-confianza='medio'] .status-badge {
+  color: var(--amber);
+  background: var(--amber-soft);
+}
+
+.outreach-lead[data-confianza='bajo'] .status-badge {
+  color: var(--rose);
+  background: var(--rose-soft);
+}
+
+.outreach-anchor {
+  margin: 11px 0 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ink);
+}
+
+.outreach-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding: 9px 11px;
+  color: var(--rose);
+  background: var(--rose-soft);
+  border-radius: 9px;
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.outreach-warning svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.outreach-draft {
+  margin-top: 12px;
+  padding: 13px 15px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+}
+
+.outreach-subject {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.outreach-draft p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--ink);
+  white-space: pre-wrap;
+}
+
+.outreach-empty-draft {
+  margin: 12px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.outreach-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 10px;
+  padding: 0;
+  color: var(--green);
+  background: none;
+  border: none;
   font-size: 12.5px;
   font-weight: 600;
   cursor: pointer;
@@ -5024,5 +5158,224 @@ button.update-row {
   .prospect-card .small-ghost.danger {
     flex-basis: 100%;
     margin-left: 0;
+.outreach-toggle[aria-expanded='true'] svg {
+  transform: rotate(90deg);
+}
+
+.outreach-evidence {
+  margin-top: 11px;
+  display: grid;
+  gap: 10px;
+}
+
+.outreach-quotes {
+  display: grid;
+  gap: 8px;
+}
+
+.outreach-quote {
+  padding: 10px 12px;
+  background: var(--canvas);
+  border-radius: 10px;
+}
+
+.outreach-quote small {
+  display: block;
+  color: var(--muted);
+  font-size: 11.5px;
+}
+
+.outreach-quote blockquote {
+  margin: 4px 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.outreach-quote.is-complaint {
+  background: var(--rose-soft);
+}
+
+.outreach-quote.is-complaint small,
+.outreach-quote.is-complaint blockquote {
+  color: var(--rose);
+}
+
+.outreach-gaps {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+.outreach-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.outreach-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 14px;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.outreach-actions button:disabled {
+  color: var(--muted);
+  cursor: default;
+}
+
+@media (max-width: 720px) {
+  .outreach-lead {
+    padding: 16px 14px;
+  }
+
+  .outreach-lead-head {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .outreach-actions button {
+    flex: 1;
+  }
+}
+
+.outreach-pulse {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  width: 100%;
+  margin-bottom: 18px;
+  padding: 15px 18px;
+  color: var(--green);
+  background: var(--green-soft);
+  border: 1px solid #d6e5de;
+  border-radius: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.outreach-pulse:hover {
+  border-color: var(--green);
+}
+
+.outreach-pulse > svg:first-child {
+  flex-shrink: 0;
+}
+
+.outreach-pulse span {
+  display: grid;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.outreach-pulse strong {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--green-dark);
+}
+
+.outreach-pulse small {
+  font-size: 12px;
+  color: var(--green);
+}
+
+.outreach-pulse > svg:last-child {
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+
+@media (max-width: 720px) {
+  .outreach-pulse {
+    margin-bottom: 14px;
+    padding: 13px 14px;
+  }
+}
+
+.outreach-send-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+  padding: 14px 18px;
+  background: var(--green-soft);
+  border: 1px solid #d6e5de;
+  border-radius: 14px;
+}
+
+.outreach-send-bar > span:first-child {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.outreach-send-bar strong {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--green-dark);
+}
+
+.outreach-send-bar small {
+  font-size: 12px;
+  color: var(--green);
+}
+
+.outreach-aviso {
+  margin: 0 0 14px;
+  padding: 11px 15px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.send-recipients {
+  display: grid;
+  gap: 6px;
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 4px 22px 14px;
+}
+
+.send-recipients > div {
+  display: grid;
+  gap: 1px;
+  padding: 9px 12px;
+  background: var(--canvas);
+  border-radius: 9px;
+}
+
+.send-recipients strong {
+  font-size: 13.5px;
+  color: var(--ink);
+}
+
+.send-recipients small {
+  font-size: 12px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 720px) {
+  .outreach-send-bar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .send-recipients {
+    padding: 4px 14px 12px;
   }
 }
