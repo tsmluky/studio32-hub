@@ -34,15 +34,23 @@ const allowedOrigins = new Set([
   'https://www.hub.studio32.es',
   'https://hub.studio32.es',
   'https://feat-prospeccion-email.studio32-hub.pages.dev',
-  'http://localhost:3000',
-  'http://localhost:5173',
-  'http://127.0.0.1:3000',
 ])
+
+// El dev server no siempre cae en el mismo puerto, y enumerarlos a mano ya costó una
+// prueba entera: el preflight se rechazaba en silencio, el navegador ni llegaba a
+// mandar el POST y en el Hub parecia que la funcion no estaba desplegada.
+//
+// Abrir localhost no afloja la seguridad de verdad: quien envia sigue necesitando
+// una sesion valida de miembro del workspace, y eso lo comprueba requireStudio32Member
+// mas abajo. CORS solo decide que pagina puede leer la respuesta, no quien puede
+// enviar.
+const esLocal = (origin: string) => /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)
 
 function corsHeaders(request: Request) {
   const origin = request.headers.get('origin') ?? ''
+  const permitido = allowedOrigins.has(origin) || esLocal(origin)
   return {
-    'Access-Control-Allow-Origin': allowedOrigins.has(origin) ? origin : 'https://hub.studio32.es',
+    'Access-Control-Allow-Origin': permitido ? origin : 'https://hub.studio32.es',
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Vary': 'Origin',
@@ -214,7 +222,16 @@ Deno.serve(async (request) => {
       } finally {
         // Cerrar siempre, tambien si el envio revienta: un socket abierto mantiene
         // vivo el isolate y se arrastra al resto de la tanda.
-        await smtp.close().catch(() => {})
+        //
+        // El try/catch envuelve el close entero y no encadena .catch() sobre su
+        // resultado: denomailer devuelve void, no una promesa. Encadenar ahi hacia
+        // que el finally lanzara SU PROPIO error justo despues de un envio correcto,
+        // y el mensaje quedaba marcado como fallido habiendo salido de verdad.
+        try {
+          await smtp.close()
+        } catch {
+          // Cerrar mal no invalida un correo ya entregado.
+        }
       }
 
       await admin

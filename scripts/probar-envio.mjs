@@ -20,10 +20,17 @@ import { createClient } from '@supabase/supabase-js'
 
 const WORKSPACE = 'studio32'
 const NOMBRE_PRUEBA = 'PRUEBA · No es un negocio real'
-const DESTINO = 'info@studio32.es'
 const REMITENTE = 'Juanma · Studio32 <juanma@studio32.es>'
 
-const soloVer = process.argv.includes('--ver')
+const args = process.argv.slice(2)
+const soloVer = args.includes('--ver')
+
+// Mejor a una direccion de fuera del dominio que al propio info@: probar contra el
+// mismo buzon que autentica el SMTP no demuestra entregabilidad, y ademas el
+// servidor puede entregarlo por atajo interno sin pasar por las mismas
+// comprobaciones. Desde fuera se ve lo que vera un prospecto de verdad.
+const iDestino = args.indexOf('--para')
+const DESTINO = iDestino !== -1 && args[iDestino + 1] ? args[iDestino + 1] : 'info@studio32.es'
 
 const url = process.env.SUPABASE_URL
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -63,7 +70,7 @@ if (soloVer) {
     if (m.error) console.log(`Error:  ${m.error}`)
 
     if (m.status === 'enviado') {
-      console.log('\nEl SMTP funciona. Ahora mira la bandeja de info@studio32.es:')
+      console.log(`\nEl SMTP funciona. Ahora mira la bandeja de ${m.to_email}:`)
       console.log('  - Si el remitente es juanma@studio32.es, el alias se acepta y está todo listo.')
       console.log('  - Si aparece como info@, hay que enviar todo desde info@ con el nombre visible.')
     } else if (m.status === 'fallido') {
@@ -141,7 +148,7 @@ const { error: errorMensaje } = await admin.from('outreach_messages').insert({
   subject: 'Prueba de envío desde el Hub',
   body:
     'Esto es una prueba del envío de prospección.\n\n' +
-    'Si ha llegado a la bandeja de info@ y en el remitente aparece juanma@studio32.es, ' +
+    'Si ha llegado y en el remitente aparece juanma@studio32.es, ' +
     'la cadena funciona: la función conecta con el SMTP de Hostinger y el alias se acepta.\n\n' +
     'Comprueba también que traiga el pie de baja.',
   status: 'aprobado',
