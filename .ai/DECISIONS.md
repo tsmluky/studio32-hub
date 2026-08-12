@@ -287,3 +287,26 @@ fallar, y por eso quedan escritos:
    Los primeros correos reales salieron con un pie que decia "opcional?t=<token>". No lo
    canto nada porque no falla: el correo se entrega igual. Solo deja sin salida a quien
    quiera darse de baja. Ahora la base solo se usa si es una URL http(s) completa.
+
+---
+
+## 2026-08-11 · Quien aprueba firma y se queda el cliente
+
+Corrige la decision del 07/08 ("el sender_id se fija al redactar") y cierra el agujero
+que dejo la fusion, donde el remitente era por campana entera.
+
+Al aprobar en el Hub se fijan tres cosas de golpe: el remitente pasa a ser el alias de
+quien aprueba, el lead queda marcado con su `owner_member_id`, y la firma se compone en
+el envio a partir de ese remitente.
+
+**Por que importa el dueno:** todas las respuestas caen en el mismo buzon de Hostinger,
+no en buzones separados. Sin `owner_member_id` no hay forma de saber a quien le toca
+seguir la conversacion, y "cada uno mantiene sus propios clientes" se queda en intencion.
+
+**Por que la firma se compone en el envio:** si viviera en el cuerpo, aprobar cambiaria
+el remitente pero no la despedida, y saldria un correo firmado por quien no es. El
+nombre se deriva del propio `from` en vez de mantener una tabla de socios en la Edge
+Function ademas de en `src/remitentes.json`.
+
+Efecto secundario a vigilar: si la skill vuelve a escribir la firma en el cuerpo, saldra
+duplicada. Esta dicho en SKILL.md y en STATE.md.

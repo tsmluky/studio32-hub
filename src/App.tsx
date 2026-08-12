@@ -1183,7 +1183,8 @@ function App() {
               status={outreach.status}
               error={outreach.error}
               onReload={outreach.reload}
-              onApprove={(messageId) => void outreach.approveMessage(messageId)}
+              activeMemberId={activeMember.id}
+              onApprove={(messageId, leadId) => void outreach.approveMessage(messageId, leadId, activeMember.id)}
               onDiscard={(leadId) => void outreach.discardLead(leadId)}
               onSend={outreach.sendApproved}
             />

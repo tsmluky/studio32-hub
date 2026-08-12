@@ -8,9 +8,9 @@ import { useState } from 'react'
 import { AlertCircle, ArrowRight, Check, CheckCircle2, ChevronRight, Clock3, Send, X, Sparkles, Ban } from 'lucide-react'
 import { EmptyState, PageHeading, SectionHeader, StatusBadge } from './ui'
 import CampaignRequest from './CampaignRequest'
-import { darDeBaja } from './outreach'
+import { darDeBaja, remitentes } from './outreach'
 import type { OutreachCampaign, OutreachLead, OutreachMessage } from './outreach'
-import type { HubSyncStatus } from './types'
+import type { HubSyncStatus, MemberId } from './types'
 
 export default function OutreachView({
   campaigns,
@@ -18,6 +18,7 @@ export default function OutreachView({
   messages,
   status,
   error,
+  activeMemberId,
   onReload,
   onApprove,
   onDiscard,
@@ -29,7 +30,8 @@ export default function OutreachView({
   status: HubSyncStatus
   error: string
   onReload: () => void
-  onApprove: (messageId: string) => void
+  activeMemberId: MemberId
+  onApprove: (messageId: string, leadId: string) => void
   onDiscard: (leadId: string) => void
   onSend: (messageIds: string[]) => Promise<{ enviados: number; total: number }>
 }) {
@@ -192,6 +194,7 @@ export default function OutreachView({
             <SectionHeader icon={<Send size={18} />} title="Cola de revisión" action={`${visibleLeads.length}`} />
             {visibleLeads.map((lead) => (
               <LeadStory
+                activeMemberId={activeMemberId}
                 key={lead.id}
                 lead={lead}
                 message={latestMessageFor(lead.id)}
@@ -225,12 +228,14 @@ export default function OutreachView({
 function LeadStory({
   lead,
   message,
+  activeMemberId,
   onApprove,
   onDiscard,
 }: {
   lead: OutreachLead
   message?: OutreachMessage
-  onApprove: (messageId: string) => void
+  activeMemberId: MemberId
+  onApprove: (messageId: string, leadId: string) => void
   onDiscard: (leadId: string) => void
 }) {
   const [open, setOpen] = useState(false)
@@ -262,6 +267,8 @@ function LeadStory({
   const elogios = huella.voz_del_cliente?.elogios_recurrentes ?? []
   const quejas = huella.voz_del_cliente?.quejas_recurrentes ?? []
   const ancla = huella.detalle_ancla?.detalle ?? ''
+  const yo = remitentes[activeMemberId]
+  const duenyo = lead.owner_member_id ? remitentes[lead.owner_member_id] : null
 
   return (
     <article className="outreach-lead" data-confianza={confianza}>
@@ -344,14 +351,28 @@ function LeadStory({
         </div>
       )}
 
+      {/* Quién se queda el cliente. Aprobar no es solo un visto bueno: fija de quién
+          sale el correo y a quién le vuelve la respuesta, porque todas caen en el
+          mismo buzón y si no consta el dueño, no consta. */}
+      {message?.status === 'borrador' ? (
+        <p className="outreach-signer">
+          Lo firmas tú: <strong>{yo?.nombre}</strong> &lt;{yo?.email}&gt;. Al aprobarlo, este
+          negocio pasa a ser tuyo.
+        </p>
+      ) : duenyo ? (
+        <p className="outreach-signer is-owned">
+          Cliente de <strong>{duenyo.nombre}</strong>. El correo sale de {duenyo.email}.
+        </p>
+      ) : null}
+
       <div className="outreach-actions">
         <button
           type="button"
           className="secondary-action"
           disabled={!message || message.status !== 'borrador'}
-          onClick={() => message && onApprove(message.id)}
+          onClick={() => message && onApprove(message.id, lead.id)}
         >
-          <Check size={16} /> {message?.status === 'aprobado' ? 'Aprobado' : 'Aprobar'}
+          <Check size={16} /> {message?.status === 'aprobado' ? 'Aprobado' : 'Aprobar y quedármelo'}
         </button>
         <button type="button" onClick={() => onDiscard(lead.id)}><X size={16} /> Descartar</button>
         {/* Descartar saca al lead de esta campaña. La baja es otra cosa: bloquea la

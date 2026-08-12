@@ -98,11 +98,29 @@ function bajaTexto(token: string) {
   return `mailto:${mailto}?subject=Baja%20${token}`
 }
 
-function componerCuerpo(body: string, enlaceBaja: string) {
+// La firma se compone aquí, no la escribe la skill.
+//
+// Motivo: quien aprueba en el Hub se queda el cliente, y al aprobar cambia el
+// remitente del mensaje. Si la firma viviera dentro del cuerpo, Gonzalo aprobaría un
+// correo que se sigue despidiendo de Juanma. Componerla en el envío hace que reasignar
+// sea seguro por construcción.
+//
+// El nombre sale del propio `from`: no hace falta una tabla de socios que mantener en
+// dos sitios. "Gonzalo · Studio32 <gonzalo@studio32.es>" firma Gonzalo; si no hay
+// nombre visible, se usa la parte local del correo en capital.
+function nombreDelRemitente(from: string) {
+  const visible = from.split('<')[0].split('·')[0].trim()
+  if (visible) return visible
+  const local = (from.match(/<([^@]+)@/) ?? from.match(/^([^@]+)@/))?.[1] ?? ''
+  return local ? local.charAt(0).toUpperCase() + local.slice(1) : 'Studio32'
+}
+
+function componerCuerpo(body: string, enlaceBaja: string, from: string) {
+  const firma = `\n\n${nombreDelRemitente(from)}\nStudio32 · Digital Systems\nstudio32.es`
   const pie = enlaceBaja.startsWith('mailto:')
     ? `\n\n—\nStudio32. Si no quieres recibir más correos nuestros, responde con la palabra BAJA.`
     : `\n\n—\nStudio32. Si no quieres recibir más correos nuestros: ${enlaceBaja}`
-  return `${body}${pie}`
+  return `${body.trimEnd()}${firma}${pie}`
 }
 
 Deno.serve(async (request) => {
@@ -224,7 +242,7 @@ Deno.serve(async (request) => {
           to: mensaje.to_email,
           replyTo: mensaje.reply_to || remitente,
           subject: mensaje.subject,
-          content: componerCuerpo(mensaje.body, enlaceBaja),
+          content: componerCuerpo(mensaje.body, enlaceBaja, remitente),
           headers: { 'List-Unsubscribe': `<${enlaceBaja}>` },
         })
       } finally {

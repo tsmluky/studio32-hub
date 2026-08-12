@@ -75,22 +75,27 @@ intentos. `git branch -r` y una consulta al esquema de Supabase cuestan un minut
 local falla en este portátil (busca un `output.eszip` que no genera) y además ensucia el
 repo con `doc/` y `supabase/.temp/`.
 
-## Agujero conocido: la firma y quién manda
+## Quien aprueba, firma y se queda el cliente
 
-Al fusionar se quedó a medias algo que conviene decidir antes de la primera tanda real:
+Decidido y hecho el 11/08. Aprobar no es solo un visto bueno: fija tres cosas a la vez.
 
-- **El remitente es por CAMPAÑA, no por quien aprueba.** Lo fija `campaign.from_email`
-  en el JSON que importa `scripts/import-outreach.mjs`. El botón "lo envío yo" que se
-  diseñó para la tabla `leads` no existe aquí.
-- **Nadie compone la firma.** `outreach-send` solo añade el pie de baja. La firma la
-  tiene que escribir la skill dentro del cuerpo, y `SKILL.md` ya lo dice así.
-- **`src/remitentes.json` es referencia, no código.** Ningún módulo lo importa: quedó
-  huérfano al borrarse la ruta de `leads`. Sirve para que la skill sepa qué dirección
-  usar al firmar.
+- **El remitente pasa a ser el de quien aprueba.** Si aprueba Gonzalo, el correo sale de
+  `gonzalo@studio32.es`. Lo escribe `approveMessage` en `src/outreach.ts` desde
+  `src/remitentes.json`, que por eso ya no es un archivo huérfano.
+- **El lead queda marcado con `owner_member_id`.** Todas las respuestas caen en el mismo
+  buzón de Hostinger, así que si no consta el dueño, no consta: sin esto no se puede
+  saber a quién le toca seguir la conversación.
+- **La firma la compone el envío**, no la skill. `outreach-send` la deriva del propio
+  `from` del mensaje. Por eso reasignar remitente es seguro por construcción: no hay un
+  nombre incrustado en el cuerpo que se quede desfasado.
 
-Si se quiere el comportamiento "firma quien aprueba", hay que cambiar `outreach-send`
-para que componga la firma desde `remitentes.json` según el `from_email` del mensaje, y
-dejar de escribirla en el cuerpo. No es mucho, pero no está hecho.
+**La skill NO debe escribir firma.** El cuerpo termina en "Un saludo," y nada más. Si
+alguna vez vuelve a escribirla, saldrá duplicada.
+
+El nombre se saca del `from` (`Gonzalo · Studio32 <gonzalo@studio32.es>` firma Gonzalo)
+para no mantener una tabla de socios en dos sitios. Ojo: Pancho firma **Francisco**,
+porque su alias es `francisco@` y sería raro que el nombre y el correo no coincidieran
+delante de un cliente.
 
 ## Lo que sigue sin resolver
 

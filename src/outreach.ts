@@ -5,11 +5,16 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
+import remitentesJson from './remitentes.json'
 import type { HubSyncStatus, MemberId } from './types'
 
 // Prospección. Vive en tablas propias y NO en hub_states: la lista de leads
 // crece sin techo y el registro de envíos es append-only, así que se carga y se
 // escribe de forma granular, igual que el calendario.
+
+/** Quién firma cada correo. Su gemelo vive en la Edge Function, que compone la firma
+ *  a partir del alias: si cambia una dirección aquí, hay que mirar allí. */
+export const remitentes = remitentesJson.remitentes as Record<MemberId, { nombre: string; email: string }>
 
 export type OutreachStatus = 'nuevo' | 'contactado' | 'respondido' | 'reunion' | 'cliente' | 'descartado'
 export type OutreachMessageStatus = 'borrador' | 'aprobado' | 'enviando' | 'enviado' | 'fallido'
@@ -141,14 +146,41 @@ export function useOutreach(enabled: boolean) {
 
   // Aprobar no envía. La transición a 'enviado' solo la hace la Edge Function
   // con la clave de servicio; las políticas del cliente no lo permiten.
-  const approveMessage = async (messageId: string) => {
+  //
+  // Aprobar SÍ decide dos cosas más, y por eso recibe quién aprueba:
+  //
+  //   1. Quién firma. El correo sale de su alias y la firma se compone en el envío
+  //      a partir de ese remitente.
+  //   2. De quién es el cliente. Se marca `owner_member_id` en el lead, porque la
+  //      respuesta va a caer en el buzón común y hay que saber a quién le toca.
+  //
+  // Es una sola decisión —"me lo quedo"— y no dos pantallas distintas.
+  const approveMessage = async (messageId: string, leadId: string, memberId: MemberId) => {
     if (!supabase) return
+    const remitente = remitentes[memberId]
+    if (!remitente) {
+      setError('No hay dirección de correo configurada para ese miembro.')
+      return
+    }
     const { data } = await supabase.auth.getUser()
     const { error: approveError } = await supabase
       .from('outreach_messages')
-      .update({ status: 'aprobado', approved_by: data.user?.id ?? null, approved_at: new Date().toISOString() })
+      .update({
+        status: 'aprobado',
+        approved_by: data.user?.id ?? null,
+        approved_at: new Date().toISOString(),
+        from_email: `${remitente.nombre} · Studio32 <${remitente.email}>`,
+        reply_to: remitente.email,
+      })
       .eq('id', messageId)
-    if (approveError) setError('No se ha podido aprobar el mensaje.')
+    if (approveError) {
+      setError('No se ha podido aprobar el mensaje.')
+      reload()
+      return
+    }
+    // El dueño del lead se marca aparte: si esto falla, el correo ya está aprobado y
+    // firmado, que es lo que no puede quedar a medias.
+    await supabase.from('outreach_leads').update({ owner_member_id: memberId }).eq('id', leadId)
     reload()
   }
 

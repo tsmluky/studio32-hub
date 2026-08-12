@@ -128,8 +128,12 @@ de abrirse, y ahí se acaba la herramienta.
 
 ### 3. El correo, y qué no puede decir
 
-Se redacta en la voz del remitente de la campaña y **termina con su firma** (ver el
-formato abajo): nada la compone en el envío, así que un cuerpo sin firma sale sin firma.
+Se redacta en la voz de quien lo vaya a firmar y **termina en "Un saludo," sin nombre**.
+
+El bloque de firma lo compone el envío a partir del remitente del mensaje. Es así
+porque en el Hub quien aprueba se queda el cliente y el remitente cambia en ese
+momento: si la firma viniera en el cuerpo, saldría un correo despidiéndose de quien no
+es. **No escribas el nombre, ni el estudio, ni la web.**
 
 **Las quejas de sus clientes NUNCA se citan al prospecto.** Van en la huella porque
 explican el lead y sirven para una llamada, pero echárselas en cara lo pierde. El correo
@@ -195,7 +199,7 @@ a medias.
       },
       "message": {
         "subject": "Asunto de 4-7 palabras, concreto",
-        "body": "80-120 palabras. Termina CON FIRMA.",
+        "body": "80-120 palabras. Termina en \"Un saludo,\" SIN nombre: la firma la pone el envio.",
         "evidencia": [
           { "afirmacion": "La frase del correo que afirma algo", "cita": "La cita que la sostiene", "fuente": "Autor · Google" }
         ]

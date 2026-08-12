@@ -5112,3 +5112,27 @@ button.update-row {
   font-size: 11px;
   white-space: nowrap;
 }
+
+/* Quien firma y de quien es el cliente. Va pegado a los botones porque es parte de
+   lo que decides al aprobar, no un dato de ficha. */
+.outreach-signer {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 12px 0 0;
+  padding: 9px 12px;
+  color: var(--green);
+  background: var(--green-soft);
+  border-radius: 9px;
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.outreach-signer.is-owned {
+  color: var(--muted);
+  background: var(--canvas);
+}
+
+.outreach-signer strong {
+  color: inherit;
+}
