@@ -163,3 +163,20 @@ búsqueda para el correo. Con la criba previa, **una pasada razonable son 6 lead
 Pedir 20 en una campaña está bien —es lo que se querría— pero se sirven en varias
 pasadas. Una tanda que no termina no sube nada: el importador solo escribe cuando se le
 llama, así que hay que subir de dos en dos y no dejarlo todo para el final.
+
+## Dónde están las reseñas literales (y dónde no)
+
+La puerta pide **cita literal con autor**, y ahí se va la mitad del tiempo si se busca a
+ciegas. Ir directo a la fuente que funciona por sector:
+
+| Sector | Fuente que sí da citas literales |
+| --- | --- |
+| Clínicas dentales, medicina estética | `doctoralia.es/clinicas/<slug>` |
+| Centros de estética, peluquería | `treatwell.es/establecimiento/<slug>` |
+
+**Los agregadores no sirven**: top-rated.online, cylex, expirit y similares devuelven
+403, y los resúmenes que salen en los resultados de búsqueda vienen parafraseados y sin
+autor, que es exactamente lo que la puerta rechaza.
+
+Si un negocio no tiene ficha en la fuente de su sector, **descártalo y sigue**. Buscar
+sus reseñas por otros diez sitios cuesta más que el lead.
