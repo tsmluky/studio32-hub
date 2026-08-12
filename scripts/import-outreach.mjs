@@ -228,6 +228,18 @@ for (const lead of payload.leads) {
   report.borradores += 1
 }
 
+// Una campaña pedida desde el Hub sigue en 'pedida' hasta que aterriza su tanda. Si no
+// se cambiara aquí, seguiría saliendo en `npm run outreach:pendientes` como trabajo por
+// hacer aunque ya estuviera hecho, y quien la pidió no vería que se le hizo caso.
+if (report.borradores > 0) {
+  const { error: statusError } = await admin
+    .from('outreach_campaigns')
+    .update({ status: 'abierta' })
+    .eq('id', campaignId)
+    .eq('status', 'pedida')
+  if (statusError) throw statusError
+}
+
 console.log(`Campaña "${payload.campaign.name}" importada.`)
 console.log(`  leads nuevos:        ${report.creados}`)
 console.log(`  leads actualizados:  ${report.actualizados}`)

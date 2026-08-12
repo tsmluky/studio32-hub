@@ -99,101 +99,136 @@ El output no es un informe para leer en chat: es un lote de leads que suben a la
 
 Cambia el destinatario, y eso cambia tres cosas.
 
-### 1. La huella es obligatoria, no opcional
+### 1. La huella es obligatoria, y tiene esta forma
 
-Lee `references/huella.md` y emite una huella completa y válida contra `references/huella.schema.json` por cada lead. Sin huella no hay lead.
+Por cada lead, una huella con estas cuatro partes. **No uses `references/huella.schema.json`
+en este modo**: ese esquema es de otra ruta y el importador no lo lee.
 
-### 2. La puerta se aplica antes de subir
+- **`detalle_ancla`** — el detalle concreto y verificable que justifica escribirles a
+  ELLOS. Es lo que hace que el correo no sirva para ningún otro negocio.
+- **`voz_del_cliente`** — qué elogian siempre y qué falla siempre, con **cita literal y
+  autor** de cada patrón. Sale de leer reseñas de verdad, no de suponer.
+- **`huecos_digitales`** — qué le falta: sin WhatsApp, sin reserva online, web sin móvil.
+- **`confianza`** — `alto` / `medio` / `bajo`, y qué no se pudo verificar.
 
-Un lead **no sube** si le falta cualquiera de estas cuatro cosas:
+### 2. La puerta se aplica antes de generar el archivo
 
-- Al menos un `dolor` con confianza `alta` o `media`
-- Al menos un `angulo` redactable en una frase
-- `negocio.email` — sin dirección pública no hay correo que aprobar
-- Coherencia entre `verificacion` y lo que afirma la huella
+Un lead **no entra en el JSON** si le falta cualquiera de estas:
 
-Los descartados se reportan aparte con su motivo en una línea. Son información sobre el criterio de búsqueda, no basura.
+- `email` — sin dirección pública no hay correo que aprobar
+- `detalle_ancla` con fuente real — sin esto el correo es plantilla
+- Al menos un elogio recurrente **con cita literal** — es de donde sale el tono
+- Coherencia: si `confianza.nivel` es `bajo`, dilo, no lo maquilles
 
-**Prefiere 6 leads sólidos a 20 con relleno.** En cuanto la bandeja tenga ruido, dejará de abrirse, y ahí se acaba la herramienta.
+Los descartados se reportan aparte con su motivo en una línea. Son información sobre el
+criterio de búsqueda, no basura.
 
-### 3. El correo se escribe para un remitente concreto
+**Prefiere 6 leads sólidos a 20 con relleno.** En cuanto la bandeja tenga ruido, dejará
+de abrirse, y ahí se acaba la herramienta.
 
-Cada lead lleva un `sender_id` (`juanma`, `gonzalo` o `pancho`). El correo se redacta **en la voz de esa persona** — no genérico para asignárselo a alguien después.
+### 3. El correo, y qué no puede decir
 
-**El cuerpo SÍ lleva firma, y hay que escribirla.** Nada la compone después: el envío
-solo añade el pie de baja. Un cuerpo sin firma sale sin firma.
+Se redacta en la voz del remitente de la campaña y **termina con su firma** (ver el
+formato abajo): nada la compone en el envío, así que un cuerpo sin firma sale sin firma.
 
-Usa la dirección que corresponda al remitente de la campaña, de `src/remitentes.json`:
+**Las quejas de sus clientes NUNCA se citan al prospecto.** Van en la huella porque
+explican el lead y sirven para una llamada, pero echárselas en cara lo pierde. El correo
+se apoya en el detalle ancla y en las palabras que usan sus propios clientes.
 
-```
-Un saludo,
+Cada afirmación del cuerpo tiene que poder acompañarse de su cita en `evidencia`. Si no
+puedes citarla, no la escribas.
 
-Juanma
-Studio32 · Digital Systems
-studio32.es
-```
-
-Ojo: el remitente es **de la campaña entera**, no por lead — lo fija `from_email` en el
-JSON que se importa. Todos los correos de una tanda salen de la misma persona, así que
-la firma es la misma en toda la tanda.
-
-Solo se puede citar material de confianza `alta` o `media`. Lo de confianza `baja` orienta el ángulo, pero no aparece en el texto.
-
-Sigue aplicando `references/outreach-guidelines.md`: el test es que el correo sea **inservible para cualquier otro negocio**.
+Sigue aplicando `references/outreach-guidelines.md`: nada de emojis, promesas numéricas,
+"espero que estés bien" ni lenguaje de agencia. El test es que el correo sea
+**inservible para cualquier otro negocio**.
 
 ### 4. Qué entrega el modo C
 
-Por cada lead que pasa la puerta:
-
-| Campo | Contenido |
-|---|---|
-| `huella` | JSON válido contra el esquema |
-| `porque` | 3-5 líneas: por qué este negocio y por qué ahora. **Es lo que Juanma lee primero** |
-| `sender_id` | Quién lo firmaría (sugerencia; el hub puede cambiarlo) |
-| `asunto` | 4-7 palabras, concreto. Nunca "Propuesta" ni "Colaboración" |
-| `cuerpo` | 80-120 palabras, en la voz del remitente, **sin bloque de firma** |
-| `scores` | Digital Presence y Opportunity, con desglose |
-
-El `porque` no es un resumen del correo. Es el argumento para que un humano decida en quince segundos, y debe apoyarse en evidencia citable.
-
-### 5. Formato de entrega
-
-Un único archivo JSON con esta forma. Los datos del negocio **no se repiten**: se leen de `huella.negocio`.
+**Un único archivo JSON con la forma exacta que espera `npm run outreach:import`.** No
+es negociable: el importador no adivina, y un archivo con otra forma se rechaza o entra
+a medias.
 
 ```json
 {
-  "tanda": "2026-08-07-dentistas-guadalajara",
+  "campaign": {
+    "name": "Clínicas dentales · Alcalá de Henares",
+    "sector": "Clínicas dentales",
+    "city": "Alcalá de Henares",
+    "oferta": "Asistente de WhatsApp que atiende y da cita",
+    "from_email": "Juanma · Studio32 <juanma@studio32.es>",
+    "reply_to": "juanma@studio32.es"
+  },
   "leads": [
     {
-      "sender_id": "juanma",
-      "porque": "...",
-      "asunto": "...",
-      "cuerpo": "...",
-      "digital_score": 32,
-      "opportunity_score": 84,
-      "scores_desglose": { },
-      "huella": { }
+      "business_name": "Nombre real de la clínica",
+      "address": "Calle y número",
+      "postal_code": "28801",
+      "website": "https://...",
+      "email": "contacto@...",
+      "phone": "918 00 00 00",
+      "maps_url": "https://maps.google.com/...",
+      "score": 84,
+      "digital_level": "bajo",
+      "has_whatsapp": false,
+      "has_online_booking": false,
+      "rating": 4.7,
+      "reviews": 240,
+      "problems": ["Sin WhatsApp", "Sin reserva online"],
+      "owner_member_id": "juanma",
+      "huella": {
+        "detalle_ancla": {
+          "detalle": "El detalle concreto y verificable que justifica escribirles",
+          "por_que_importa": "Por qué abre la conversación",
+          "fuente": "De dónde sale"
+        },
+        "voz_del_cliente": {
+          "elogios_recurrentes": [
+            { "patron": "Qué elogian siempre", "cita": "Cita literal", "fuente": "Autor · Google", "veces": 7 }
+          ],
+          "quejas_recurrentes": [
+            { "patron": "Qué falla siempre", "cita": "Cita literal", "fuente": "Autor · Google", "veces": 3 }
+          ],
+          "palabras_que_usan": ["cómo llaman ellos a lo que compran"]
+        },
+        "huecos_digitales": ["Sin WhatsApp", "Sin reserva online"],
+        "confianza": { "nivel": "alto", "no_encontrado": ["Lo que no se pudo verificar"] }
+      },
+      "message": {
+        "subject": "Asunto de 4-7 palabras, concreto",
+        "body": "80-120 palabras. Termina CON FIRMA.",
+        "evidencia": [
+          { "afirmacion": "La frase del correo que afirma algo", "cita": "La cita que la sostiene", "fuente": "Autor · Google" }
+        ]
+      }
     }
   ]
 }
 ```
 
-Se sube con `npm run outreach:import -- <archivo.json>`.
+**`campaign.name` importa:** si coincide con una campaña que ya existe, los leads se
+enganchan a ella y pasa de `pedida` a `abierta`. Cuando el encargo venga de
+`npm run outreach:pendientes`, usa el nombre tal cual lo da.
 
-**Ese script escribe en cuanto se lanza: no hay modo de revisión.** La puerta de calidad
-se aplica AQUÍ, al generar, no al subir. Lo que suba entra como borrador y nadie lo
-recibe sin que se apruebe en el Hub, pero un lead flojo que llegue a la bandeja ya ha
-gastado la confianza de quien la abre.
+**`from_email` tiene que ser un alias que exista de verdad:** `info`, `citas`,
+`contacto`, `francisco`, `gonzalo`, `hello`, `juanma`, `kikos`, `support`.
+**No existe `hola@`.** Pancho firma como `francisco@`.
 
-El script bloquea, además, los antipatrones que `outreach-guidelines.md` marca como
-"nunca": emojis, promesas numéricas, "espero que estés bien" y lenguaje de agencia.
-No los avisa — los rechaza. Si un lead tuyo cae ahí, el correo estaba mal escrito.
-También rechaza los cuerpos que traen firma: la firma la compone el envío.
+**`evidencia` es lo que hace revisable el correo.** Cada afirmación del cuerpo con su
+cita literal y su fuente. Es lo que se enseña en el Hub debajo del correo para que quien
+aprueba lo compruebe en dos segundos en vez de fiarse.
 
-Un negocio, un correo: el script deduplica por email y también por dominio propio,
-así que `info@clinica.es` y `citas@clinica.es` no pueden recibir dos correos. Si un
-lead se marcó como baja, rechazado o ya enviado, su negocio queda ocupado para
-siempre — es justo lo que impide volver a escribirle.
+**Las quejas nunca se citan en el correo.** Van en la huella porque explican el lead y
+sirven para una llamada, pero echárselas en cara al prospecto lo pierde.
+
+### 5. Cómo se sube
+
+```
+npm run outreach:import -- <archivo.json>
+```
+
+**Escribe en cuanto se lanza: no hay modo de revisión.** Lo que suba entra como borrador
+y nadie lo recibe sin que se apruebe en el Hub, pero un lead flojo que llegue a la
+bandeja ya ha gastado la confianza de quien la abre.
 
 ---
 
