@@ -14,14 +14,14 @@ Herramientas → Prospección
 "Pedir campaña"
   sector · zona · oferta
         │
-        └─ campaña 'pedida' ──►  npm run outreach:pendientes
+        └─ campaña 'pedida' ──►  npm run outreach
                                    lista los encargos y escupe
                                    el prompt listo para pegar
                                          │
                                    Claude Code + las 3 skills
                                    (suscripción, no API)
                                          │
-                                   npm run outreach:import
+                                   npm run outreach --
                                          │
                                          └─ 'abierta' ──►  revisar
                                                            aprobar
@@ -57,7 +57,7 @@ nuevo del agente. Se construye una vez y se usa dos veces.
 2. Importarlo:
 
    ```
-   npm run outreach:import -- ruta/al/archivo.json
+   npm run outreach -- ruta/al/archivo.json
    ```
 
 3. Juanma entra en el Hub, revisa la cola, aprueba lo que le convence y pulsa Enviar una

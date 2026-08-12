@@ -144,7 +144,7 @@ Sigue aplicando `references/outreach-guidelines.md`: nada de emojis, promesas nu
 
 ### 4. Qué entrega el modo C
 
-**Un único archivo JSON con la forma exacta que espera `npm run outreach:import`.** No
+**Un único archivo JSON con la forma exacta que espera `npm run outreach --`.** No
 es negociable: el importador no adivina, y un archivo con otra forma se rechaza o entra
 a medias.
 
@@ -207,7 +207,7 @@ a medias.
 
 **`campaign.name` importa:** si coincide con una campaña que ya existe, los leads se
 enganchan a ella y pasa de `pedida` a `abierta`. Cuando el encargo venga de
-`npm run outreach:pendientes`, usa el nombre tal cual lo da.
+`npm run outreach`, usa el nombre tal cual lo da.
 
 **`from_email` tiene que ser un alias que exista de verdad:** `info`, `citas`,
 `contacto`, `francisco`, `gonzalo`, `hello`, `juanma`, `kikos`, `support`.
@@ -223,7 +223,7 @@ sirven para una llamada, pero echárselas en cara al prospecto lo pierde.
 ### 5. Cómo se sube
 
 ```
-npm run outreach:import -- <archivo.json>
+npm run outreach -- <archivo.json>
 ```
 
 **Escribe en cuanto se lanza: no hay modo de revisión.** Lo que suba entra como borrador

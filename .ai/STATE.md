@@ -28,10 +28,10 @@ intentos. `git branch -r` y una consulta al esquema de Supabase cuestan un minut
 
 1. **Hub** — Herramientas › Prospección › "Pedir campaña": sector, zona, oferta,
    cantidad y notas. Nace en estado `pedida`, sin leads.
-2. **Local** — `npm run outreach:pendientes` lista los encargos y escupe el prompt
+2. **Local** — `npm run outreach` lista los encargos y escupe el prompt
    listo para pegar en Claude Code. Corre con la **suscripción**, no por API: es la
    razón de que este paso sea local y no un worker en la nube.
-3. **Local** — `npm run outreach:import -- tanda.json` sube leads y borradores; la
+3. **Local** — `npm run outreach -- tanda.json` sube leads y borradores; la
    campaña pasa a `abierta`.
 4. **Hub** — se revisa el correo con su evidencia y se aprueba.
 5. **Edge Function `outreach-send`** — envía por SMTP de Hostinger.
@@ -66,7 +66,7 @@ intentos. `git branch -r` y una consulta al esquema de Supabase cuestan un minut
 | Aprobar → enviar desde el Hub | ✅ verificado end-to-end |
 | Baja bloquea el envío | ✅ verificado: se reaprobó a propósito y salió `Enviados 0 de 1` |
 | Llega a Recibidos, no a Spam | ✅ un envío. Un dato, no una conclusión |
-| `outreach:pendientes` contra la base | ✅ responde |
+| `npm run outreach` contra la base | ✅ responde |
 | Pedir campaña desde el Hub | ✅ verificado: hay un pedido real esperando |
 | `import-outreach.mjs` | ✅ probado con `scripts/outreach-ejemplo.json` |
 | Generar la tanda con la skill | **lo único de la cadena sin ejecutar nunca** |

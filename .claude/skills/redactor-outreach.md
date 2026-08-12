@@ -130,7 +130,7 @@ La salida es el archivo que consume el Hub. Formato en
 `studio32-hub/scripts/outreach-ejemplo.json`, y se importa con:
 
 ```
-npm run outreach:import -- ruta/al/archivo.json
+npm run outreach -- ruta/al/archivo.json
 ```
 
 Cada lead lleva sus datos, su `huella` y su `message` con `subject`, `body` y `evidencia`.

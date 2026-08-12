@@ -13,8 +13,7 @@
     "supabase:bootstrap": "node scripts/bootstrap-supabase.mjs",
     "supabase:reset-state": "node scripts/reset-hub-state.mjs",
     "supabase:migrate": "node --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/apply-migrations.mjs",
-    "outreach:pendientes": "node --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/outreach-pendientes.mjs",
-    "outreach:import": "node --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/import-outreach.mjs",
+    "outreach": "node --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/outreach.mjs",
     "fn:deploy": "supabase functions deploy outreach-send --project-ref wwhinwxedcvpxprmcsta --use-api",
     "outreach:probar": "node --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/probar-envio.mjs"
   },

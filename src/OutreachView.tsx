@@ -134,8 +134,12 @@ export default function OutreachView({
               <StatusBadge>pedida</StatusBadge>
             </article>
           ))}
+          {/* Quien pide una campaña no sabe qué pasa después, y quien la genera no
+              recuerda el comando. Las dos cosas se resuelven diciéndolo aquí. */}
           <p className="campaign-queue-foot">
-            Se generan en local con la skill. Cuando la tanda suba, aparecen aquí abajo con sus correos.
+            Ahora le toca a Pancho: la genera en su ordenador con <code>npm run outreach</code> y
+            la sube. Cuando esté, estos encargos desaparecen de aquí y sus correos salen abajo,
+            listos para revisar.
           </p>
         </section>
       )}
