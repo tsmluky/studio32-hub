@@ -3,9 +3,9 @@
 //   npm run outreach:probar          siembra el lead de prueba
 //   npm run outreach:probar -- --ver comprueba en qué quedó
 //
-// Siembra un lead ficticio cuyo destinatario es el propio buzón de Studio32, con el
-// correo ya aprobado y firmado por el alias de Juanma. Después se pulsa Enviar en el
-// Hub y se vuelve a ejecutar con --ver.
+// Siembra un lead ficticio cuyo destinatario es una dirección propia, con el correo en
+// BORRADOR. Se aprueba en el Hub —que es lo que fija quién firma y de quién es el
+// cliente— se envía, y se vuelve a ejecutar con --ver.
 //
 // El disparo NO lo hace este script a propósito: la función exige una sesión de
 // miembro real y rechaza la clave de servicio. Eso es correcto —ningún correo debe
@@ -71,8 +71,8 @@ if (soloVer) {
 
     if (m.status === 'enviado') {
       console.log(`\nEl SMTP funciona. Ahora mira la bandeja de ${m.to_email}:`)
-      console.log('  - Si el remitente es juanma@studio32.es, el alias se acepta y está todo listo.')
-      console.log('  - Si aparece como info@, hay que enviar todo desde info@ con el nombre visible.')
+      console.log('  - El remitente debe ser el alias de quien aprobó, no info@.')
+      console.log('  - La firma del cuerpo debe llevar SU nombre, y aparecer UNA sola vez.')
     } else if (m.status === 'fallido') {
       console.log('\nNo ha salido. El texto de arriba dice por qué.')
       console.log('  - "connection"/"refused"/"timeout" -> Deno no deja salir el 465.')
@@ -151,9 +151,9 @@ const { error: errorMensaje } = await admin.from('outreach_messages').insert({
     'Si ha llegado y en el remitente aparece juanma@studio32.es, ' +
     'la cadena funciona: la función conecta con el SMTP de Hostinger y el alias se acepta.\n\n' +
     'Comprueba también que traiga el pie de baja.',
-  status: 'aprobado',
-  approved_by: miembro.user_id,
-  approved_at: new Date().toISOString(),
+  // Entra como BORRADOR, no aprobado: aprobar en el Hub es lo que fija quien firma
+  // y de quien es el cliente, y esta prueba no sirve de nada si se lo salta.
+  status: 'borrador',
   evidencia: [],
 })
 
@@ -162,9 +162,9 @@ if (errorMensaje) {
   process.exit(1)
 }
 
-console.log('\nLead de prueba sembrado y aprobado.')
-console.log(`  De:   ${REMITENTE}`)
+console.log('\nLead de prueba sembrado, en BORRADOR.')
 console.log(`  Para: ${DESTINO}`)
-console.log('\nAhora, en el Hub: Herramientas -> Prospección -> Aprobados -> Enviar.')
+console.log('\nAhora, en el Hub: Herramientas -> Prospección -> Aprobar con tu perfil')
+console.log('(el correo saldrá de TU alias y firmado con TU nombre) -> Enviar.')
 console.log('Después, para ver en qué quedó:')
 console.log('  npm run outreach:probar -- --ver')
