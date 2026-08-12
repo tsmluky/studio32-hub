@@ -15,11 +15,16 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const aqui = path.dirname(fileURLToPath(import.meta.url))
-const archivo = process.argv.slice(2).find((a) => !a.startsWith('--'))
+const args = process.argv.slice(2)
+const cerrando = args.includes('--cerrar')
+// Con `--cerrar` los sueltos son el id y el motivo, no un archivo que importar.
+const archivo = cerrando ? null : args.find((a) => !a.startsWith('--'))
 
-const destino = archivo
-  ? path.join(aqui, 'import-outreach.mjs')
-  : path.join(aqui, 'outreach-pendientes.mjs')
+const destino = cerrando
+  ? path.join(aqui, 'cerrar-campana.mjs')
+  : archivo
+    ? path.join(aqui, 'import-outreach.mjs')
+    : path.join(aqui, 'outreach-pendientes.mjs')
 
 const hijo = spawn(process.execPath, [destino, ...process.argv.slice(2)], {
   stdio: 'inherit',

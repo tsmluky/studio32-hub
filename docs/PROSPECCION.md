@@ -139,3 +139,27 @@ Para el importador hace falta además `.env.local` con `SUPABASE_URL` y
 
 Crear un lead de prueba con una dirección propia como destinatario, aprobarlo y enviarlo.
 Si llega con el pie de baja y la cabecera `List-Unsubscribe`, la cadena funciona.
+
+## Sectores que no funcionan por correo
+
+**Mirar esto antes de aceptar una campaña.** Prospectar un sector de esta lista es
+tiempo tirado: los negocios no publican correo y la puerta los descarta a todos.
+
+| Sector | Qué pasa |
+| --- | --- |
+| Barberías y peluquerías | No publican correo. Van de Instagram, teléfono y Booksy. Comprobado el 12/08/2026 en Torrejón de Ardoz: cinco negocios con web propia, reseñas y reserva online, **ninguno con email**. |
+
+Sectores que sí funcionan, comprobado: **clínicas dentales** (publican correo casi
+siempre, tienen web y reseñas abundantes).
+
+Si descubres otro sector muerto, **apúntalo aquí**. Es lo que impide que la siguiente
+pasada vuelva a gastar media hora en lo mismo.
+
+## Cuánto cuesta una tanda
+
+Verificar un lead de verdad son 2-3 páginas cargadas: su web, sus reseñas, y a veces una
+búsqueda para el correo. Con la criba previa, **una pasada razonable son 6 leads**.
+
+Pedir 20 en una campaña está bien —es lo que se querría— pero se sirven en varias
+pasadas. Una tanda que no termina no sube nada: el importador solo escribe cuando se le
+llama, así que hay que subir de dos en dos y no dejarlo todo para el final.
