@@ -114,6 +114,30 @@ Secretos necesarios en Supabase → Edge Functions → Secrets:
 - `OUTREACH_FROM` — `Studio32 <info@studio32.es>`.
 - `OUTREACH_UNSUBSCRIBE_BASE` — opcional. Sin él, el pie del correo pide responder BAJA.
 
+## Por qué los envíos no salían en "Enviados"
+
+Entregar por SMTP y guardar copia en Enviados son **dos operaciones distintas contra dos
+servicios distintos**. El SMTP entrega y ahí acaba su trabajo; la copia la escribe siempre
+el cliente de correo, por IMAP, contra la carpeta del buzón. Como la Edge Function solo
+hablaba SMTP, los correos salían de verdad y la carpeta se quedaba vacía — lo que hacía
+dudar de si el envío había ocurrido, teniéndolo registrado en el Hub.
+
+Desde el 12/08 la función escribe también la copia, por IMAP, con la **misma cuenta** que
+ya usa para enviar: no hace falta ningún secreto nuevo. Opcionales, por si acaso:
+
+- `IMAP_HOST` / `IMAP_PORT` — por defecto `imap.hostinger.com` y `993`.
+- `IMAP_SENT_FOLDER` — forzar la carpeta. Normalmente no hace falta: se descubre sola
+  preguntándole al servidor cuál marca con el atributo `\Sent`.
+- `OUTREACH_SENT_COPY=off` — apagar la copia.
+
+**La copia nunca puede estropear un envío.** Se escribe después de dar el correo por
+enviado, no lanza errores hacia arriba, y si falla una vez deja de intentarse en el resto
+de la tanda: 25 mensajes esperando a un IMAP que no contesta agotarían el tiempo de la
+función con los correos ya entregados.
+
+Dónde se comprueba de verdad si algo salió: **el estado en el Hub** (`enviado`, con su
+`sent_at`), no la carpeta del webmail.
+
 ## Por qué SMTP y no una API de correo
 
 Studio32 tiene **una sola cuenta** en Hostinger, `info@studio32.es`, con alias para

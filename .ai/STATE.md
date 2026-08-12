@@ -59,6 +59,11 @@ intentos. `git branch -r` y una consulta al esquema de Supabase cuestan un minut
   se abre a partir de Pro. Por eso el envío vive en una Edge Function.
 - **Solo la Edge Function marca 'enviado'.** Las políticas se lo prohíben al cliente,
   para que un fallo de interfaz no dé por enviado algo que no salió.
+- **La carpeta "Enviados" del webmail no es la prueba de nada.** SMTP entrega, pero la
+  copia en Enviados la escribe el cliente por IMAP: son dos servicios distintos. Por eso
+  los primeros envíos reales dejaban la carpeta vacía. Desde el 12/08 la función también
+  escribe la copia (`imap.ts`), con la misma cuenta y sin secretos nuevos. **Lo que
+  manda sigue siendo el estado en el Hub**, no la carpeta.
 - **Tres fronteras en el envío:** aprobación humana explícita, lista de bajas, y no
   escribir dos veces a la misma dirección en 60 días.
 - **La huella es esquema compartido con `studio32-agent`.** Si un lead convierte,
@@ -80,6 +85,7 @@ intentos. `git branch -r` y una consulta al esquema de Supabase cuestan un minut
 | `npm run outreach` contra la base | ✅ responde |
 | Pedir campaña desde el Hub | ✅ verificado: hay un pedido real esperando |
 | `import-outreach.mjs` | ✅ probado con `scripts/outreach-ejemplo.json` |
+| Copia en Enviados por IMAP | escrita y probada contra un servidor falso, **sin desplegar** |
 | Generar la tanda con la skill | ✅ ejecutado el 12/08: 4 leads reales de fisioterapia en la bandeja |
 
 **La cadena entera está recorrida.** El 12/08 se ejecutó `/prospectar` contra la campaña
