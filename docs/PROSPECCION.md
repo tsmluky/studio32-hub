@@ -127,7 +127,8 @@ ya usa para enviar: no hace falta ningún secreto nuevo. Opcionales, por si acas
 
 - `IMAP_HOST` / `IMAP_PORT` — por defecto `imap.hostinger.com` y `993`.
 - `IMAP_SENT_FOLDER` — forzar la carpeta. Normalmente no hace falta: se descubre sola
-  preguntándole al servidor cuál marca con el atributo `\Sent`.
+  preguntándole al servidor cuál marca con el atributo `\Sent`. En Hostinger sale
+  `INBOX.Sent`, comprobado con un envío real el 12/08/2026.
 - `OUTREACH_SENT_COPY=off` — apagar la copia.
 
 **La copia nunca puede estropear un envío.** Se escribe después de dar el correo por

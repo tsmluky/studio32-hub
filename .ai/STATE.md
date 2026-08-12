@@ -85,7 +85,8 @@ intentos. `git branch -r` y una consulta al esquema de Supabase cuestan un minut
 | `npm run outreach` contra la base | ✅ responde |
 | Pedir campaña desde el Hub | ✅ verificado: hay un pedido real esperando |
 | `import-outreach.mjs` | ✅ probado con `scripts/outreach-ejemplo.json` |
-| Copia en Enviados por IMAP | escrita y probada contra un servidor falso, **sin desplegar** |
+| Deno deja salir el 993 (IMAP) | ✅ verificado el 12/08 |
+| Copia en Enviados por IMAP | ✅ desplegada y **verificada con un envío real**: aparece en `INBOX.Sent` |
 | Generar la tanda con la skill | ✅ ejecutado el 12/08: 4 leads reales de fisioterapia en la bandeja |
 
 **La cadena entera está recorrida.** El 12/08 se ejecutó `/prospectar` contra la campaña
