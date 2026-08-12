@@ -5136,3 +5136,198 @@ button.update-row {
 .outreach-signer strong {
   color: inherit;
 }
+
+/* ── Prospección: barra de campaña y filtros ── */
+
+.outreach-bar {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding: 14px 16px;
+}
+
+/* Rueda en horizontal en vez de crecer hacia abajo: las campañas se acumulan y una
+   rejilla convertía la barra en un bloque de 100px de alto. */
+.outreach-campaigns {
+  display: flex;
+  gap: 7px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: thin;
+}
+
+.outreach-campaigns::-webkit-scrollbar {
+  height: 5px;
+}
+
+.outreach-campaigns::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 999px;
+}
+
+.outreach-campaigns button {
+  flex: 0 0 auto;
+  max-width: 260px;
+  padding: 7px 13px;
+  overflow: hidden;
+  color: var(--muted);
+  background: var(--canvas);
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.outreach-campaigns button:hover {
+  color: var(--ink);
+}
+
+.outreach-campaigns button.is-active {
+  color: #fff;
+  background: var(--green-dark);
+}
+
+.outreach-filters {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+  scrollbar-width: none;
+}
+
+.outreach-filters::-webkit-scrollbar {
+  display: none;
+}
+
+.outreach-filters button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex: 0 0 auto;
+  padding: 7px 12px;
+  color: var(--muted);
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.outreach-filters button:hover {
+  background: var(--canvas);
+}
+
+.outreach-filters button[aria-selected='true'] {
+  color: var(--green);
+  background: var(--green-soft);
+}
+
+.outreach-filters b {
+  display: grid;
+  place-items: center;
+  min-width: 19px;
+  height: 18px;
+  padding: 0 5px;
+  color: inherit;
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 999px;
+  font-size: 10.5px;
+}
+
+@media (max-width: 700px) {
+  .outreach-bar {
+    padding: 12px;
+  }
+}
+
+/* ── Longitud de línea ──
+   Esta pantalla se LEE antes de aprobar, y a 1100px de ancho salían 150 caracteres
+   por línea: el ojo pierde el renglón al volver. Se acota la prosa a ~72, que es lo
+   cómodo, sin estrechar la tarjeta (la cabecera y los botones siguen usando el ancho
+   completo). */
+.outreach-anchor,
+.outreach-draft,
+.outreach-warning,
+.outreach-signer,
+.outreach-quotes,
+.outreach-gaps {
+  /* 56ch y no 72: la unidad `ch` mide el ancho del cero, mas ancho que la letra
+     media en esta tipografia, asi que 72ch daban unos 105 caracteres reales. */
+  max-width: 56ch;
+}
+
+/* El aviso de resultado del envío aparecía como una barra suelta sin relación con
+   nada. Se ata visualmente a la barra de envío y se le da el tono que le toca. */
+.outreach-aviso {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 14px;
+  padding: 11px 14px;
+  color: var(--green);
+  background: var(--green-soft);
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* ── Lead plegable ── */
+
+.outreach-lead-open {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  text-align: left;
+  cursor: pointer;
+}
+
+.outreach-lead-open > svg {
+  flex: 0 0 auto;
+  color: var(--muted);
+  transition: transform 0.15s ease;
+}
+
+.outreach-lead-open > svg.is-open {
+  transform: rotate(90deg);
+}
+
+.outreach-lead-open > span {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+/* Plegado, el porqué se recorta a tres líneas: lo justo para decidir si abrirlo, sin
+   que cinco leads seguidos vuelvan a ser un muro de texto. */
+.outreach-anchor.is-clamped {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+
+.outreach-lead-more {
+  margin-top: 9px;
+  padding: 0;
+  color: var(--green);
+  background: transparent;
+  border: 0;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.outreach-lead-more:hover {
+  text-decoration: underline;
+}

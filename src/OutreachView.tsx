@@ -158,16 +158,22 @@ export default function OutreachView({
         </section>
       ) : (
         <>
-          <section className="task-command-bar surface">
-            <div className="segmented-control" aria-label="Campaña">
-              <button type="button" className={campaignId === 'all' ? 'is-active' : ''} onClick={() => setCampaignId('all')}>Todas</button>
-              {campaigns.map((campaign) => (
+          {/* Las campañas se acumulan mes a mes, así que esto es una fila que rueda,
+              no una rejilla que crece hacia abajo. Antes usaba `segmented-control`,
+              pensado para dos o tres opciones fijas, y con cinco campañas ya se
+              convertía en un bloque de dos columnas. */}
+          <section className="outreach-bar surface">
+            <div className="outreach-campaigns" aria-label="Campaña">
+              <button type="button" className={campaignId === 'all' ? 'is-active' : ''} onClick={() => setCampaignId('all')}>
+                Todas
+              </button>
+              {campaigns.filter((campaign) => campaign.status !== 'pedida').map((campaign) => (
                 <button key={campaign.id} type="button" className={campaignId === campaign.id ? 'is-active' : ''} onClick={() => setCampaignId(campaign.id)}>
                   {campaign.name}
                 </button>
               ))}
             </div>
-            <div className="task-filter-tabs" role="tablist" aria-label="Filtrar correos">
+            <div className="outreach-filters" role="tablist" aria-label="Filtrar correos">
               {filters.map((item) => (
                 <button key={item.id} type="button" role="tab" aria-selected={filter === item.id} className={filter === item.id ? 'is-active' : ''} onClick={() => setFilter(item.id)}>
                   {item.label}<b>{item.count}</b>
@@ -238,6 +244,7 @@ function LeadStory({
   onApprove: (messageId: string, leadId: string) => void
   onDiscard: (leadId: string) => void
 }) {
+  const [abierto, setAbierto] = useState(false)
   const [open, setOpen] = useState(false)
   const [bajando, setBajando] = useState(false)
   const [bajaHecha, setBajaHecha] = useState(false)
@@ -270,23 +277,49 @@ function LeadStory({
   const yo = remitentes[activeMemberId]
   const duenyo = lead.owner_member_id ? remitentes[lead.owner_member_id] : null
 
+  // Plegado se ve el estado del correo; abierto ya lo dicen los botones.
+  const estadoMensaje = !abierto && message && message.status !== 'borrador'
+    ? <StatusBadge>{message.status}</StatusBadge>
+    : null
+
   return (
     <article className="outreach-lead" data-confianza={confianza}>
+      {/* La cabecera entera abre y cierra. Con la cola llena, ver cinco correos
+          completos de golpe es un muro; plegados se escanea por negocio y se abre el
+          que toque. Y como Aprobar vive dentro, no se puede aprobar sin abrir. */}
       <header className="outreach-lead-head">
-        <span>
-          <strong>{lead.business_name}</strong>
-          <small>{[lead.city, lead.website].filter(Boolean).join(' · ')}</small>
-        </span>
+        <button
+          type="button"
+          className="outreach-lead-open"
+          onClick={() => setAbierto((v) => !v)}
+          aria-expanded={abierto}
+        >
+          <ChevronRight size={16} className={abierto ? 'is-open' : ''} />
+          <span>
+            <strong>{lead.business_name}</strong>
+            <small>{[lead.city, lead.website].filter(Boolean).join(' · ')}</small>
+          </span>
+        </button>
         <span className="outreach-badges">
+          {estadoMensaje}
           <b className="outreach-score">{lead.score}</b>
           <StatusBadge>{confianza === 'alto' ? 'Evidencia alta' : confianza === 'medio' ? 'Evidencia media' : 'Evidencia floja'}</StatusBadge>
         </span>
       </header>
 
+      {/* El porqué se ve siempre, plegado incluido: es lo que se lee para decidir si
+          merece la pena abrirlo. */}
       {ancla && (
-        <p className="outreach-anchor">{ancla}</p>
+        <p className={`outreach-anchor${abierto ? '' : ' is-clamped'}`}>{ancla}</p>
       )}
 
+      {!abierto && (
+        <button type="button" className="outreach-lead-more" onClick={() => setAbierto(true)}>
+          Leer el correo y decidir
+        </button>
+      )}
+
+      {abierto && (<>
       {confianza !== 'alto' && (
         <p className="outreach-warning">
           <AlertCircle size={15} /> La huella no se pudo verificar del todo. Lee el correo con calma antes de aprobarlo.
@@ -388,6 +421,7 @@ function LeadStory({
         </button>
       </div>
       {bajaError && <p className="outreach-baja-error"><AlertCircle size={14} /> {bajaError}</p>}
+      </>)}
     </article>
   )
 }

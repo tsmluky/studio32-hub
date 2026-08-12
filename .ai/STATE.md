@@ -28,11 +28,12 @@ intentos. `git branch -r` y una consulta al esquema de Supabase cuestan un minut
 
 1. **Hub** — Herramientas › Prospección › "Pedir campaña": sector, zona, oferta,
    cantidad y notas. Nace en estado `pedida`, sin leads.
-2. **Local** — `npm run outreach` lista los encargos y escupe el prompt
-   listo para pegar en Claude Code. Corre con la **suscripción**, no por API: es la
-   razón de que este paso sea local y no un worker en la nube.
-3. **Local** — `npm run outreach -- tanda.json` sube leads y borradores; la
-   campaña pasa a `abierta`.
+2. **Local** — abrir Claude Code en este repo y escribir **`/prospectar`**. Lee la
+   cola él mismo, genera cada tanda y la sube. Sin copiar ni pegar nada.
+   Corre con la **suscripción**, no por API: es la razón de que este paso sea local y
+   no un worker en la nube.
+   (`npm run outreach` sigue existiendo para mirar la cola a mano, y
+   `npm run outreach -- tanda.json` para subir un JSON suelto.)
 4. **Hub** — se revisa el correo con su evidencia y se aprueba.
 5. **Edge Function `outreach-send`** — envía por SMTP de Hostinger.
 

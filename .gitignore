@@ -41,6 +41,9 @@ credentials.json
 # Excepción: la config compartida SÍ va al repo — es lo que sincroniza los hooks
 # entre portátil y sobremesa.
 !.claude/settings.json
+# Y los comandos: /prospectar es parte del flujo de trabajo, no de una maquina.
+!.claude/commands/
+!.claude/commands/**
 .hermes/
 
 # Restos del empaquetador de la CLI de Supabase.
