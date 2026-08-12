@@ -80,7 +80,17 @@ intentos. `git branch -r` y una consulta al esquema de Supabase cuestan un minut
 | `npm run outreach` contra la base | ✅ responde |
 | Pedir campaña desde el Hub | ✅ verificado: hay un pedido real esperando |
 | `import-outreach.mjs` | ✅ probado con `scripts/outreach-ejemplo.json` |
-| Generar la tanda con la skill | **lo único de la cadena sin ejecutar nunca** |
+| Generar la tanda con la skill | ✅ ejecutado el 12/08: 4 leads reales de fisioterapia en la bandeja |
+
+**La cadena entera está recorrida.** El 12/08 se ejecutó `/prospectar` contra la campaña
+"Fisioterapia · Guadalajara" y subió 4 leads con sus 4 borradores. Sigue `pedida`→`abierta`
+con 6 pendientes: la campaña pedía 10 y una pasada da para 6 como mucho.
+
+Lo que enseñó la primera pasada real: **la puerta que descarta no es el correo, son las
+citas literales de reseñas.** Ocho de nueve centros publicaban correo; solo cuatro tenían
+una reseña con autor localizable. Está apuntado en `docs/PROSPECCION.md`, junto con el
+detalle de que en fisioterapia las opiniones de Doctoralia cuelgan del profesional y no
+del centro.
 
 **Desplegar la función:** `npm run fn:deploy`. Lleva `--use-api` porque el empaquetado
 local falla en este portátil (busca un `output.eszip` que no genera) y además ensucia el

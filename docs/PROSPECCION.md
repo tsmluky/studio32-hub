@@ -150,7 +150,14 @@ tiempo tirado: los negocios no publican correo y la puerta los descarta a todos.
 | Barberías y peluquerías | No publican correo. Van de Instagram, teléfono y Booksy. Comprobado el 12/08/2026 en Torrejón de Ardoz: cinco negocios con web propia, reseñas y reserva online, **ninguno con email**. |
 
 Sectores que sí funcionan, comprobado: **clínicas dentales** (publican correo casi
-siempre, tienen web y reseñas abundantes).
+siempre, tienen web y reseñas abundantes) y **fisioterapia** (comprobado el 12/08/2026 en
+Guadalajara: de nueve centros con web propia, ocho publicaban correo).
+
+**En fisioterapia el cuello de botella no es el correo, son las reseñas.** Ocho de nueve
+tenían correo público, pero solo cuatro tenían una cita literal con autor localizable, y
+por eso solo cuatro pasaron la puerta. Al cribar, comprobar el correo **y** que exista
+ficha en Doctoralia o testimonios firmados en su web: sin lo segundo el lead se cae igual,
+y se cae después de haber gastado el tiempo.
 
 Si descubres otro sector muerto, **apúntalo aquí**. Es lo que impide que la siguiente
 pasada vuelva a gastar media hora en lo mismo.
@@ -173,6 +180,17 @@ ciegas. Ir directo a la fuente que funciona por sector:
 | --- | --- |
 | Clínicas dentales, medicina estética | `doctoralia.es/clinicas/<slug>` |
 | Centros de estética, peluquería | `treatwell.es/establecimiento/<slug>` |
+| Fisioterapia | `doctoralia.es`, pero **por profesional, no por centro** |
+
+**En fisioterapia las opiniones cuelgan del fisioterapeuta, no de la clínica.** El centro
+suele salir con cero opiniones mientras sus fisios tienen treinta cada uno. El atajo:
+abrir `doctoralia.es/fisioterapeuta/<ciudad>`, que lista profesionales con su centro y su
+número de opiniones, y entrar por la ficha de quien más tenga. Buscar por el nombre de la
+clínica devuelve fichas vacías y hace pensar que no hay reseñas.
+
+Si el centro no está en Doctoralia, mirar los **testimonios firmados de su propia web**
+antes de descartarlo: sirven para la puerta, aunque suelen estar sin renovar desde hace
+años y bajan la confianza a `medio`.
 
 **Los agregadores no sirven**: top-rated.online, cylex, expirit y similares devuelven
 403, y los resúmenes que salen en los resultados de búsqueda vienen parafraseados y sin
