@@ -56,7 +56,9 @@ no está terminada.
 
 La barra inferior tiene **cinco destinos como máximo**. Las vistas secundarias van en
 la hoja "Más"; no se encogen ocho etiquetas hasta hacerlas ilegibles. La navegación
-compacta se mantiene hasta 920px porque una tablet vertical tampoco es un escritorio.
+móvil llega hasta 720px. Entre 721 y 920px se usa el escritorio compacto: sidebar
+estrecho, topbar completa y contenido fluido. No obligar al usuario a reducir el zoom
+para que el Hub elija la navegación adecuada.
 
 En tableros operativos, estado y calidad no se mezclan como si fueran el mismo filtro.
 La acción habitual lleva la jerarquía visual; las acciones permanentes o raras viven

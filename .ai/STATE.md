@@ -13,6 +13,8 @@ se edita a mano**.
 - Vistas: Hoy, Tareas, Calendario, Proyectos, Inbox, Biblioteca y **Herramientas**.
 - Interfaz móvil: cinco destinos en la barra inferior (Hoy, Tareas, Proyectos,
   Herramientas, Más). Calendario, Inbox, Biblioteca y Alta viven en la hoja Más.
+- Entre 721 y 920px se usa **escritorio compacto**: sidebar de 190px y topbar de
+  escritorio. La barra móvil queda reservada para 720px o menos.
 - Sistema visual renovado el 13/08: fondo cálido, verde Studio32, superficies con
   profundidad ligera, tipografía más legible y el mismo ritmo en todas las vistas.
 - Tablas: `workspaces`, `workspace_members`, `hub_states` y `outreach_*` (4).

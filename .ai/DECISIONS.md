@@ -318,8 +318,9 @@ duplicada. Esta dicho en SKILL.md y en STATE.md.
 La barra inferior llegó a ocho entradas. Cabían en píxeles, pero los textos quedaban
 cortados y los objetivos táctiles eran demasiado pequeños. Se reduce a Hoy, Tareas,
 Proyectos, Herramientas y Más. Calendario, Inbox, Biblioteca y Alta de asistente viven
-en una hoja con descripción y contador. El patrón se usa hasta 920px: una tablet
-vertical tampoco tiene espacio útil para simular el sidebar completo.
+en una hoja con descripción y contador. Tras probar el Hub en su ventana real, el
+patrón queda reservado para 720px o menos; la franja intermedia se resuelve con el
+escritorio compacto descrito más abajo.
 
 No se elimina ninguna ruta ni se cambia la navegación de escritorio. "Más" agrupa lo
 secundario; no es un cajón para ocultar Herramientas, que sigue siendo destino principal.
@@ -351,3 +352,16 @@ tokens y la capa compartida de `src/style.css` gobiernan Hoy, Tareas, Calendario
 Proyectos, Inbox, Biblioteca, Herramientas, diálogos y proyecto. Así una vista nueva
 hereda identidad sin copiar CSS. Movimiento solo como respuesta breve y con
 `prefers-reduced-motion`; la estética nunca puede reducir la comodidad operativa.
+
+---
+
+## 2026-08-13 · La ventana estrecha de escritorio no es móvil
+
+En la ventana habitual del Hub el área útil puede quedarse cerca de 850px. El corte
+anterior en 920px activaba la cabecera y la barra inferior móviles; bajar el zoom al 80%
+parecía arreglarlo porque el viewport CSS cruzaba artificialmente ese corte.
+
+Entre 721 y 920px el Hub conserva ahora su modelo de escritorio con un sidebar de 190px,
+topbar horizontal y densidad ajustada. El contenido mantiene sus composiciones fluidas
+para no desbordar. La navegación móvil empieza en 720px: el breakpoint representa el
+modo de uso, no una categoría genérica de dispositivo.
