@@ -310,3 +310,29 @@ Function ademas de en `src/remitentes.json`.
 
 Efecto secundario a vigilar: si la skill vuelve a escribir la firma en el cuerpo, saldra
 duplicada. Esta dicho en SKILL.md y en STATE.md.
+
+---
+
+## 2026-08-13 · Cinco destinos móviles y el resto en Más
+
+La barra inferior llegó a ocho entradas. Cabían en píxeles, pero los textos quedaban
+cortados y los objetivos táctiles eran demasiado pequeños. Se reduce a Hoy, Tareas,
+Proyectos, Herramientas y Más. Calendario, Inbox, Biblioteca y Alta de asistente viven
+en una hoja con descripción y contador. El patrón se usa hasta 920px: una tablet
+vertical tampoco tiene espacio útil para simular el sidebar completo.
+
+No se elimina ninguna ruta ni se cambia la navegación de escritorio. "Más" agrupa lo
+secundario; no es un cajón para ocultar Herramientas, que sigue siendo destino principal.
+
+---
+
+## 2026-08-13 · Prospección se organiza por decisión, no por tablas
+
+Campaña, estado del correo y calidad de evidencia son dimensiones distintas. La fila de
+campañas pasa a ser un selector; el estado conserva tres pasos (Por revisar, Listos para
+enviar, Historial) y "evidencia floja" es un filtro adicional, no una cuarta pestaña.
+
+Las campañas de prueba siguen accesibles en un grupo propio, pero "Todas las campañas
+reales" las excluye. El encaje muestra su nombre y escala, aprobar es la única acción
+principal, y la baja permanente vive en "Más opciones". En Historial no se ofrece
+Descartar: bloquear futuros contactos no puede hacer desaparecer un envío ya realizado.

@@ -37,7 +37,8 @@ export default function OutreachView({
 }) {
   const [pedirOpen, setPedirOpen] = useState(false)
   const [campaignId, setCampaignId] = useState<string | 'all'>('all')
-  const [filter, setFilter] = useState<'review' | 'approved' | 'sent' | 'weak'>('review')
+  const [filter, setFilter] = useState<'review' | 'approved' | 'sent'>('review')
+  const [weakOnly, setWeakOnly] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [enviando, setEnviando] = useState(false)
   const [aviso, setAviso] = useState('')
@@ -45,21 +46,33 @@ export default function OutreachView({
   // Lo encargado y aun sin leads: no entra en los filtros de revision porque
   // todavia no hay nada que revisar.
   const pedidas = campaigns.filter((campana) => campana.status === 'pedida')
+  const selectableCampaigns = campaigns.filter((campaign) => campaign.status !== 'pedida')
+  const realCampaigns = selectableCampaigns.filter((campaign) => !/^prueba\b/i.test(campaign.name.trim()))
+  const testCampaigns = selectableCampaigns.filter((campaign) => /^prueba\b/i.test(campaign.name.trim()))
+  const testCampaignIds = new Set(testCampaigns.map((campaign) => campaign.id))
 
   const latestMessageFor = (leadId: string) => messages.find((message) => message.lead_id === leadId)
 
   const scopedLeads = leads.filter((lead) => {
     if (lead.status === 'descartado') return false
-    return campaignId === 'all' || lead.campaign_id === campaignId
+    if (campaignId !== 'all') return lead.campaign_id === campaignId
+    return !lead.campaign_id || !testCampaignIds.has(lead.campaign_id)
   })
 
-  const matchesFilter = (lead: OutreachLead) => {
+  const matchesState = (lead: OutreachLead, stateFilter: typeof filter) => {
     const message = latestMessageFor(lead.id)
-    if (filter === 'weak') return (lead.huella?.confianza?.nivel ?? 'bajo') !== 'alto'
     if (!message) return false
-    if (filter === 'review') return message.status === 'borrador'
-    if (filter === 'approved') return message.status === 'aprobado'
-    return message.status === 'enviado' || message.status === 'enviando'
+    return stateFilter === 'review'
+      ? message.status === 'borrador'
+      : stateFilter === 'approved'
+        ? message.status === 'aprobado'
+        : message.status === 'enviado' || message.status === 'enviando'
+  }
+
+  const matchesFilter = (lead: OutreachLead) => {
+    const matchesCurrentState = matchesState(lead, filter)
+    const matchesQuality = !weakOnly || (lead.huella?.confianza?.nivel ?? 'bajo') !== 'alto'
+    return matchesCurrentState && matchesQuality
   }
 
   const visibleLeads = scopedLeads.filter(matchesFilter)
@@ -84,22 +97,23 @@ export default function OutreachView({
   }
 
   const countFor = (id: typeof filter) => {
-    return scopedLeads.filter((lead) => {
-      const message = latestMessageFor(lead.id)
-      if (id === 'weak') return (lead.huella?.confianza?.nivel ?? 'bajo') !== 'alto'
-      if (!message) return false
-      if (id === 'review') return message.status === 'borrador'
-      if (id === 'approved') return message.status === 'aprobado'
-      return message.status === 'enviado' || message.status === 'enviando'
-    }).length
+    return scopedLeads.filter((lead) => matchesState(lead, id)).length
   }
 
   const filters: Array<{ id: typeof filter; label: string; count: number }> = [
     { id: 'review', label: 'Por revisar', count: countFor('review') },
-    { id: 'approved', label: 'Aprobados', count: countFor('approved') },
-    { id: 'sent', label: 'Enviados', count: countFor('sent') },
-    { id: 'weak', label: 'Evidencia floja', count: countFor('weak') },
+    { id: 'approved', label: 'Listos para enviar', count: countFor('approved') },
+    { id: 'sent', label: 'Historial', count: countFor('sent') },
   ]
+  const weakCount = scopedLeads.filter((lead) => matchesState(lead, filter) && (lead.huella?.confianza?.nivel ?? 'bajo') !== 'alto').length
+  const listTitle = filter === 'review' ? 'Por revisar' : filter === 'approved' ? 'Listos para enviar' : 'Historial de envíos'
+  const emptyBody = weakOnly
+    ? 'No hay correos con evidencia floja dentro de este estado y campaña.'
+    : filter === 'review'
+      ? 'No queda ningún correo pendiente de revisión en esta campaña.'
+      : filter === 'approved'
+        ? 'No hay correos aprobados esperando el envío.'
+        : 'Todavía no hay envíos en esta campaña.'
 
   return (
     <div className="page outreach-page">
@@ -139,9 +153,9 @@ export default function OutreachView({
           {/* Quien pide una campaña no sabe qué pasa después, y quien la genera no
               recuerda el comando. Las dos cosas se resuelven diciéndolo aquí. */}
           <p className="campaign-queue-foot">
-            Ahora le toca a Pancho: la genera en su ordenador con <code>npm run outreach</code> y
-            la sube. Cuando esté, estos encargos desaparecen de aquí y sus correos salen abajo,
-            listos para revisar.
+            Ahora le toca a Pancho: abre Claude Code, ejecuta <code>/prospectar</code> y sigue las
+            indicaciones. Cuando la tanda esté lista, el encargo desaparece de aquí y sus correos
+            aparecen abajo para revisarlos.
           </p>
         </section>
       )}
@@ -158,28 +172,41 @@ export default function OutreachView({
         </section>
       ) : (
         <>
-          {/* Las campañas se acumulan mes a mes, así que esto es una fila que rueda,
-              no una rejilla que crece hacia abajo. Antes usaba `segmented-control`,
-              pensado para dos o tres opciones fijas, y con cinco campañas ya se
-              convertía en un bloque de dos columnas. */}
-          <section className="outreach-bar surface">
-            <div className="outreach-campaigns" aria-label="Campaña">
-              <button type="button" className={campaignId === 'all' ? 'is-active' : ''} onClick={() => setCampaignId('all')}>
-                Todas
-              </button>
-              {campaigns.filter((campaign) => campaign.status !== 'pedida').map((campaign) => (
-                <button key={campaign.id} type="button" className={campaignId === campaign.id ? 'is-active' : ''} onClick={() => setCampaignId(campaign.id)}>
-                  {campaign.name}
-                </button>
-              ))}
+          <section className="outreach-controls surface">
+            <label className="outreach-campaign-picker">
+              <span>Campaña</span>
+              <select value={campaignId} onChange={(event) => setCampaignId(event.target.value)}>
+                <option value="all">Todas las campañas reales</option>
+                {realCampaigns.map((campaign) => <option key={campaign.id} value={campaign.id}>{campaign.name}</option>)}
+                {testCampaigns.length > 0 && (
+                  <optgroup label="Pruebas">
+                    {testCampaigns.map((campaign) => <option key={campaign.id} value={campaign.id}>{campaign.name}</option>)}
+                  </optgroup>
+                )}
+              </select>
+            </label>
+
+            <div className="outreach-state-filter">
+              <span>Estado</span>
+              <div className="outreach-filters" role="tablist" aria-label="Estado del correo">
+                {filters.map((item) => (
+                  <button key={item.id} type="button" role="tab" aria-selected={filter === item.id} className={filter === item.id ? 'is-active' : ''} onClick={() => setFilter(item.id)}>
+                    {item.label}<b>{item.count}</b>
+                  </button>
+                ))}
+              </div>
             </div>
-            <div className="outreach-filters" role="tablist" aria-label="Filtrar correos">
-              {filters.map((item) => (
-                <button key={item.id} type="button" role="tab" aria-selected={filter === item.id} className={filter === item.id ? 'is-active' : ''} onClick={() => setFilter(item.id)}>
-                  {item.label}<b>{item.count}</b>
-                </button>
-              ))}
-            </div>
+
+            <button
+              className="outreach-quality-filter"
+              type="button"
+              aria-pressed={weakOnly}
+              onClick={() => setWeakOnly((current) => !current)}
+            >
+              <AlertCircle size={16} />
+              <span>Solo evidencia floja</span>
+              <b>{weakCount}</b>
+            </button>
           </section>
 
           {destinatarios.length > 0 && (
@@ -197,7 +224,7 @@ export default function OutreachView({
           {aviso && <p className="outreach-aviso">{aviso}</p>}
 
           <section className="surface outreach-list">
-            <SectionHeader icon={<Send size={18} />} title="Cola de revisión" action={`${visibleLeads.length}`} />
+            <SectionHeader icon={filter === 'sent' ? <CheckCircle2 size={18} /> : <Send size={18} />} title={listTitle} action={`${visibleLeads.length}`} />
             {visibleLeads.map((lead) => (
               <LeadStory
                 activeMemberId={activeMemberId}
@@ -212,7 +239,7 @@ export default function OutreachView({
               <EmptyState
                 icon={<CheckCircle2 size={24} />}
                 title="Nada en esta vista"
-                body="Cambia el filtro o la campaña. Los borradores los genera la skill de prospección."
+                body={emptyBody}
               />
             )}
           </section>
@@ -261,7 +288,9 @@ function LeadStory({
     try {
       await darDeBaja(lead.email)
       setBajaHecha(true)
-      onDiscard(lead.id)
+      // Un correo ya enviado pertenece al historial: bloquear futuros contactos no
+      // debe hacerlo desaparecer. Borradores y aprobados sí salen de la cola.
+      if (message?.status !== 'enviado' && message?.status !== 'enviando') onDiscard(lead.id)
     } catch (e) {
       setBajaError(e instanceof Error ? e.message : 'No se ha podido registrar la baja.')
     } finally {
@@ -276,6 +305,11 @@ function LeadStory({
   const ancla = huella.detalle_ancla?.detalle ?? ''
   const yo = remitentes[activeMemberId]
   const duenyo = lead.owner_member_id ? remitentes[lead.owner_member_id] : null
+  const decisionLabel = message?.status === 'enviado' || message?.status === 'enviando'
+    ? 'Ver correo enviado'
+    : message?.status === 'aprobado'
+      ? 'Revisar correo aprobado'
+      : 'Leer el correo y decidir'
 
   // Plegado se ve el estado del correo; abierto ya lo dicen los botones.
   const estadoMensaje = !abierto && message && message.status !== 'borrador'
@@ -302,7 +336,9 @@ function LeadStory({
         </button>
         <span className="outreach-badges">
           {estadoMensaje}
-          <b className="outreach-score">{lead.score}</b>
+          <span className="outreach-score" aria-label={`Encaje ${lead.score} sobre 100`} title="Encaje estimado con la campaña">
+            <small>Encaje</small><b>{lead.score}</b>
+          </span>
           <StatusBadge>{confianza === 'alto' ? 'Evidencia alta' : confianza === 'medio' ? 'Evidencia media' : 'Evidencia floja'}</StatusBadge>
         </span>
       </header>
@@ -315,7 +351,7 @@ function LeadStory({
 
       {!abierto && (
         <button type="button" className="outreach-lead-more" onClick={() => setAbierto(true)}>
-          Leer el correo y decidir
+          {decisionLabel}
         </button>
       )}
 
@@ -337,7 +373,7 @@ function LeadStory({
 
       <button className="outreach-toggle" type="button" onClick={() => setOpen((current) => !current)} aria-expanded={open}>
         <ChevronRight size={15} />
-        {open ? 'Ocultar de dónde sale' : 'Ver de dónde sale'}
+        {open ? 'Ocultar evidencias y fuentes' : 'Ver evidencias y fuentes'}
       </button>
 
       {open && (
@@ -399,26 +435,35 @@ function LeadStory({
       ) : null}
 
       <div className="outreach-actions">
-        <button
-          type="button"
-          className="secondary-action"
-          disabled={!message || message.status !== 'borrador'}
-          onClick={() => message && onApprove(message.id, lead.id)}
-        >
-          <Check size={16} /> {message?.status === 'aprobado' ? 'Aprobado' : 'Aprobar y quedármelo'}
-        </button>
-        <button type="button" onClick={() => onDiscard(lead.id)}><X size={16} /> Descartar</button>
-        {/* Descartar saca al lead de esta campaña. La baja es otra cosa: bloquea la
-            dirección para siempre, aunque mañana vuelva dentro de otro negocio. */}
-        <button
-          type="button"
-          className="outreach-baja"
-          disabled={!lead.email || bajando}
-          title={lead.email ? `No volver a escribir a ${lead.email}` : 'Este lead no tiene correo'}
-          onClick={() => void darBaja()}
-        >
-          <Ban size={16} /> {bajaHecha ? 'En la lista de bajas' : 'No escribir más'}
-        </button>
+        {message?.status === 'borrador' && (
+          <>
+            <button
+              type="button"
+              className="outreach-approve-action"
+              onClick={() => onApprove(message.id, lead.id)}
+            >
+              <Check size={16} /> Aprobar y quedármelo
+            </button>
+            <button className="outreach-discard-action" type="button" onClick={() => onDiscard(lead.id)}><X size={16} /> Descartar</button>
+          </>
+        )}
+        {/* La baja es deliberadamente secundaria: es poco frecuente y permanente.
+            Sigue a un toque, pero no compite visualmente con la decisión normal. */}
+        <details className="outreach-more-actions">
+          <summary>Más opciones</summary>
+          <div>
+            <small>Bloquea esta dirección para todas las campañas futuras.</small>
+            <button
+              type="button"
+              className="outreach-baja"
+              disabled={!lead.email || bajando}
+              title={lead.email ? `No volver a escribir a ${lead.email}` : 'Este lead no tiene correo'}
+              onClick={() => void darBaja()}
+            >
+              <Ban size={16} /> {bajaHecha ? 'Dirección bloqueada' : 'No volver a contactar'}
+            </button>
+          </div>
+        </details>
       </div>
       {bajaError && <p className="outreach-baja-error"><AlertCircle size={14} /> {bajaError}</p>}
       </>)}

@@ -1,5 +1,5 @@
 {
-  "_nota": "REFERENCIA, no lo lee ningun codigo todavia. Que direccion usa cada socio al escribir a un prospecto. Studio32 tiene UNA cuenta real en Hostinger (info@studio32.es) y estos son alias suyos: el SMTP se autentica como info@ y pone en From: el alias que toque. Hoy el remitente se fija por CAMPANA (campaign.from_email en el JSON que importa scripts/import-outreach.mjs), no por quien aprueba, y la firma la escribe la skill dentro del cuerpo: nada la compone en el envio. Ojo con Pancho: su id interno es 'pancho' (login del Hub y outreach_leads.owner_member_id) pero su alias de correo es francisco@.",
+  "_nota": "Fuente de verdad que lee el Hub para mostrar y fijar el remitente al aprobar. Studio32 tiene UNA cuenta real en Hostinger (info@studio32.es) y estos son alias suyos: el SMTP se autentica como info@ y pone en From el alias de quien aprueba. La firma la compone la Edge Function al enviar; la skill no la escribe. Ojo con Pancho: su id interno es 'pancho', pero su nombre de firma es Francisco y su alias es francisco@.",
   "cuenta_real": "info@studio32.es",
   "remitentes": {
     "juanma": {

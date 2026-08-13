@@ -223,20 +223,16 @@ export function useOutreachPulse(enabled: boolean) {
     let cancelled = false
 
     const load = async () => {
-      const [pendingRows, campaignRows] = await Promise.all([
-        client
-          .from('outreach_messages')
-          .select('id', { count: 'exact', head: true })
-          .eq('workspace_id', 'studio32')
-          .eq('status', 'borrador'),
-        client
-          .from('outreach_campaigns')
-          .select('name')
-          .eq('workspace_id', 'studio32')
-          .eq('status', 'abierta')
-          .order('created_at', { ascending: false })
-          .limit(1),
-      ])
+      // El `!inner` no es decorativo: descartar un lead no toca su mensaje, que se
+      // queda en 'borrador' para siempre. Además se trae el nombre de SU campaña;
+      // elegir simplemente la última abierta atribuía correos de fisioterapia a una
+      // campaña de prueba sin relación con ellos.
+      const pendingRows = await client
+        .from('outreach_messages')
+        .select('id, outreach_leads!inner(status, outreach_campaigns(name))', { count: 'exact' })
+        .eq('workspace_id', 'studio32')
+        .eq('status', 'borrador')
+        .neq('outreach_leads.status', 'descartado')
 
       if (cancelled) return
 
@@ -247,7 +243,15 @@ export function useOutreachPulse(enabled: boolean) {
       }
 
       setPending(pendingRows.count ?? 0)
-      setCampaign(campaignRows.data?.[0]?.name ?? '')
+      const campaignNames = new Set(
+        (pendingRows.data ?? [])
+          .map((row) => {
+            const lead = row.outreach_leads as { outreach_campaigns?: { name?: string } | null } | null
+            return lead?.outreach_campaigns?.name
+          })
+          .filter((name): name is string => Boolean(name)),
+      )
+      setCampaign(campaignNames.size === 1 ? [...campaignNames][0] : campaignNames.size > 1 ? `${campaignNames.size} campañas pendientes` : '')
     }
 
     void load()

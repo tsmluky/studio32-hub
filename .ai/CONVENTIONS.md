@@ -54,6 +54,15 @@ El hub se usa desde el móvil más que desde el escritorio. Cualquier vista nuev
 diseña y se prueba primero a 375px de ancho. Si solo funciona bien en escritorio,
 no está terminada.
 
+La barra inferior tiene **cinco destinos como máximo**. Las vistas secundarias van en
+la hoja "Más"; no se encogen ocho etiquetas hasta hacerlas ilegibles. La navegación
+compacta se mantiene hasta 920px porque una tablet vertical tampoco es un escritorio.
+
+En tableros operativos, estado y calidad no se mezclan como si fueran el mismo filtro.
+La acción habitual lleva la jerarquía visual; las acciones permanentes o raras viven
+en "Más opciones". Un registro ya enviado pertenece al historial y no desaparece al
+bloquear futuros contactos.
+
 ## Modularidad
 
 `src/App.tsx` acumula demasiado (~3.000 líneas). **No añadir vistas nuevas dentro.**

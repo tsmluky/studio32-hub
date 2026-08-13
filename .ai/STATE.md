@@ -1,6 +1,6 @@
 # Estado — studio32-hub
 
-> Se **sobrescribe**, no se acumula. Tope ~100 líneas. Última actualización: 2026-08-11.
+> Se **sobrescribe**, no se acumula. Tope ~100 líneas. Última actualización: 2026-08-13.
 
 ## Qué es
 
@@ -11,6 +11,8 @@ se edita a mano**.
 ## Dónde está ahora
 
 - Vistas: Hoy, Tareas, Calendario, Proyectos, Inbox, Biblioteca y **Herramientas**.
+- Interfaz móvil: cinco destinos en la barra inferior (Hoy, Tareas, Proyectos,
+  Herramientas, Más). Calendario, Inbox, Biblioteca y Alta viven en la hoja Más.
 - Tablas: `workspaces`, `workspace_members`, `hub_states` y `outreach_*` (4).
 - Repo hermano `studio32-hub-agent` (bot de Telegram, en Railway).
 
@@ -69,7 +71,7 @@ intentos. `git branch -r` y una consulta al esquema de Supabase cuestan un minut
 - **La huella es esquema compartido con `studio32-agent`.** Si un lead convierte,
   alimenta `templates/<vertical>/`.
 
-## Qué está probado (11/08) y qué no
+## Qué está probado (13/08) y qué no
 
 | | Estado |
 |---|---|
@@ -88,6 +90,8 @@ intentos. `git branch -r` y una consulta al esquema de Supabase cuestan un minut
 | Deno deja salir el 993 (IMAP) | ✅ verificado el 12/08 |
 | Copia en Enviados por IMAP | ✅ desplegada y **verificada con un envío real**: aparece en `INBOX.Sent` |
 | Generar la tanda con la skill | ✅ ejecutado el 12/08: 4 leads reales de fisioterapia en la bandeja |
+| Interfaz Herramientas/Prospección | ✅ revisada con datos reales a 375, 768 y 1280 px |
+| Pulso de Hoy | ✅ cuenta solo leads vivos y muestra la campaña real de los pendientes |
 
 **La cadena entera está recorrida.** El 12/08 se ejecutó `/prospectar` contra la campaña
 "Fisioterapia · Guadalajara" y subió 4 leads con sus 4 borradores. Sigue `pedida`→`abierta`
@@ -133,7 +137,9 @@ delante de un cliente.
 - **No hay página de bajas.** El pie del correo pide responder BAJA. La tabla ya tiene
   `unsubscribe_token` por lead, así que una página que reciba el token y escriba la baja
   sola cerraría el ciclo. Es lo más barato que queda por hacer.
-- **La interfaz está sin pulir.** Es lo siguiente que se va a tocar.
+- **Queda pulido visual adicional, no un rediseño pendiente.** El 13/08 se rehizo la
+  navegación móvil y la jerarquía de Prospección. Campaña, estado y calidad son filtros
+  separados; las pruebas quedan fuera por defecto y Enviados funciona como historial.
 
 ## Ojo con esto
 

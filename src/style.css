@@ -161,6 +161,11 @@ p {
   gap: 4px;
 }
 
+.mobile-navigation,
+.mobile-more-backdrop {
+  display: none;
+}
+
 .main-navigation button,
 .sidebar-projects button {
   display: flex;
@@ -3418,7 +3423,9 @@ button.update-row {
   }
 }
 
-@media (max-width: 700px) {
+/* Hasta 920px se usa la navegación compacta: ocho accesos en una cabecera de
+   tablet eran técnicamente visibles, pero no cómodos ni legibles. */
+@media (max-width: 920px) {
   .project-branch-summary {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -3469,9 +3476,9 @@ button.update-row {
     display: none;
   }
 
-  .main-navigation {
+  .mobile-navigation {
     display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     align-items: stretch;
     width: 100%;
     height: 62px;
@@ -3479,7 +3486,11 @@ button.update-row {
     overflow: visible;
   }
 
-  .main-navigation button {
+  .desktop-navigation {
+    display: none;
+  }
+
+  .mobile-navigation button {
     position: relative;
     display: flex;
     flex-direction: column;
@@ -3490,24 +3501,29 @@ button.update-row {
     min-width: 0;
     min-height: 56px;
     padding: 3px 4px;
+    color: #bdc9c5;
+    background: transparent;
+    border: 0;
     border-radius: 7px;
-    font-size: 8px;
+    font-size: 10px;
+    font-weight: 600;
     text-align: center;
+    cursor: pointer;
   }
 
-  .main-navigation button span {
+  .mobile-navigation button span {
     display: block;
     max-width: 100%;
     line-height: 1.1;
   }
 
-  .main-navigation button.is-active {
+  .mobile-navigation button.is-active {
     color: #ffffff;
     background: rgba(255, 255, 255, 0.1);
     box-shadow: inset 0 2px #8fc2b8;
   }
 
-  .main-navigation button b {
+  .mobile-navigation button b {
     position: absolute;
     top: 5px;
     left: calc(50% + 8px);
@@ -3516,6 +3532,132 @@ button.update-row {
     margin: 0;
     padding: 0 4px;
     font-size: 9px;
+  }
+
+  .mobile-more-backdrop {
+    position: fixed;
+    inset: 0 0 calc(68px + env(safe-area-inset-bottom));
+    display: flex;
+    align-items: flex-end;
+    padding: 14px;
+    background: rgba(20, 34, 31, 0.32);
+    backdrop-filter: blur(3px);
+    z-index: 81;
+  }
+
+  .mobile-more-sheet {
+    width: 100%;
+    padding: 8px;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    box-shadow: 0 22px 70px rgba(20, 35, 31, 0.24);
+  }
+
+  .mobile-more-sheet > header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 9px 12px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .mobile-more-sheet > header > span {
+    display: grid;
+    gap: 1px;
+  }
+
+  .mobile-more-sheet > header small {
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .mobile-more-sheet > header strong {
+    font-family: 'Manrope', Arial, sans-serif;
+    font-size: 17px;
+  }
+
+  .mobile-more-sheet > header button {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    color: var(--muted);
+    background: var(--canvas);
+    border: 0;
+    border-radius: 10px;
+  }
+
+  .mobile-more-sheet > div {
+    display: grid;
+    gap: 3px;
+    padding-top: 6px;
+  }
+
+  .mobile-more-sheet > div > button {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 11px;
+    min-height: 60px;
+    padding: 7px 9px;
+    color: var(--ink);
+    background: transparent;
+    border: 0;
+    border-radius: 11px;
+    text-align: left;
+  }
+
+  .mobile-more-sheet > div > button.is-active {
+    color: var(--green-dark);
+    background: var(--green-soft);
+  }
+
+  .mobile-more-icon {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    color: var(--green);
+    background: var(--green-soft);
+    border-radius: 11px;
+  }
+
+  .mobile-more-sheet > div > button > span:nth-child(2) {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .mobile-more-sheet > div > button strong {
+    font-size: 13.5px;
+  }
+
+  .mobile-more-sheet > div > button small {
+    color: var(--muted);
+    font-size: 11.5px;
+  }
+
+  .mobile-more-sheet > div > button > svg,
+  .mobile-more-sheet > div > button > b {
+    color: var(--muted);
+  }
+
+  .mobile-more-sheet > div > button > b {
+    display: grid;
+    place-items: center;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 6px;
+    color: var(--green-dark);
+    background: #fff;
+    border-radius: 999px;
+    font-size: 11px;
   }
 
   .workspace-topbar {
@@ -4585,18 +4727,10 @@ button.update-row {
   color: var(--muted);
 }
 
-/* La barra inferior del movil ahora lleva ocho entradas: las siete del menu
-   mas el acceso al alta de asistente. */
+/* En móvil las herramientas cuelgan de su índice; el submenú es solo de escritorio. */
 @media (max-width: 920px) {
   .sidebar-tools {
     display: none;
-  }
-}
-
-@media (max-width: 700px) {
-  .main-navigation {
-    grid-template-columns: repeat(8, minmax(0, 1fr));
-    gap: 2px;
   }
 }
 
@@ -4647,11 +4781,23 @@ button.update-row {
 .outreach-score {
   display: inline-flex;
   align-items: center;
+  gap: 5px;
   min-height: 24px;
   padding: 0 9px;
   color: var(--amber);
   background: var(--amber-soft);
   border-radius: 999px;
+}
+
+.outreach-score small {
+  color: inherit;
+  font-size: 9.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.outreach-score b {
   font-size: 11px;
   font-weight: 700;
 }
@@ -4791,6 +4937,8 @@ button.update-row {
 
 .outreach-actions {
   display: flex;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
   margin-top: 14px;
 }
@@ -4816,6 +4964,67 @@ button.update-row {
   cursor: default;
 }
 
+.outreach-actions .outreach-approve-action {
+  color: #fff;
+  background: var(--green-dark);
+  border-color: var(--green-dark);
+}
+
+.outreach-actions .outreach-approve-action:hover {
+  background: #16342f;
+}
+
+.outreach-discard-action:hover {
+  background: var(--canvas);
+}
+
+.outreach-more-actions {
+  position: relative;
+  margin-left: auto;
+}
+
+.outreach-more-actions summary {
+  min-height: 34px;
+  padding: 8px 10px;
+  color: var(--muted);
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+
+.outreach-more-actions summary::-webkit-details-marker {
+  display: none;
+}
+
+.outreach-more-actions summary:hover,
+.outreach-more-actions[open] summary {
+  color: var(--ink);
+  background: var(--canvas);
+}
+
+.outreach-more-actions > div {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 6px);
+  display: grid;
+  gap: 9px;
+  width: min(285px, calc(100vw - 52px));
+  padding: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  box-shadow: var(--shadow);
+  z-index: 4;
+}
+
+.outreach-more-actions > div > small {
+  color: var(--muted);
+  font-size: 11.5px;
+  line-height: 1.4;
+}
+
 @media (max-width: 720px) {
   .outreach-lead {
     padding: 16px 14px;
@@ -4827,7 +5036,19 @@ button.update-row {
   }
 
   .outreach-actions button {
+    min-height: 42px;
+  }
+
+  .outreach-actions .outreach-approve-action {
+    flex: 1 0 100%;
+  }
+
+  .outreach-actions .outreach-discard-action {
     flex: 1;
+  }
+
+  .outreach-more-actions {
+    margin-left: 0;
   }
 }
 
@@ -5137,65 +5358,56 @@ button.update-row {
   color: inherit;
 }
 
-/* ── Prospección: barra de campaña y filtros ── */
+/* ── Prospección: contexto, estado y calidad son filtros distintos ── */
 
-.outreach-bar {
+.outreach-controls {
   display: grid;
-  gap: 12px;
+  grid-template-columns: minmax(220px, 1fr) auto auto;
+  align-items: end;
+  gap: 16px;
   margin-bottom: 14px;
   padding: 14px 16px;
 }
 
-/* Rueda en horizontal en vez de crecer hacia abajo: las campañas se acumulan y una
-   rejilla convertía la barra en un bloque de 100px de alto. */
-.outreach-campaigns {
-  display: flex;
+.outreach-campaign-picker,
+.outreach-state-filter {
+  display: grid;
   gap: 7px;
-  overflow-x: auto;
-  padding-bottom: 2px;
-  scrollbar-width: thin;
+  min-width: 0;
 }
 
-.outreach-campaigns::-webkit-scrollbar {
-  height: 5px;
-}
-
-.outreach-campaigns::-webkit-scrollbar-thumb {
-  background: var(--line);
-  border-radius: 999px;
-}
-
-.outreach-campaigns button {
-  flex: 0 0 auto;
-  max-width: 260px;
-  padding: 7px 13px;
-  overflow: hidden;
+.outreach-campaign-picker > span,
+.outreach-state-filter > span {
   color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.outreach-campaign-picker select {
+  width: 100%;
+  height: 38px;
+  padding: 0 34px 0 11px;
+  color: var(--ink);
   background: var(--canvas);
   border: 1px solid transparent;
-  border-radius: 999px;
+  border-radius: 9px;
   font-size: 12.5px;
   font-weight: 600;
-  text-overflow: ellipsis;
-  white-space: nowrap;
   cursor: pointer;
 }
 
-.outreach-campaigns button:hover {
-  color: var(--ink);
-}
-
-.outreach-campaigns button.is-active {
-  color: #fff;
-  background: var(--green-dark);
+.outreach-campaign-picker select:hover,
+.outreach-campaign-picker select:focus-visible {
+  background: #fff;
+  border-color: #aac4bd;
 }
 
 .outreach-filters {
   display: flex;
   gap: 4px;
   overflow-x: auto;
-  border-top: 1px solid var(--line);
-  padding-top: 12px;
   scrollbar-width: none;
 }
 
@@ -5239,9 +5451,86 @@ button.update-row {
   font-size: 10.5px;
 }
 
-@media (max-width: 700px) {
-  .outreach-bar {
+.outreach-quality-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 0 11px;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.outreach-quality-filter:hover {
+  color: var(--ink);
+  background: var(--canvas);
+}
+
+.outreach-quality-filter[aria-pressed='true'] {
+  color: var(--amber);
+  background: var(--amber-soft);
+  border-color: #ead5bd;
+}
+
+.outreach-quality-filter b {
+  display: grid;
+  place-items: center;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 5px;
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 999px;
+  font-size: 10.5px;
+}
+
+@media (max-width: 980px) {
+  .outreach-controls {
+    grid-template-columns: minmax(200px, 1fr) auto;
+  }
+
+  .outreach-quality-filter {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+}
+
+/* En tablet los tres controles se apilan: contexto, estado y calidad se leen en el
+   mismo orden en que se usan, sin comprimir las etiquetas. */
+@media (max-width: 920px) {
+  .outreach-controls {
+    grid-template-columns: 1fr;
+    gap: 13px;
     padding: 12px;
+  }
+
+  .outreach-quality-filter {
+    grid-column: auto;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .outreach-filters button {
+    min-height: 44px;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 6px 5px;
+    font-size: 11.5px;
+    line-height: 1.15;
+    white-space: normal;
+  }
+
+  .outreach-filters {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 3px;
+    overflow: visible;
   }
 }
 

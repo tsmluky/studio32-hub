@@ -22,6 +22,7 @@ import {
   ListTodo,
   Link as LinkIcon,
   LogOut,
+  Menu,
   MessageCircle,
   Pencil,
   Plus,
@@ -1493,6 +1494,16 @@ function Sidebar({
   onChangePin?: () => void
   onSignOut: () => void | Promise<void>
 }) {
+  const [mobileMoreOpen, setMobileMoreOpen] = useState(false)
+  const mobilePrimaryIds: Array<Exclude<MainView, 'project'>> = ['today', 'tasks', 'projects', 'tools']
+  const mobileSecondaryIds: Array<Exclude<MainView, 'project'>> = ['calendar', 'inbox', 'library']
+  const mobileMoreActive = mobileSecondaryIds.includes(activeView as Exclude<MainView, 'project'>)
+
+  const navigateFromMobile = (target: Exclude<MainView, 'project'>) => {
+    setMobileMoreOpen(false)
+    onNavigate(target)
+  }
+
   return (
     <aside className="sidebar" aria-label="Navegación principal">
       <div className="brand-lockup">
@@ -1508,7 +1519,7 @@ function Sidebar({
         Captura rápida
       </button>
 
-      <nav className="main-navigation">
+      <nav className="main-navigation desktop-navigation">
         {navigation.map((item) => {
           const Icon = item.icon
           const isActive =
@@ -1566,6 +1577,85 @@ function Sidebar({
           <span>Alta de asistente</span>
         </button>
       </nav>
+
+      <nav className="mobile-navigation" aria-label="Navegación móvil">
+        {mobilePrimaryIds.map((itemId) => {
+          const item = navigation.find((candidate) => candidate.id === itemId)!
+          const Icon = item.icon
+          const isActive =
+            item.id === activeView ||
+            (item.id === 'projects' && activeView === 'project') ||
+            (item.id === 'tools' && tools.some((tool) => tool.id === activeView))
+          return (
+            <button
+              key={item.id}
+              type="button"
+              className={isActive ? 'is-active' : ''}
+              onClick={() => navigateFromMobile(item.id)}
+              aria-label={item.label}
+              data-testid={`mobile-nav-${item.id}`}
+            >
+              <Icon size={20} />
+              <span>{item.label}</span>
+            </button>
+          )
+        })}
+        <button
+          type="button"
+          className={mobileMoreOpen || mobileMoreActive ? 'is-active' : ''}
+          onClick={() => setMobileMoreOpen((current) => !current)}
+          aria-label="Más secciones"
+          aria-expanded={mobileMoreOpen}
+          data-testid="mobile-nav-more"
+        >
+          <Menu size={20} />
+          <span>Más</span>
+          {inboxCount > 0 && <b>{inboxCount}</b>}
+        </button>
+      </nav>
+
+      {mobileMoreOpen && (
+        <div className="mobile-more-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && setMobileMoreOpen(false)}>
+          <section className="mobile-more-sheet" role="dialog" aria-modal="true" aria-labelledby="mobile-more-title">
+            <header>
+              <span>
+                <small>Studio32 Hub</small>
+                <strong id="mobile-more-title">Más secciones</strong>
+              </span>
+              <button type="button" onClick={() => setMobileMoreOpen(false)} aria-label="Cerrar más secciones"><X size={18} /></button>
+            </header>
+            <div>
+              {mobileSecondaryIds.map((itemId) => {
+                const item = navigation.find((candidate) => candidate.id === itemId)!
+                const Icon = item.icon
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    className={activeView === item.id ? 'is-active' : ''}
+                    onClick={() => navigateFromMobile(item.id)}
+                  >
+                    <span className="mobile-more-icon"><Icon size={19} /></span>
+                    <span><strong>{item.label}</strong><small>{item.id === 'calendar' ? 'Agenda y próximas citas' : item.id === 'inbox' ? 'Pendientes por ordenar' : 'Recursos y enlaces del equipo'}</small></span>
+                    {item.id === 'inbox' && inboxCount > 0 ? <b>{inboxCount}</b> : <ChevronRight size={17} />}
+                  </button>
+                )
+              })}
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMoreOpen(false)
+                  window.open(ONBOARDING_URL, '_blank', 'noopener,noreferrer')
+                }}
+              >
+                <span className="mobile-more-icon"><Sparkles size={19} /></span>
+                <span><strong>Alta de asistente</strong><small>Configurar un nuevo cliente</small></span>
+                <ChevronRight size={17} />
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
 
       <div className="sidebar-projects">
         <div className="sidebar-section-title">
