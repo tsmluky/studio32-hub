@@ -336,3 +336,18 @@ Las campañas de prueba siguen accesibles en un grupo propio, pero "Todas las ca
 reales" las excluye. El encaje muestra su nombre y escala, aprobar es la única acción
 principal, y la baja permanente vive en "Más opciones". En Historial no se ofrece
 Descartar: bloquear futuros contactos no puede hacer desaparecer un envío ya realizado.
+
+---
+
+## 2026-08-13 · El Hub se siente como un estudio operativo
+
+La interfaz era limpia pero excesivamente plana: mucho blanco sin jerarquía, bordes
+finos en todas partes y metadatos de 8-9px. Se conserva la arquitectura y se renueva el
+sistema visual completo: lienzo cálido, verde profundo Studio32, superficies marfil,
+radios más generosos, profundidad ligera y tamaños de lectura reales.
+
+No se adopta un framework ni se rediseña vista por vista con estilos propios. Los
+tokens y la capa compartida de `src/style.css` gobiernan Hoy, Tareas, Calendario,
+Proyectos, Inbox, Biblioteca, Herramientas, diálogos y proyecto. Así una vista nueva
+hereda identidad sin copiar CSS. Movimiento solo como respuesta breve y con
+`prefers-reduced-motion`; la estética nunca puede reducir la comodidad operativa.

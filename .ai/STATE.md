@@ -13,6 +13,8 @@ se edita a mano**.
 - Vistas: Hoy, Tareas, Calendario, Proyectos, Inbox, Biblioteca y **Herramientas**.
 - Interfaz móvil: cinco destinos en la barra inferior (Hoy, Tareas, Proyectos,
   Herramientas, Más). Calendario, Inbox, Biblioteca y Alta viven en la hoja Más.
+- Sistema visual renovado el 13/08: fondo cálido, verde Studio32, superficies con
+  profundidad ligera, tipografía más legible y el mismo ritmo en todas las vistas.
 - Tablas: `workspaces`, `workspace_members`, `hub_states` y `outreach_*` (4).
 - Repo hermano `studio32-hub-agent` (bot de Telegram, en Railway).
 
@@ -91,6 +93,7 @@ intentos. `git branch -r` y una consulta al esquema de Supabase cuestan un minut
 | Copia en Enviados por IMAP | ✅ desplegada y **verificada con un envío real**: aparece en `INBOX.Sent` |
 | Generar la tanda con la skill | ✅ ejecutado el 12/08: 4 leads reales de fisioterapia en la bandeja |
 | Interfaz Herramientas/Prospección | ✅ revisada con datos reales a 375, 768 y 1280 px |
+| Renovación visual completa | ✅ Hoy, Tareas, Calendario, Proyectos, Inbox, Biblioteca, Herramientas y proyecto real, escritorio y móvil |
 | Pulso de Hoy | ✅ cuenta solo leads vivos y muestra la campaña real de los pendientes |
 
 **La cadena entera está recorrida.** El 12/08 se ejecutó `/prospectar` contra la campaña

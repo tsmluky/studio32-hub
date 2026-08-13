@@ -63,6 +63,18 @@ La acción habitual lleva la jerarquía visual; las acciones permanentes o raras
 en "Más opciones". Un registro ya enviado pertenece al historial y no desaparece al
 bloquear futuros contactos.
 
+## Sistema visual
+
+Los tokens compartidos viven en `:root` y la capa de renovación está al final de
+`src/style.css`, bajo "Renovación visual · agosto 2026". Antes de inventar un color,
+radio o sombra nuevo, reutilizar `--surface`, `--canvas`, `--line`, `--green-*`,
+`--shadow-soft`, `--radius` o `--radius-small`.
+
+La dirección es **estudio operativo**, no dashboard SaaS genérico: fondo cálido,
+verde profundo, profundidad ligera y texto cómodo. Las sombras sirven para separar
+capas, no para decorar cada elemento. Manrope queda para jerarquía y DM Sans para uso
+continuado. Animación corta solo como respuesta; respetar `prefers-reduced-motion`.
+
 ## Modularidad
 
 `src/App.tsx` acumula demasiado (~3.000 líneas). **No añadir vistas nuevas dentro.**

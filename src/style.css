@@ -5620,3 +5620,788 @@ button.update-row {
 .outreach-lead-more:hover {
   text-decoration: underline;
 }
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Renovación visual · agosto 2026
+
+   El Hub es una herramienta de trabajo diaria: cálido y reconocible, pero con la
+   calma de un buen escritorio. Esta capa unifica lo que antes eran superficies muy
+   planas y tipografías demasiado pequeñas sin alterar la arquitectura de las vistas.
+   ────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  --ink: #182622;
+  --muted: #697670;
+  --line: #dce3dc;
+  --surface: #fffefa;
+  --canvas: #f3f4ef;
+  --green: #2d746a;
+  --green-dark: #173e38;
+  --green-soft: #e4f0eb;
+  --blue: #4f6fa8;
+  --blue-soft: #e9eef8;
+  --amber: #ae6d35;
+  --amber-soft: #f7ecdf;
+  --rose: #a55454;
+  --rose-soft: #f8e9e7;
+  --shadow: 0 18px 46px rgba(30, 50, 44, 0.11);
+  --shadow-soft: 0 5px 18px rgba(30, 50, 44, 0.055);
+  --radius: 16px;
+  --radius-small: 11px;
+}
+
+::selection {
+  color: #102f2a;
+  background: #bfe0d7;
+}
+
+body {
+  background:
+    radial-gradient(circle at 72% -18%, rgba(111, 157, 143, 0.12), transparent 34rem),
+    linear-gradient(180deg, #f7f7f3 0, var(--canvas) 330px);
+}
+
+.hub-shell {
+  grid-template-columns: 258px minmax(0, 1fr);
+}
+
+.sidebar {
+  padding: 24px 17px 17px;
+  background:
+    radial-gradient(circle at 16% 0, rgba(105, 166, 151, 0.18), transparent 18rem),
+    linear-gradient(180deg, #193b35 0%, #18342f 58%, #142e2a 100%);
+  border-right: 0;
+  box-shadow: 8px 0 34px rgba(20, 45, 39, 0.08);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+
+.sidebar::-webkit-scrollbar {
+  display: none;
+}
+
+.brand-lockup {
+  gap: 12px;
+}
+
+.brand-lockup strong {
+  font-size: 14.5px;
+  letter-spacing: -0.02em;
+}
+
+.brand-lockup small {
+  color: #a8bbb5;
+  font-size: 11.5px;
+}
+
+.brand-mark {
+  width: 39px;
+  height: 39px;
+  flex-basis: 39px;
+  background: linear-gradient(145deg, #4b9187, #2f6f67);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 11px;
+  box-shadow: 0 6px 18px rgba(7, 30, 25, 0.2), inset 0 1px rgba(255, 255, 255, 0.14);
+}
+
+.sidebar-capture {
+  min-height: 43px;
+  margin: 24px 0 18px;
+  color: #183a34;
+  background: linear-gradient(180deg, #edf7f2, #dcece5);
+  border-radius: 11px;
+  box-shadow: 0 7px 18px rgba(6, 27, 23, 0.16);
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+.sidebar-capture:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 23px rgba(6, 27, 23, 0.2);
+}
+
+.main-navigation {
+  gap: 5px;
+}
+
+.main-navigation button,
+.sidebar-projects button {
+  min-height: 41px;
+  padding: 0 11px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  transition: color 0.14s ease, background 0.14s ease, transform 0.14s ease;
+}
+
+.main-navigation button:hover,
+.sidebar-projects button:hover {
+  transform: translateX(2px);
+}
+
+.main-navigation button.is-active,
+.sidebar-projects button.is-active {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.075));
+  box-shadow: inset 3px 0 #86c3b7, 0 5px 16px rgba(8, 28, 24, 0.12);
+}
+
+.sidebar-tools {
+  margin-left: 22px;
+  padding: 4px 0 4px 10px;
+  border-left-color: rgba(151, 198, 188, 0.22);
+}
+
+.sidebar-tools button {
+  min-height: 34px;
+  border-radius: 8px;
+}
+
+.sidebar-section-title,
+.sidebar-team {
+  letter-spacing: 0.06em;
+}
+
+.workspace-topbar {
+  min-height: 70px;
+  padding: 0 36px;
+  background: rgba(255, 255, 252, 0.86);
+  border-bottom-color: rgba(210, 220, 213, 0.8);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.85), 0 7px 24px rgba(36, 53, 48, 0.035);
+  backdrop-filter: blur(18px) saturate(1.12);
+}
+
+.global-search {
+  height: 42px;
+  padding: 0 13px;
+  background: rgba(239, 242, 237, 0.86);
+  border-color: rgba(220, 227, 220, 0.7);
+  border-radius: 12px;
+}
+
+.global-search input {
+  font-size: 13.5px;
+}
+
+.primary-action,
+.secondary-action,
+.small-primary,
+.text-button,
+.team-capacity {
+  border-radius: 10px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+
+.primary-action {
+  min-height: 40px;
+  padding: 0 16px;
+  background: linear-gradient(180deg, #214c45, var(--green-dark));
+  box-shadow: 0 6px 15px rgba(23, 62, 56, 0.16);
+  font-size: 12.5px;
+}
+
+.primary-action:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 9px 20px rgba(23, 62, 56, 0.2);
+}
+
+.secondary-action {
+  min-height: 40px;
+  padding: 0 15px;
+  background: rgba(255, 255, 252, 0.9);
+  box-shadow: 0 2px 7px rgba(31, 50, 44, 0.035);
+  font-size: 12.5px;
+}
+
+.secondary-action:hover {
+  transform: translateY(-1px);
+  border-color: #afc6bf;
+  box-shadow: var(--shadow-soft);
+}
+
+.page,
+.project-page {
+  width: min(1240px, calc(100% - 72px));
+  padding: 44px 0 72px;
+}
+
+.narrow-page {
+  width: min(1020px, calc(100% - 72px));
+}
+
+.page-heading {
+  margin-bottom: 30px;
+}
+
+.eyebrow {
+  margin-bottom: 8px;
+  color: #337b70;
+  font-size: 10.5px;
+  letter-spacing: 0.11em;
+}
+
+.page-heading h1 {
+  margin-bottom: 7px;
+  font-size: clamp(29px, 2.6vw, 35px);
+  line-height: 1.1;
+  letter-spacing: -0.035em;
+}
+
+.page-heading p {
+  max-width: 680px;
+  color: #6e7975;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.surface,
+.projects-overview,
+.project-branch-summary {
+  background: rgba(255, 255, 252, 0.96);
+  border-color: rgba(216, 224, 217, 0.95);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+}
+
+.section-header {
+  min-height: 56px;
+  padding: 0 21px;
+  border-bottom-color: #e9eee9;
+}
+
+.section-header > span:first-child {
+  gap: 9px;
+}
+
+.section-header strong {
+  font-size: 13px;
+  letter-spacing: -0.01em;
+}
+
+.section-action {
+  font-size: 10.5px;
+}
+
+.daily-summary {
+  min-height: 94px;
+  margin-bottom: 24px;
+  background: rgba(255, 255, 252, 0.97);
+  border-color: rgba(216, 224, 217, 0.95);
+  border-radius: 18px;
+  box-shadow: var(--shadow-soft);
+}
+
+.summary-metric {
+  padding: 0 22px;
+}
+
+.summary-metric strong {
+  font-size: 27px;
+  letter-spacing: -0.04em;
+}
+
+.summary-metric span {
+  font-size: 10.5px;
+  line-height: 1.25;
+}
+
+.summary-focus {
+  padding: 0 24px;
+  background:
+    radial-gradient(circle at 88% 25%, rgba(126, 186, 171, 0.24), transparent 12rem),
+    linear-gradient(135deg, #214d46, #173b36);
+}
+
+.summary-focus small {
+  color: #a9c9c1;
+  letter-spacing: 0.06em;
+}
+
+.summary-focus strong {
+  font-size: 13px;
+}
+
+.outreach-pulse {
+  min-height: 70px;
+  margin-bottom: 20px;
+  padding: 16px 19px;
+  background: linear-gradient(135deg, #e4f1ec, #edf6f1);
+  border-color: #cfe2da;
+  border-radius: 16px;
+  box-shadow: 0 5px 16px rgba(39, 103, 91, 0.055);
+}
+
+.outreach-pulse:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-soft);
+}
+
+.team-focus-item {
+  min-height: 122px;
+  padding: 19px 20px;
+}
+
+.team-focus-meta strong {
+  font-size: 12px;
+}
+
+.team-focus-content p {
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.today-grid,
+.project-overview-grid,
+.library-grid {
+  gap: 20px;
+}
+
+.task-command-bar {
+  gap: 16px;
+  margin-bottom: 18px;
+  padding: 16px;
+}
+
+.segmented-control {
+  padding: 4px;
+  background: #edf1ec;
+  border-radius: 10px;
+}
+
+.segmented-control button {
+  min-height: 38px;
+  border-radius: 7px;
+  font-size: 10.5px;
+}
+
+.task-filter-tabs {
+  gap: 7px;
+}
+
+.task-filter-tabs button {
+  min-height: 37px;
+  padding: 0 12px;
+  border-radius: 9px;
+  font-size: 10px;
+}
+
+.task-row {
+  min-height: 68px;
+  gap: 11px;
+}
+
+.task-title-button,
+.task-content > strong {
+  font-size: 13px;
+}
+
+.task-content small,
+.task-content > span button {
+  font-size: 9.5px;
+}
+
+.task-edit-button,
+.icon-button {
+  border-radius: 10px;
+}
+
+.calendar-toolbar {
+  min-height: 64px;
+  margin-bottom: 14px;
+  padding: 0 17px;
+}
+
+.calendar-toolbar h2 {
+  font-size: 17px;
+  letter-spacing: -0.02em;
+}
+
+.calendar-layout {
+  gap: 14px;
+}
+
+.calendar-month,
+.calendar-day-panel {
+  overflow: hidden;
+}
+
+.calendar-grid > button {
+  min-height: 108px;
+  padding: 10px;
+  background: #fffefa;
+}
+
+.calendar-grid > button:hover {
+  background: #f2f8f4;
+}
+
+.calendar-grid > button.is-selected {
+  background: #edf6f2;
+  box-shadow: inset 0 0 0 2px #73a69c;
+}
+
+.calendar-weekdays {
+  min-height: 39px;
+  background: #f5f7f3;
+}
+
+.project-branch-summary {
+  min-height: 54px;
+  margin-bottom: 18px;
+  overflow: hidden;
+}
+
+.project-branch-summary strong {
+  font-size: 18px;
+}
+
+.project-table {
+  border-radius: var(--radius);
+}
+
+.project-table-head {
+  min-height: 46px;
+  padding: 0 23px;
+  background: #f6f8f4;
+  font-size: 9.5px;
+  letter-spacing: 0.045em;
+}
+
+.project-table-row {
+  min-height: 98px;
+  padding: 15px 23px;
+}
+
+.project-table-row:hover {
+  background: #f7faf6;
+}
+
+.project-branch-head {
+  min-height: 39px;
+  padding: 0 23px;
+  background: #eef3ee;
+}
+
+.project-name-cell strong {
+  font-size: 13px;
+}
+
+.project-name-cell small,
+.milestone-cell small {
+  font-size: 9.5px;
+}
+
+.milestone-cell strong {
+  font-size: 11px;
+}
+
+.inbox-toolbar {
+  min-height: 55px;
+  padding: 0 21px;
+  background: #f7f8f5;
+}
+
+.inbox-toolbar span {
+  font-size: 11px;
+}
+
+.inbox-row {
+  min-height: 94px;
+  padding: 15px 0;
+}
+
+.inbox-content strong {
+  font-size: 12.5px;
+}
+
+.inbox-content small {
+  font-size: 10px;
+}
+
+.capture-type {
+  min-width: 57px;
+  height: 25px;
+  border-radius: 7px;
+  font-size: 8.5px;
+}
+
+.resource-list,
+.decision-list {
+  padding-right: 20px;
+  padding-left: 20px;
+}
+
+.resource-row {
+  min-height: 68px;
+}
+
+.resource-icon {
+  width: 37px;
+  height: 37px;
+  border-radius: 10px;
+}
+
+.resource-row strong,
+.decision-list strong {
+  font-size: 11.5px;
+}
+
+.resource-row small,
+.decision-list small {
+  font-size: 9.5px;
+}
+
+.decision-list > button,
+.decision-list > article {
+  padding: 16px 0;
+}
+
+.tool-row {
+  min-height: 78px;
+  padding: 15px 14px;
+  border-radius: 13px;
+}
+
+.tool-row:hover,
+.tool-row:focus-visible {
+  background: #f0f6f2;
+  transform: translateX(2px);
+}
+
+.tool-icon {
+  width: 44px;
+  height: 44px;
+  flex-basis: 44px;
+  border-radius: 13px;
+}
+
+.tool-copy strong {
+  font-size: 14.5px;
+}
+
+.tool-copy small {
+  font-size: 12.5px;
+}
+
+.project-page {
+  padding-top: 32px;
+}
+
+.project-header {
+  min-height: 190px;
+  padding: 32px 34px;
+  background:
+    radial-gradient(circle at 82% 18%, rgba(124, 183, 169, 0.28), transparent 18rem),
+    linear-gradient(135deg, #234a43 0%, #173832 72%);
+  border-top-width: 5px;
+  border-radius: 19px 19px 0 0;
+  box-shadow: 0 15px 40px rgba(22, 55, 49, 0.13);
+}
+
+.project-header h1 {
+  font-size: 30px;
+  letter-spacing: -0.035em;
+}
+
+.project-header p {
+  font-size: 13px;
+}
+
+.project-edit-action {
+  min-height: 37px;
+  padding: 0 13px;
+  border-radius: 10px;
+  font-size: 10px;
+}
+
+.project-context-bar {
+  min-height: 64px;
+  padding: 0 28px;
+  background: #fffefa;
+}
+
+.project-context-bar strong {
+  font-size: 11px;
+}
+
+.project-tabs {
+  min-height: 58px;
+  margin-bottom: 21px;
+  padding: 0 9px;
+  background: #fffefa;
+  border-radius: 0 0 16px 16px;
+  box-shadow: var(--shadow-soft);
+}
+
+.project-tabs button {
+  height: 57px;
+  padding: 0 15px;
+  font-size: 11px;
+}
+
+.capture-dialog {
+  border-color: rgba(211, 220, 213, 0.95);
+  border-radius: 18px;
+  box-shadow: 0 28px 90px rgba(18, 38, 33, 0.25);
+}
+
+.capture-dialog > header {
+  min-height: 74px;
+  padding: 0 22px;
+}
+
+.capture-dialog header strong {
+  font-size: 13.5px;
+}
+
+.capture-dialog header small {
+  font-size: 10px;
+}
+
+.dialog-icon {
+  width: 37px;
+  height: 37px;
+  border-radius: 11px;
+}
+
+.capture-dialog input,
+.capture-dialog select {
+  height: 43px;
+  border-radius: 9px;
+  font-size: 12px;
+}
+
+.capture-dialog textarea {
+  border-radius: 9px;
+  font-size: 12px;
+}
+
+.empty-state {
+  min-height: 245px;
+}
+
+.empty-state svg {
+  padding: 7px;
+  overflow: visible;
+  background: var(--green-soft);
+  border-radius: 13px;
+}
+
+.empty-state strong {
+  font-size: 13.5px;
+}
+
+.empty-state p {
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+@media (max-width: 920px) {
+  .hub-shell {
+    display: block;
+  }
+
+  .sidebar {
+    padding: 6px 12px env(safe-area-inset-bottom);
+    background: rgba(20, 48, 43, 0.97);
+    box-shadow: 0 -10px 30px rgba(20, 45, 39, 0.13);
+    overflow: visible;
+  }
+
+  .mobile-navigation button {
+    border-radius: 11px;
+    font-size: 10px;
+  }
+
+  .mobile-navigation button.is-active {
+    background: rgba(255, 255, 255, 0.13);
+    box-shadow: inset 0 2px #9bcec3, 0 5px 14px rgba(4, 25, 21, 0.1);
+  }
+
+  .workspace-topbar {
+    padding-right: 18px;
+    padding-left: 18px;
+  }
+
+  .page,
+  .project-page,
+  .narrow-page {
+    width: min(100% - 32px, 1220px);
+    padding-top: 30px;
+  }
+
+  .page-heading h1 {
+    font-size: clamp(27px, 5vw, 33px);
+  }
+
+  .surface,
+  .projects-overview,
+  .project-branch-summary {
+    border-radius: 14px;
+  }
+}
+
+@media (max-width: 560px) {
+  .workspace-topbar {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .page,
+  .project-page,
+  .narrow-page {
+    width: min(100% - 24px, 1220px);
+    padding-top: 25px;
+  }
+
+  .page-heading {
+    margin-bottom: 24px;
+  }
+
+  .page-heading h1 {
+    font-size: 27px;
+  }
+
+  .page-heading p {
+    font-size: 13.5px;
+  }
+
+  .daily-summary {
+    border-radius: 15px;
+  }
+
+  .task-filter-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    overflow: visible;
+  }
+
+  .task-filter-tabs button {
+    justify-content: center;
+    min-width: 0;
+    padding: 0 6px;
+  }
+
+  .section-header {
+    padding: 0 16px;
+  }
+
+  .project-header {
+    padding: 26px 22px;
+    border-radius: 16px 16px 0 0;
+  }
+
+  .project-header h1 {
+    font-size: 27px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
