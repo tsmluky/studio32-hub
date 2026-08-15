@@ -1,6 +1,6 @@
 # Estado — studio32-hub
 
-> Se **sobrescribe**, no se acumula. Tope ~100 líneas. Última actualización: 2026-08-13.
+> Se **sobrescribe**, no se acumula. Tope ~100 líneas. Última actualización: 2026-08-15.
 
 ## Qué es
 
@@ -108,7 +108,7 @@ compartido y la decide una persona.
 | `import-outreach.mjs` | ✅ probado con `scripts/outreach-ejemplo.json` |
 | Deno deja salir el 993 (IMAP) | ✅ verificado el 12/08 |
 | Copia en Enviados por IMAP | ✅ desplegada y **verificada con un envío real**: aparece en `INBOX.Sent` |
-| Generar la tanda con la skill | ✅ ejecutado el 12/08: 4 leads reales de fisioterapia en la bandeja |
+| Generar la tanda con la skill | ✅ 12/08 (4 de fisioterapia) y 15/08 (6 de dentales · valencia) |
 | Interfaz Herramientas/Prospección | ✅ revisada con datos reales a 375, 768 y 1280 px |
 | Renovación visual completa | ✅ Hoy, Tareas, Calendario, Proyectos, Inbox, Biblioteca, Herramientas y proyecto real, escritorio y móvil |
 | Pulso de Hoy | ✅ cuenta solo leads vivos y muestra la campaña real de los pendientes |
@@ -124,6 +124,13 @@ citas literales de reseñas.** Ocho de nueve centros publicaban correo; solo cua
 una reseña con autor localizable. Está apuntado en `docs/PROSPECCION.md`, junto con el
 detalle de que en fisioterapia las opiniones de Doctoralia cuelgan del profesional y no
 del centro.
+
+El 15/08 se sirvió la campaña "Clínicas dentales · valencia" (pedía 15): **6 leads con
+sus 6 borradores**, sigue `abierta` con 9 por generar. En dentales la puerta que descarta
+es la contraria, el **correo**: reseñas hay de sobra, pero cinco de doce clínicas con web
+propia no publican ninguna dirección. También en `docs/PROSPECCION.md`, con los dos
+atajos que ahorran tiempo (salir del listado de Doctoralia, y mirar el aviso legal antes
+de descartar por falta de correo).
 
 **Desplegar la función:** `npm run fn:deploy`. Lleva `--use-api` porque el empaquetado
 local falla en este portátil (busca un `output.eszip` que no genera) y además ensucia el

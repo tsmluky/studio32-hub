@@ -178,6 +178,22 @@ Sectores que sí funcionan, comprobado: **clínicas dentales** (publican correo 
 siempre, tienen web y reseñas abundantes) y **fisioterapia** (comprobado el 12/08/2026 en
 Guadalajara: de nueve centros con web propia, ocho publicaban correo).
 
+**En clínicas dentales el cuello de botella es justo el contrario: el correo.**
+Comprobado el 15/08/2026 en Valencia: reseñas sobran —cualquier clínica con ficha en
+Doctoralia pasa de 100 opiniones con citas literales y autor— pero de doce candidatas
+con web propia, **cinco no publicaban ninguna dirección de correo**, ni en contacto ni
+en el aviso legal. Cribar por correo primero, como dice el paso 2, y no al revés.
+
+Dos atajos que ahorran la mitad del tiempo en este sector:
+
+- **`doctoralia.es/clinicas/odontologia/<ciudad>` es el mejor punto de partida.** Lista
+  clínicas con su dirección, su número de opiniones y el enlace a su ficha. Adivinar el
+  slug de una clínica concreta (`/clinicas/<nombre-que-suena-bien>`) devuelve 404 casi
+  siempre; salir del listado, no.
+- **Si no hay correo en contacto, mirar el aviso legal antes de descartar.** Varias lo
+  publican solo ahí, a nombre del titular. Cuenta como correo público, pero conviene
+  anotarlo en `confianza` porque a veces es una cuenta personal.
+
 **En fisioterapia el cuello de botella no es el correo, son las reseñas.** Ocho de nueve
 tenían correo público, pero solo cuatro tenían una cita literal con autor localizable, y
 por eso solo cuatro pasaron la puerta. Al cribar, comprobar el correo **y** que exista
