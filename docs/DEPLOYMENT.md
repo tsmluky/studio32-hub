@@ -48,11 +48,25 @@ La migración SQL versionada está en `supabase/migrations`. La web pública no 
 
 ## Publicación web
 
-1. Ejecutar `npm run build:static` con las variables públicas de Supabase.
-2. Publicar el contenido de `static-dist` en `tsmluky/studio32-hub-live`.
-3. GitHub Pages sirve la rama `main` desde la raíz.
-4. El archivo `public/CNAME` mantiene asociado `www.hub.studio32.es`.
-5. El repositorio de despliegue solo contiene artefactos compilados; el código fuente permanece en el repositorio privado.
+**No hay ningún paso manual: se publica al hacer push a `main`.** Cloudflare Pages está
+conectado al repositorio desde su propio panel, construye y despliega. Cada rama obtiene
+además su vista previa en `<rama>.studio32-hub.pages.dev`, que es de donde salió el
+enlace de prueba de la prospección.
+
+Como la configuración vive en el panel de Cloudflare y no en el repo, aquí no hay
+archivo que leer: el comando de build y el directorio de salida se consultan allí.
+
+`npm run build:static` sigue existiendo para reproducir el build en local (sale en
+`static-dist/`), pero **publicar no requiere ejecutarlo**.
+
+### Aviso: `studio32-hub-live` está muerto
+
+Era el despliegue anterior, por GitHub Pages. **Ya no sirve el sitio.** Su último commit
+es del 20/07/2026 y producción entrega un bundle distinto del que contiene. Si alguien
+copia `static-dist` ahí creyendo que publica, no publica nada y además parecerá que sí.
+
+Comprobado el 15/08/2026: `hub.studio32.es` responde `Server: cloudflare`, y un arreglo
+de CSS empujado a `main` estaba en vivo pocos minutos después sin tocar nada más.
 
 ## Google Calendar
 

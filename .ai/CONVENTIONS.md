@@ -93,8 +93,18 @@ Herramienta nueva de la sección Herramientas = una entrada en `tools`
 
 ## Deploy
 
-`studio32-hub-live` es el repo de publicación y contiene **build generado**. No se
-edita a mano nunca. `static-dist/` tampoco se toca a mano.
+**Se publica solo: push a `main` y Cloudflare Pages construye y despliega.** No hay
+nada que ejecutar a mano ni ningún archivo de configuración en el repo — la conexión
+con GitHub vive en el panel de Cloudflare. Las ramas obtienen su propia vista previa
+en `<rama>.studio32-hub.pages.dev`.
+
+Comprobado el 15/08/2026: `hub.studio32.es` responde con `Server: cloudflare` y servía
+un arreglo de CSS pocos minutos después de empujarlo.
+
+**`studio32-hub-live` ya NO se usa.** Era el despliegue por GitHub Pages y su último
+commit es del 20/07/2026; producción sirve un bundle distinto del que hay ahí. Si
+alguien lo actualiza pensando que publica algo, no publica nada. `static-dist/` sigue
+siendo build generado y no se toca a mano.
 
 ## Secretos
 

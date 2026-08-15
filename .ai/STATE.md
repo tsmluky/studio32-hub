@@ -5,8 +5,11 @@
 ## Qué es
 
 Workspace interno del equipo (Juanma, Pancho, Gonzalo). Vive en `hub.studio32.es`.
-El build estático se publica desde el repo gemelo `studio32-hub-live` — **generado, no
-se edita a mano**.
+
+**Se publica solo: push a `main` y Cloudflare Pages lo despliega.** Nada que ejecutar.
+El repo gemelo `studio32-hub-live` **está muerto** — era el despliegue por GitHub Pages,
+su último commit es del 20/07 y producción sirve otro bundle. Actualizarlo no publica
+nada. Comprobado el 15/08.
 
 ## Dónde está ahora
 
