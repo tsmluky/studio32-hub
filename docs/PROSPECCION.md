@@ -187,6 +187,31 @@ y se cae después de haber gastado el tiempo.
 Si descubres otro sector muerto, **apúntalo aquí**. Es lo que impide que la siguiente
 pasada vuelva a gastar media hora en lo mismo.
 
+## Zonas ya exprimidas
+
+**Fisioterapia · Guadalajara capital — agotada a 15/08/2026, con 7 leads.** No es que el
+sector falle: es que la ciudad tiene los centros que tiene. Estos se comprobaron uno a
+uno y **no entran**, así que no vuelvas a investigarlos salvo que cambie algo:
+
+| Negocio | Correo | Por qué se cayó |
+| --- | --- | --- |
+| Clínica Corposane | sí | Ficha de Doctoralia vacía. Comprobado dos veces |
+| Pelvitae | sí | 55 opiniones, pero ninguna citable con autor |
+| Fisioalma | sí | Solo un testimonio en su web, sin firmar |
+| Instituto de Fisioterapia y Deporte | sí | "Aún no ha recibido ninguna opinión" |
+| Alea Fisioterapia | sí | 151 reseñas en Google, ninguna citable con autor |
+| Fisioterapia Peinado | sí | Sin ficha localizable con opiniones |
+| Fisiolux | **no** | No publica correo |
+| Arte Fisioterapia | **no** | Su web no carga (error de TLS) y no hay correo en ningún directorio |
+
+Fíjate en el patrón: **seis de los ocho tienen correo y se caen igual, por las reseñas.**
+Confirma lo de más arriba — en fisioterapia la puerta que descarta no es el correo.
+
+**Dónde seguir cuando haga falta más volumen:** Azuqueca de Henares (19200) tiene al
+menos cuatro centros con web propia sin tocar —FisioAzuqueca, Fisiobrain, Alana,
+Policlínica Acacias—. Es campaña aparte, no se coló en esta: la que estaba pedida decía
+Guadalajara y ampliar la zona por mi cuenta habría falseado lo que se encargó.
+
 ## Cuánto cuesta una tanda
 
 Verificar un lead de verdad son 2-3 páginas cargadas: su web, sus reseñas, y a veces una
