@@ -109,6 +109,8 @@ compartido y la decide una persona.
 | Interfaz Herramientas/Prospección | ✅ revisada con datos reales a 375, 768 y 1280 px |
 | Renovación visual completa | ✅ Hoy, Tareas, Calendario, Proyectos, Inbox, Biblioteca, Herramientas y proyecto real, escritorio y móvil |
 | Pulso de Hoy | ✅ cuenta solo leads vivos y muestra la campaña real de los pendientes |
+| Portada y cola dicen lo mismo | ✅ 15/08: 3 y 3, ya sin rodeo — los 7 huérfanos se borraron |
+| Controles de Prospección | ✅ 15/08: sin recorte ni desborde a 375, 900, 1024 y 1280 |
 
 **La cadena entera está recorrida.** El 12/08 se ejecutó `/prospectar` contra la campaña
 "Fisioterapia · Guadalajara" y subió 4 leads con sus 4 borradores. Sigue `pedida`→`abierta`
@@ -160,12 +162,17 @@ delante de un cliente.
 
 ## Ojo con esto
 
-Hay un correo real preparado para **Clínica Dental Dr. Garcés** (`cdentaldrgarces@gmail.com`)
-desde los datos semilla del 04/08. Estuvo marcado como `aprobado` sin que nadie lo hubiera
-revisado, y una tanda de envío lo habría mandado. Se devolvió a `borrador` el 11/08.
-
 **Antes de pulsar Enviar, mirar siempre qué hay en la cola de aprobados.** El diálogo de
-confirmación lista los destinatarios: leerlo, no darle a aceptar.
+confirmación lista los destinatarios: leerlo, no darle a aceptar. Viene de un susto real:
+el seed del 04/08 dejó un correo a **Clínica Dental Dr. Garcés** marcado como `aprobado`
+sin que nadie lo hubiera revisado, y una tanda de envío lo habría mandado. Se devolvió a
+`borrador` el 11/08 y el lead se borró el 15/08 al limpiar los descartados.
+
+**Descartar borra el lead y su borrador** (15/08). Un negocio descartado puede volver en
+una tanda futura si pasa la puerta — es deliberado. Lo que no vuelve nunca es quien esté
+en la lista de bajas, que va por dirección y sobrevive a todo. Un lead con correo ya
+enviado no se borra: se marca, porque la FK es `on delete cascade` y la cascada se
+saltaría las políticas que protegen lo enviado.
 
 **`from_email` tiene que ser un alias que exista en Hostinger.** Los que hay:
 `info`, `citas`, `contacto`, `francisco`, `gonzalo`, `hello`, `juanma`, `kikos`,

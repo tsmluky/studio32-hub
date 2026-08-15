@@ -46,16 +46,35 @@ export default function OutreachView({
   // Lo encargado y aun sin leads: no entra en los filtros de revision porque
   // todavia no hay nada que revisar.
   const pedidas = campaigns.filter((campana) => campana.status === 'pedida')
-  const selectableCampaigns = campaigns.filter((campaign) => campaign.status !== 'pedida')
+
+  // Una campaña sin ningún lead vivo no se ofrece: seleccionarla solo puede llevar a
+  // una lista vacía. Pasaba con las que se agotaron descartando (Alcalá, Valencia,
+  // Torrejón), que seguían en el selector como si tuvieran trabajo dentro.
+  //
+  // Se deriva de los leads en vez de mirar `campaign.status` para que se mantenga
+  // sola: en cuanto se descarta el último lead, la campaña desaparece de aquí sin que
+  // nadie tenga que acordarse de cerrarla. La fila de la campaña sigue en la base —es
+  // el registro de que ese sector se intentó— pero deja de estorbar.
+  const campanasConLeads = new Set(
+    leads.filter((lead) => lead.status !== 'descartado').map((lead) => lead.campaign_id),
+  )
+  const selectableCampaigns = campaigns.filter(
+    (campaign) => campaign.status !== 'pedida' && campanasConLeads.has(campaign.id),
+  )
   const realCampaigns = selectableCampaigns.filter((campaign) => !/^prueba\b/i.test(campaign.name.trim()))
   const testCampaigns = selectableCampaigns.filter((campaign) => /^prueba\b/i.test(campaign.name.trim()))
   const testCampaignIds = new Set(testCampaigns.map((campaign) => campaign.id))
+
+  // Si la campaña elegida se queda sin leads mientras la miras —descartas el último—,
+  // deja de estar en la lista y la selección apuntaría a la nada. Se vuelve a "todas"
+  // sola en vez de enseñar una vista vacía sin explicación.
+  const activeCampaignId = selectableCampaigns.some((campaign) => campaign.id === campaignId) ? campaignId : 'all'
 
   const latestMessageFor = (leadId: string) => messages.find((message) => message.lead_id === leadId)
 
   const scopedLeads = leads.filter((lead) => {
     if (lead.status === 'descartado') return false
-    if (campaignId !== 'all') return lead.campaign_id === campaignId
+    if (activeCampaignId !== 'all') return lead.campaign_id === activeCampaignId
     return !lead.campaign_id || !testCampaignIds.has(lead.campaign_id)
   })
 
@@ -175,7 +194,7 @@ export default function OutreachView({
           <section className="outreach-controls surface">
             <label className="outreach-campaign-picker">
               <span>Campaña</span>
-              <select value={campaignId} onChange={(event) => setCampaignId(event.target.value)}>
+              <select value={activeCampaignId} onChange={(event) => setCampaignId(event.target.value)}>
                 <option value="all">Todas las campañas reales</option>
                 {realCampaigns.map((campaign) => <option key={campaign.id} value={campaign.id}>{campaign.name}</option>)}
                 {testCampaigns.length > 0 && (

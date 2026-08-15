@@ -5360,10 +5360,22 @@ button.update-row {
 
 /* ── Prospección: contexto, estado y calidad son filtros distintos ── */
 
+/* Los tres controles se envuelven; no se comprimen.
+
+   Antes eran tres columnas de rejilla en una sola línea. El problema es que las
+   media queries miden la VENTANA y lo que manda aquí es el ancho que queda tras el
+   sidebar: a 1024px de ventana esta fila solo dispone de ~680px, necesita ~780, y
+   ninguno de los cortes (980px, 920px) ha entrado todavía. La rejilla encogía la
+   columna del estado a 209px para un contenido de 378 y "Historial" quedaba fuera,
+   alcanzable solo con un scroll horizontal cuya barra está oculta a propósito unas
+   líneas más abajo. Es decir: una pestaña entera desaparecida sin ninguna pista.
+
+   Envolviendo se arregla solo y deja de depender de acertar el breakpoint, que es la
+   misma trampa que ya costó la navegación en la ventana estrecha de escritorio. */
 .outreach-controls {
-  display: grid;
-  grid-template-columns: minmax(220px, 1fr) auto auto;
-  align-items: end;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
   gap: 16px;
   margin-bottom: 14px;
   padding: 14px 16px;
@@ -5373,7 +5385,18 @@ button.update-row {
 .outreach-state-filter {
   display: grid;
   gap: 7px;
-  min-width: 0;
+}
+
+/* La campaña absorbe el espacio sobrante; el estado nunca baja de lo que ocupa su
+   propio texto, así que si no cabe salta de línea en vez de recortarse. */
+.outreach-campaign-picker {
+  flex: 1 1 220px;
+  min-width: 200px;
+}
+
+.outreach-state-filter {
+  flex: 0 1 auto;
+  min-width: max-content;
 }
 
 .outreach-campaign-picker > span,
@@ -5489,28 +5512,30 @@ button.update-row {
   font-size: 10.5px;
 }
 
-@media (max-width: 980px) {
-  .outreach-controls {
-    grid-template-columns: minmax(200px, 1fr) auto;
-  }
-
-  .outreach-quality-filter {
-    grid-column: 1 / -1;
-    justify-self: start;
-  }
-}
+/* El corte de 980px que había aquí sobra: repartía las columnas a mano para un caso
+   que el envoltorio ya resuelve solo, y además llegaba tarde —el problema aparecía
+   antes, en cuanto el sidebar dejaba la fila por debajo de ~780px—. */
 
 /* En tablet los tres controles se apilan: contexto, estado y calidad se leen en el
    mismo orden en que se usan, sin comprimir las etiquetas. */
 @media (max-width: 920px) {
   .outreach-controls {
-    grid-template-columns: 1fr;
+    flex-direction: column;
+    align-items: stretch;
     gap: 13px;
     padding: 12px;
   }
 
+  /* Apilados dejan de competir por el ancho, así que se sueltan los mínimos. El de
+     `max-content` es importante quitarlo: son ~380px y en un móvil de 375 desbordaría
+     la pantalla entera. Abajo, `.outreach-filters` pasa a tres columnas iguales y ya
+     reparte el ancho disponible. */
+  .outreach-campaign-picker,
+  .outreach-state-filter {
+    min-width: 0;
+  }
+
   .outreach-quality-filter {
-    grid-column: auto;
     width: 100%;
     justify-content: center;
   }

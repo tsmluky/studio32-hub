@@ -184,12 +184,53 @@ export function useOutreach(enabled: boolean) {
     reload()
   }
 
+  // Descartar borra de verdad; no marca y deja el rastro.
+  //
+  // Marcarlo dejaba dos problemas, y el segundo es el que importa:
+  //
+  //   1. El borrador seguía vivo en 'borrador' para siempre. La portada llegó a decir
+  //      "10 correos esperan tu visto bueno" con 3 en la cola. Se tapó contando solo
+  //      mensajes de leads vivos, pero las filas seguían ahí.
+  //   2. El negocio quedaba congelado como 'descartado'. Una tanda futura lo
+  //      reconocía por dominio, le refrescaba la huella y la puntuación... y no
+  //      volvía a la revisión NUNCA, porque el importador no toca el estado a
+  //      propósito. Un lead descartado por evidencia floja no podía volver aunque
+  //      después apareciesen reseñas buenas.
+  //
+  // Borrarlo lo devuelve al punto de partida: si la siguiente pasada lo encuentra y
+  // pasa la puerta, entra como nuevo. El precio es que un negocio que no interesa
+  // puede reaparecer y haya que descartarlo otra vez; se acepta a cambio de no perder
+  // los que sí mejoran.
+  //
+  // **Descartar no es la baja.** Lo que no vuelve nunca es quien esté en
+  // `outreach_suppressions`, que va por dirección y sobrevive a que el negocio se
+  // borre, se renombre o vuelva dentro de otra campaña.
+  //
+  // Excepción, y no es menor: un lead con un correo ya enviado NO se borra.
+  // `outreach_messages.lead_id` cuelga del lead con `on delete cascade`, y la cascada
+  // no pasa por las políticas de la tabla —que prohíben borrar lo enviado—, así que
+  // borrar el lead se llevaría por delante el registro del envío sin avisar. Eso es
+  // historia, no un borrador. Se comprueba contra la base y no contra el estado local,
+  // porque de esto no se vuelve.
   const discardLead = async (leadId: string) => {
     if (!supabase) return
-    const { error: discardError } = await supabase
-      .from('outreach_leads')
-      .update({ status: 'descartado' })
-      .eq('id', leadId)
+
+    const { data: enviados, error: readError } = await supabase
+      .from('outreach_messages')
+      .select('id')
+      .eq('lead_id', leadId)
+      .in('status', ['enviado', 'enviando'])
+      .limit(1)
+
+    if (readError) {
+      setError('No se ha podido comprobar si a este lead ya se le escribió.')
+      return
+    }
+
+    const { error: discardError } = enviados?.length
+      ? await supabase.from('outreach_leads').update({ status: 'descartado' }).eq('id', leadId)
+      : await supabase.from('outreach_leads').delete().eq('id', leadId)
+
     if (discardError) setError('No se ha podido descartar el lead.')
     reload()
   }
@@ -223,10 +264,13 @@ export function useOutreachPulse(enabled: boolean) {
     let cancelled = false
 
     const load = async () => {
-      // El `!inner` no es decorativo: descartar un lead no toca su mensaje, que se
-      // queda en 'borrador' para siempre. Además se trae el nombre de SU campaña;
-      // elegir simplemente la última abierta atribuía correos de fisioterapia a una
-      // campaña de prueba sin relación con ellos.
+      // El `!inner` se queda como red, aunque descartar ya borra el lead y su borrador
+      // con él: si alguna vez vuelve a existir un mensaje sin lead vivo, la portada no
+      // volverá a inflar el contador. Fue el sintoma que destapó todo esto — decía "10
+      // correos esperan tu visto bueno" con 3 en la cola.
+      //
+      // Además se trae el nombre de SU campaña; elegir simplemente la última abierta
+      // atribuía correos de fisioterapia a una campaña de prueba sin relación con ellos.
       const pendingRows = await client
         .from('outreach_messages')
         .select('id, outreach_leads!inner(status, outreach_campaigns(name))', { count: 'exact' })

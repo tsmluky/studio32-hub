@@ -355,6 +355,82 @@ hereda identidad sin copiar CSS. Movimiento solo como respuesta breve y con
 
 ---
 
+## 2026-08-15 · Descartar borra el lead, no lo marca
+
+Marcar `descartado` dejaba dos rastros, y el segundo es el que de verdad importaba:
+
+1. El borrador seguía vivo en `borrador` para siempre. La portada llegó a decir "10
+   correos esperan tu visto bueno" con 3 en la cola. El 13/08 se tapó contando solo
+   mensajes de leads vivos (`!inner`), pero las 7 filas huérfanas seguían ahí.
+2. **El negocio quedaba congelado.** Una tanda futura lo reconocía por dominio, le
+   refrescaba huella y puntuación, y no volvía a la revisión nunca: el importador no
+   toca el estado a propósito, para no pisar trabajo comercial. Un lead descartado por
+   evidencia floja no podía volver aunque después aparecieran reseñas buenas.
+
+Ahora se borra. Vuelve al punto de partida: si la siguiente pasada lo encuentra y pasa
+la puerta, entra como nuevo. El precio aceptado es que un negocio que no interesa puede
+reaparecer y haya que descartarlo otra vez; se prefiere eso a perder los que mejoran.
+
+**Descartar no es la baja, y por eso esto no afloja nada.** Lo que no vuelve jamás es
+quien esté en `outreach_suppressions`: va por dirección, la comprueba el envío, y
+sobrevive a que el negocio se borre, se renombre o vuelva dentro de otra campaña.
+
+**Excepción con trampa:** un lead con un correo ya enviado NO se borra, se marca. La FK
+`outreach_messages.lead_id` es `on delete cascade`, y **la cascada no pasa por las
+políticas de la tabla** —que prohíben borrar lo enviado—, así que borrar el lead se
+llevaría por delante el registro del envío en silencio. Se comprueba contra la base y no
+contra el estado local del cliente, porque de esto no se vuelve.
+
+Limpieza de una vez: se borraron los 7 huérfanos que quedaban. Entre ellos, el correo de
+Clínica Dental Dr. Garcés del seed del 04/08 que llevaba desde entonces avisando en
+`STATE.md`.
+
+---
+
+## 2026-08-15 · Una campaña sin leads vivos no se ofrece en el selector
+
+Seleccionarla solo podía llevar a una lista vacía. Pasaba con las que se agotaron
+descartando —Alcalá, Valencia, Torrejón—, que seguían ofreciéndose como si tuvieran
+trabajo dentro.
+
+Se deriva de los leads y no de `campaign.status` para que se mantenga solo: en cuanto se
+descarta el último lead, la campaña desaparece del selector sin que nadie tenga que
+acordarse de cerrarla. Si la campaña elegida se queda vacía mientras la miras, la
+selección vuelve a "todas" sola en vez de enseñar una vista vacía sin explicación.
+
+La fila de la campaña se conserva —es el registro de que ese sector se intentó— y las
+que ya no van a dar más se cierran con su motivo en `notas`, que es lo que permite a
+quien la encargó saber por qué su encargo no dio nada.
+
+---
+
+## 2026-08-15 · Los controles de Prospección se envuelven, no se comprimen
+
+Tercera vez que muerde lo mismo: **una media query mide la ventana, pero lo que manda
+es el ancho que queda después del sidebar.**
+
+Los tres controles (campaña, estado, calidad) eran columnas de rejilla en una línea,
+con cortes en 980px y 920px. A 1024px de ventana la fila solo dispone de ~680px y
+necesita ~780, y ninguno de los dos cortes ha entrado todavía: la rejilla encogía la
+columna del estado a 209px para un contenido de 378. **"Historial" quedaba fuera del
+contenedor**, alcanzable solo con un scroll horizontal cuya barra está oculta a
+propósito — una pestaña entera desaparecida sin ninguna pista visual.
+
+Ahora la fila envuelve (`flex-wrap`): la campaña absorbe el sobrante y el estado nunca
+baja de su `max-content`, así que si no cabe salta de línea en vez de recortarse. Se
+mantiene solo y deja de depender de acertar el breakpoint. El corte de 980px se
+elimina por innecesario.
+
+**Cuidado al apilar en móvil:** ese `min-width: max-content` son ~380px y a 375px
+desbordaría la pantalla entera, así que el bloque de ≤920px lo resetea a 0. Verificado
+sin desborde a 375, 900, 1024 y 1280.
+
+La lección, que ya está escrita para la navegación y conviene no volver a aprender: si
+un ancho depende del sidebar, el breakpoint por ventana llega tarde. Componer para que
+no dependa de él.
+
+---
+
 ## 2026-08-13 · La ventana estrecha de escritorio no es móvil
 
 En la ventana habitual del Hub el área útil puede quedarse cerca de 850px. El corte
