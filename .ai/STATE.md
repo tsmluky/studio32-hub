@@ -30,6 +30,18 @@ nunca aplicada). El 11/08 se fusionaron: **gana `outreach_*`**.
 **Antes de tocar prospección, mira si ya existe.** El coste de no hacerlo ya son tres
 intentos. `git branch -r` y una consulta al esquema de Supabase cuestan un minuto.
 
+**La rama buena es `main`, siempre.** Quedan dos ramas remotas cuyos nombres suenan a
+trabajo activo y no lo son: `feat/prospeccion-email` y `merge/prospeccion-unificada`.
+Comprobado el 15/08/2026: **las dos están enteramente fusionadas en `main`**, cero
+commits exclusivos en cualquiera de ellas. Son restos de la unificación del 11/08.
+
+Si te encuentras el checkout en una de ellas —le pasó al sobremesa el 15/08, con `main`
+local 39 commits por detrás— no hay nada que rescatar: `git checkout main` y
+`git pull --rebase`. Lo que despista es que la regla de arriba dice "comprueba las
+ramas", y al comprobarlas aparecen dos candidatas plausibles; por eso queda escrito
+aquí cuál gana. Borrarlas sería lo limpio, pero es una acción sobre el remoto
+compartido y la decide una persona.
+
 ## Herramientas · Prospección — el ciclo
 
 1. **Hub** — Herramientas › Prospección › "Pedir campaña": sector, zona, oferta,
