@@ -108,7 +108,7 @@ compartido y la decide una persona.
 | `import-outreach.mjs` | ✅ probado con `scripts/outreach-ejemplo.json` |
 | Deno deja salir el 993 (IMAP) | ✅ verificado el 12/08 |
 | Copia en Enviados por IMAP | ✅ desplegada y **verificada con un envío real**: aparece en `INBOX.Sent` |
-| Generar la tanda con la skill | ✅ 12/08 (4 fisio), 15/08 (6 dentales·valencia), 16/08 (6 dentales·barcelona, 4 dentales·azuqueca, 6 estética·valencia) |
+| Generar la tanda con la skill | ✅ 12/08 (4 fisio), 15/08 (6 dentales·valencia), 16/08 (6 dentales·barcelona, 4 dentales·azuqueca, 6 estética·valencia, 3 estética·valencia-amistat) |
 | Cerrar campaña agotada (`--cerrar`) | ✅ 16/08: "Clínicas dentales · azuqueca de henares", 4 de 10 pedidos, pueblo sin más candidatas |
 | Interfaz Herramientas/Prospección | ✅ revisada con datos reales a 375, 768 y 1280 px |
 | Renovación visual completa | ✅ Hoy, Tareas, Calendario, Proyectos, Inbox, Biblioteca, Herramientas y proyecto real, escritorio y móvil |
@@ -151,6 +151,18 @@ resultó ser la fuente de reseñas del sector, no Doctoralia (este apenas tiene 
 estética). Detalle en `docs/PROSPECCION.md`, incluido un obstáculo nuevo: correo
 protegido con ofuscación Cloudflare, visible para un humano pero no copiable por una
 carga automatizada — costó 2 leads (Onírika, Cosméticaclub).
+
+El 16/08 se sirvió también una campaña nueva y distinta de la anterior: "Centros de
+estética · Valencia, zona amistat, ayora, bblasco ibañez y cercanía" (pedía 25, zona
+mucho más estrecha). Solo **3 leads**: Fabiola Carreño Estéticas, Xanadel y Laura
+Olcina, las tres con reseñas que nombran al profesional en persona, no al centro. El
+obstáculo no fue el correo (las tres lo publicaban en su propia web) sino el volumen de
+negocios reales dentro de una zona tan pequeña — varios candidatos de la búsqueda
+inicial resultaron estar fuera de la zona pedida (Ciutat Vella, La Saïdia, Benicalap)
+pese a salir en las mismas búsquedas. Dos dominios que un buscador daba por buenos
+(mimateyavalencia.com, monikversatilestyles.es) no resolvían al cargarlos de verdad, así
+que esos leads se descartaron sin subir un email sin verificar de primera mano. Sigue
+`abierta` con 22 por generar.
 
 **Desplegar la función:** `npm run fn:deploy`. Lleva `--use-api` porque el empaquetado
 local falla en este portátil (busca un `output.eszip` que no genera) y además ensucia el
