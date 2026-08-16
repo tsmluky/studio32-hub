@@ -108,7 +108,7 @@ compartido y la decide una persona.
 | `import-outreach.mjs` | ✅ probado con `scripts/outreach-ejemplo.json` |
 | Deno deja salir el 993 (IMAP) | ✅ verificado el 12/08 |
 | Copia en Enviados por IMAP | ✅ desplegada y **verificada con un envío real**: aparece en `INBOX.Sent` |
-| Generar la tanda con la skill | ✅ 12/08 (4 fisio), 15/08 (6 dentales·valencia), 16/08 (6 dentales·barcelona, 4 dentales·azuqueca) |
+| Generar la tanda con la skill | ✅ 12/08 (4 fisio), 15/08 (6 dentales·valencia), 16/08 (6 dentales·barcelona, 4 dentales·azuqueca, 6 estética·valencia) |
 | Cerrar campaña agotada (`--cerrar`) | ✅ 16/08: "Clínicas dentales · azuqueca de henares", 4 de 10 pedidos, pueblo sin más candidatas |
 | Interfaz Herramientas/Prospección | ✅ revisada con datos reales a 375, 768 y 1280 px |
 | Renovación visual completa | ✅ Hoy, Tareas, Calendario, Proyectos, Inbox, Biblioteca, Herramientas y proyecto real, escritorio y móvil |
@@ -144,8 +144,13 @@ realidad abre ese mismo WhatsApp sin agenda detrás. El 16/08 se sirvió tambié
 el correo no es el problema, las reseñas citables sí. Detalle de quién cayó y por qué en
 `docs/PROSPECCION.md` → "Zonas ya exprimidas".
 
-Queda pendiente en la cola "Centros de estética · Valencia" (40, sector sin comprobar
-aún si funciona por correo).
+El 16/08 se sirvió también "Centros de estética · Valencia" (pedía 40): **6 leads con
+sus 6 borradores**, primera vez que se prueba este sector — sigue `abierta` con 34 por
+generar. Funciona por correo (8 de 10 candidatas de Treatwell lo publicaban) y Treatwell
+resultó ser la fuente de reseñas del sector, no Doctoralia (este apenas tiene fichas de
+estética). Detalle en `docs/PROSPECCION.md`, incluido un obstáculo nuevo: correo
+protegido con ofuscación Cloudflare, visible para un humano pero no copiable por una
+carga automatizada — costó 2 leads (Onírika, Cosméticaclub).
 
 **Desplegar la función:** `npm run fn:deploy`. Lleva `--use-api` porque el empaquetado
 local falla en este portátil (busca un `output.eszip` que no genera) y además ensucia el

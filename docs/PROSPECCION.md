@@ -175,8 +175,25 @@ tiempo tirado: los negocios no publican correo y la puerta los descarta a todos.
 | Barberías y peluquerías | No publican correo. Van de Instagram, teléfono y Booksy. Comprobado el 12/08/2026 en Torrejón de Ardoz: cinco negocios con web propia, reseñas y reserva online, **ninguno con email**. |
 
 Sectores que sí funcionan, comprobado: **clínicas dentales** (publican correo casi
-siempre, tienen web y reseñas abundantes) y **fisioterapia** (comprobado el 12/08/2026 en
-Guadalajara: de nueve centros con web propia, ocho publicaban correo).
+siempre, tienen web y reseñas abundantes), **fisioterapia** (comprobado el 12/08/2026 en
+Guadalajara: de nueve centros con web propia, ocho publicaban correo) y **centros de
+estética** (comprobado el 16/08/2026 en Valencia: de diez candidatas de Treatwell, ocho
+tenían correo verificable).
+
+**Centros de estética: Treatwell es la fuente de reseñas, no Doctoralia.** Este sector
+casi no tiene ficha en Doctoralia (es de salud, no de belleza); `treatwell.es/
+establecimientos/tipo-centro-wellness/en-<ciudad>-<provincia>-es/` y las variantes por
+tratamiento (`tratamiento-tratamientos-faciales`, etc.) listan el centro, su nota media,
+su número de opiniones y el enlace a su ficha, que sí trae opiniones literales con
+nombre y fecha — igual de fiable que Doctoralia para dentales.
+
+**Nuevo obstáculo de correo, distinto a "no publican":** dos candidatas (Onírika,
+Cosméticaclub) tienen correo en su web, pero protegido con ofuscación Cloudflare
+(`/cdn-cgi/l/email-protection`) — un humano lo ve al cargar la página porque el
+navegador lo desofusca con JavaScript, pero no se puede copiar el texto literal desde
+una carga automatizada. Se descartaron por no poder verificar la cadena exacta, no por
+falta de correo real. Si vuelve a pasar, probar el aviso legal (a veces está en texto
+plano ahí aunque en contacto esté ofuscado) antes de descartar.
 
 **En clínicas dentales el cuello de botella es justo el contrario: el correo.**
 Comprobado el 15/08/2026 en Valencia: reseñas sobran —cualquier clínica con ficha en
