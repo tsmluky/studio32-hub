@@ -5,7 +5,7 @@
 // Function, que es la única que puede marcar un mensaje como enviado.
 
 import { useState } from 'react'
-import { AlertCircle, ArrowRight, Check, CheckCircle2, ChevronRight, Clock3, Send, X, Sparkles, Ban } from 'lucide-react'
+import { AlertCircle, ArrowRight, Check, CheckCircle2, ChevronRight, Clock3, Send, X, Sparkles, Ban, Pencil } from 'lucide-react'
 import { EmptyState, PageHeading, SectionHeader, StatusBadge } from './ui'
 import CampaignRequest from './CampaignRequest'
 import { darDeBaja, remitentes } from './outreach'
@@ -22,6 +22,7 @@ export default function OutreachView({
   onReload,
   onApprove,
   onDiscard,
+  onEdit,
   onSend,
 }: {
   campaigns: OutreachCampaign[]
@@ -33,6 +34,7 @@ export default function OutreachView({
   activeMemberId: MemberId
   onApprove: (messageId: string, leadId: string) => void
   onDiscard: (leadId: string) => void
+  onEdit: (messageId: string, subject: string, body: string) => Promise<void>
   onSend: (messageIds: string[]) => Promise<{ enviados: number; total: number }>
 }) {
   const [pedirOpen, setPedirOpen] = useState(false)
@@ -252,6 +254,7 @@ export default function OutreachView({
                 message={latestMessageFor(lead.id)}
                 onApprove={onApprove}
                 onDiscard={onDiscard}
+                onEdit={onEdit}
               />
             ))}
             {!visibleLeads.length && (
@@ -283,18 +286,55 @@ function LeadStory({
   activeMemberId,
   onApprove,
   onDiscard,
+  onEdit,
 }: {
   lead: OutreachLead
   message?: OutreachMessage
   activeMemberId: MemberId
   onApprove: (messageId: string, leadId: string) => void
   onDiscard: (leadId: string) => void
+  onEdit: (messageId: string, subject: string, body: string) => Promise<void>
 }) {
   const [abierto, setAbierto] = useState(false)
   const [open, setOpen] = useState(false)
   const [bajando, setBajando] = useState(false)
   const [bajaHecha, setBajaHecha] = useState(false)
   const [bajaError, setBajaError] = useState('')
+  const [editando, setEditando] = useState(false)
+  const [asunto, setAsunto] = useState('')
+  const [cuerpo, setCuerpo] = useState('')
+  const [guardando, setGuardando] = useState(false)
+  const [errorEdicion, setErrorEdicion] = useState('')
+
+  // Reescribir solo tiene sentido mientras el correo no haya salido. Lo enviado es
+  // historia y las políticas de la tabla lo prohíben de todos modos.
+  const editable = message?.status === 'borrador' || message?.status === 'aprobado'
+
+  const abrirEditor = () => {
+    if (!message) return
+    setAsunto(message.subject)
+    setCuerpo(message.body)
+    setErrorEdicion('')
+    setEditando(true)
+  }
+
+  const guardar = async () => {
+    if (!message) return
+    if (!asunto.trim() || !cuerpo.trim()) {
+      setErrorEdicion('El asunto y el cuerpo no pueden quedarse vacíos.')
+      return
+    }
+    setGuardando(true)
+    setErrorEdicion('')
+    try {
+      await onEdit(message.id, asunto, cuerpo)
+      setEditando(false)
+    } catch (e) {
+      setErrorEdicion(e instanceof Error ? e.message : 'No se ha podido guardar.')
+    } finally {
+      setGuardando(false)
+    }
+  }
 
   // Se pide confirmación porque no hay vuelta atrás desde aquí: para sacar a alguien
   // de la lista de bajas hay que ir a la base de datos. Y es correcto que cueste —
@@ -382,10 +422,72 @@ function LeadStory({
       )}
 
       {message ? (
-        <div className="outreach-draft">
-          <span className="outreach-subject">{message.subject}</span>
-          <p>{message.body}</p>
-        </div>
+        editando ? (
+          /* Las citas se enseñan DENTRO del editor, no debajo.
+
+             Si se reescribe el cuerpo, la evidencia de abajo puede dejar de
+             corresponderse con lo que dice el correo — y esa correspondencia es lo
+             único que hace fiable la bandeja. Avisar después no sirve de nada;
+             teniéndolas delante se reescribe sabiendo qué se puede afirmar. */
+          <div className="outreach-editor">
+            <label>
+              <span>Asunto</span>
+              <input
+                type="text"
+                value={asunto}
+                onChange={(event) => setAsunto(event.target.value)}
+                disabled={guardando}
+              />
+            </label>
+            <label>
+              <span>Correo</span>
+              <textarea
+                rows={12}
+                value={cuerpo}
+                onChange={(event) => setCuerpo(event.target.value)}
+                disabled={guardando}
+              />
+            </label>
+
+            <p className="outreach-editor-nota">
+              Termina en «Un saludo,» y nada más: la firma la pone el envío con los datos
+              de quien apruebe. Si la escribes aquí, saldrá dos veces.
+            </p>
+
+            {message.evidencia?.length ? (
+              <div className="outreach-editor-evidencia">
+                <span>Lo que puedes afirmar de este negocio</span>
+                {message.evidencia.map((item, index) => (
+                  <div key={index}>
+                    <blockquote>{item.cita}</blockquote>
+                    <small>{item.fuente}</small>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+
+            {errorEdicion && <p className="outreach-baja-error"><AlertCircle size={14} /> {errorEdicion}</p>}
+
+            <div className="outreach-editor-acciones">
+              <button type="button" className="text-button" onClick={() => setEditando(false)} disabled={guardando}>
+                Cancelar
+              </button>
+              <button type="button" className="secondary-action" onClick={() => void guardar()} disabled={guardando}>
+                <Check size={16} /> {guardando ? 'Guardando…' : 'Guardar cambios'}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="outreach-draft">
+            <span className="outreach-subject">{message.subject}</span>
+            <p>{message.body}</p>
+            {editable && (
+              <button type="button" className="outreach-reescribir" onClick={abrirEditor}>
+                <Pencil size={14} /> Reescribir
+              </button>
+            )}
+          </div>
+        )
       ) : (
         <p className="outreach-empty-draft">Sin borrador todavía.</p>
       )}
@@ -454,7 +556,10 @@ function LeadStory({
       ) : null}
 
       <div className="outreach-actions">
-        {message?.status === 'borrador' && (
+        {/* Mientras se reescribe no se puede aprobar ni descartar: aprobar fijaría el
+            remitente sobre un texto a medio cambiar, y descartar tiraría el lead con
+            la edición sin guardar dentro. Se guarda o se cancela primero. */}
+        {message?.status === 'borrador' && !editando && (
           <>
             <button
               type="button"

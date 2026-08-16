@@ -1187,6 +1187,7 @@ function App() {
               activeMemberId={activeMember.id}
               onApprove={(messageId, leadId) => void outreach.approveMessage(messageId, leadId, activeMember.id)}
               onDiscard={(leadId) => void outreach.discardLead(leadId)}
+              onEdit={outreach.updateMessageDraft}
               onSend={outreach.sendApproved}
             />
           ) : (

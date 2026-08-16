@@ -114,6 +114,7 @@ compartido y la decide una persona.
 | Pulso de Hoy | ✅ cuenta solo leads vivos y muestra la campaña real de los pendientes |
 | Portada y cola dicen lo mismo | ✅ 15/08: 3 y 3, ya sin rodeo — los 7 huérfanos se borraron |
 | Controles de Prospección | ✅ 15/08: sin recorte ni desborde a 375, 900, 1024 y 1280 |
+| Reescribir el correo antes de aprobar | compila y entra en el bundle; **sin probar en el navegador** |
 
 **La cadena entera está recorrida.** El 12/08 se ejecutó `/prospectar` contra la campaña
 "Fisioterapia · Guadalajara" y subió 4 leads con sus 4 borradores. Sigue `pedida`→`abierta`

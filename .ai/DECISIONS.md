@@ -431,6 +431,32 @@ no dependa de él.
 
 ---
 
+## 2026-08-15 · El correo se puede reescribir, y las citas se enseñan dentro del editor
+
+La skill acierta casi siempre, pero "casi" no basta cuando lo que sale lleva el nombre
+de quien firma. Hasta ahora la única salida a un correo que no convencía era descartar
+el lead entero: tirar un negocio bueno por una frase mala.
+
+Se edita `subject` y `body`, nada más. **La evidencia no se edita desde aquí**, y es
+deliberado: es el registro de lo que se comprobó del negocio, y dejar que se reescriba
+convierte la prueba en opinión. Las políticas ya solo permiten actualizar en
+'borrador', 'aprobado' o 'fallido', así que lo enviado es intocable por construcción.
+
+**Lo que de verdad decide el diseño:** si se reescribe el cuerpo, la evidencia puede
+dejar de corresponderse con lo que dice el correo — y esa correspondencia es lo único
+que hace fiable la bandeja. Avisar después no sirve de nada. Por eso las citas se
+enseñan **dentro del editor**, al lado del textarea: se reescribe sabiendo qué se puede
+afirmar, y el riesgo se convierte en ayuda.
+
+Mientras se edita no se puede aprobar ni descartar: aprobar fijaría el remitente sobre
+un texto a medio cambiar, y descartar tiraría el lead con la edición sin guardar
+dentro. Se guarda o se cancela primero.
+
+El editor recuerda además que el cuerpo termina en "Un saludo," y nada más — es el
+error que la firma compuesta en el envío castiga con una firma duplicada.
+
+---
+
 ## 2026-08-13 · La ventana estrecha de escritorio no es móvil
 
 En la ventana habitual del Hub el área útil puede quedarse cerca de 850px. El corte

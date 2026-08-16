@@ -235,6 +235,29 @@ export function useOutreach(enabled: boolean) {
     reload()
   }
 
+  // Reescribir el correo a mano antes de aprobarlo.
+  //
+  // La skill acierta casi siempre, pero "casi" no basta cuando lo que sale lleva el
+  // nombre de quien firma. Sin esto la única salida a un correo que no convence era
+  // descartar el lead entero, que es tirar un negocio bueno por una frase mala.
+  //
+  // **Solo toca `subject` y `body`.** La evidencia no se edita desde aquí a propósito:
+  // es el registro de lo que se comprobó del negocio, y dejar que se reescriba
+  // convertiría la prueba en opinión. Por eso el editor la enseña al lado — se
+  // reescribe mirando lo que se puede afirmar, no a ciegas.
+  //
+  // Las políticas solo permiten actualizar mientras el mensaje esté en 'borrador',
+  // 'aprobado' o 'fallido', así que lo enviado es intocable por construcción.
+  const updateMessageDraft = async (messageId: string, subject: string, body: string) => {
+    if (!supabase) throw new Error('Reescribir necesita una sesión conectada.')
+    const { error: updateError } = await supabase
+      .from('outreach_messages')
+      .update({ subject: subject.trim(), body: body.trim() })
+      .eq('id', messageId)
+    if (updateError) throw new Error('No se ha podido guardar el correo.')
+    reload()
+  }
+
   // Enviar es lo único irreversible de todo el tablero. Va en tanda y no por
   // lead: se revisa uno a uno con calma y se envía una vez, a conciencia.
   // La función comprueba bajas, repeticiones y aprobación antes de disparar.
@@ -247,7 +270,7 @@ export function useOutreach(enabled: boolean) {
     return data as { enviados: number; total: number; resultados: Array<{ id: string; estado: string; motivo?: string }> }
   }
 
-  return { campaigns, leads, messages, status, error, reload, approveMessage, discardLead, sendApproved }
+  return { campaigns, leads, messages, status, error, reload, approveMessage, discardLead, updateMessageDraft, sendApproved }
 }
 
 // Pulso para la portada. Deliberadamente NO reutiliza useOutreach: aquí solo

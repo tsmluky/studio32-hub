@@ -4871,6 +4871,124 @@ button.update-row {
   color: var(--muted);
 }
 
+/* ── Reescribir el correo ──
+   Discreto dentro del borrador: la acción normal es leer y aprobar, reescribir es la
+   excepción. No compite con Aprobar, pero se ve sin tener que buscarlo. */
+.outreach-reescribir {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 11px;
+  padding: 5px 10px;
+  color: var(--muted);
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.outreach-reescribir:hover {
+  color: var(--ink);
+  background: var(--canvas);
+  border-color: #aac4bd;
+}
+
+.outreach-editor {
+  display: grid;
+  gap: 11px;
+  margin-top: 12px;
+  padding: 14px 15px;
+  background: var(--canvas);
+  border: 1px solid #aac4bd;
+  border-radius: 11px;
+}
+
+.outreach-editor label {
+  display: grid;
+  gap: 5px;
+}
+
+.outreach-editor label > span {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.outreach-editor input,
+.outreach-editor textarea {
+  width: 100%;
+  padding: 9px 11px;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.outreach-editor textarea {
+  resize: vertical;
+  min-height: 180px;
+}
+
+.outreach-editor input:focus-visible,
+.outreach-editor textarea:focus-visible {
+  outline: none;
+  border-color: var(--green);
+}
+
+.outreach-editor-nota {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* Las citas, dentro del editor. Reescribir mirando lo que se puede afirmar evita el
+   correo bonito que ya no sostiene ninguna fuente. */
+.outreach-editor-evidencia {
+  display: grid;
+  gap: 8px;
+  padding: 11px 12px;
+  background: #fff;
+  border-radius: 10px;
+}
+
+.outreach-editor-evidencia > span {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.outreach-editor-evidencia blockquote {
+  margin: 0;
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.outreach-editor-evidencia small {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 11.5px;
+}
+
+.outreach-editor-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .outreach-toggle {
   display: inline-flex;
   align-items: center;
