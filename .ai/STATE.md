@@ -1,6 +1,6 @@
 # Estado — studio32-hub
 
-> Se **sobrescribe**, no se acumula. Tope ~100 líneas. Última actualización: 2026-08-15.
+> Se **sobrescribe**, no se acumula. Tope ~100 líneas. Última actualización: 2026-08-16.
 
 ## Qué es
 
@@ -108,7 +108,7 @@ compartido y la decide una persona.
 | `import-outreach.mjs` | ✅ probado con `scripts/outreach-ejemplo.json` |
 | Deno deja salir el 993 (IMAP) | ✅ verificado el 12/08 |
 | Copia en Enviados por IMAP | ✅ desplegada y **verificada con un envío real**: aparece en `INBOX.Sent` |
-| Generar la tanda con la skill | ✅ 12/08 (4 de fisioterapia) y 15/08 (6 de dentales · valencia) |
+| Generar la tanda con la skill | ✅ 12/08 (4 fisio), 15/08 (6 dentales · valencia), 16/08 (6 dentales · barcelona) |
 | Interfaz Herramientas/Prospección | ✅ revisada con datos reales a 375, 768 y 1280 px |
 | Renovación visual completa | ✅ Hoy, Tareas, Calendario, Proyectos, Inbox, Biblioteca, Herramientas y proyecto real, escritorio y móvil |
 | Pulso de Hoy | ✅ cuenta solo leads vivos y muestra la campaña real de los pendientes |
@@ -132,6 +132,15 @@ es la contraria, el **correo**: reseñas hay de sobra, pero cinco de doce clíni
 propia no publican ninguna dirección. También en `docs/PROSPECCION.md`, con los dos
 atajos que ahorran tiempo (salir del listado de Doctoralia, y mirar el aviso legal antes
 de descartar por falta de correo).
+
+El 16/08 se sirvió "Clínicas dentales · barcelona" (pedía 15): **6 leads con sus 6
+borradores**, sigue `abierta` con 9 por generar. En Barcelona el correo no fue el
+problema (8 de 10 candidatas lo publicaban): el hueco digital que sostuvo casi todos
+los correos fue que la clínica ya tiene tracción real (100-380 reseñas) pero el primer
+contacto sigue siendo un WhatsApp atendido a mano o un botón de "reservar" que en
+realidad abre ese mismo WhatsApp sin agenda detrás. Quedan pendientes en la cola dos
+campañas más: "Clínicas dentales · azuqueca de henares" (10) y "Centros de estética ·
+Valencia" (40, sector sin comprobar aún si funciona por correo).
 
 **Desplegar la función:** `npm run fn:deploy`. Lleva `--use-api` porque el empaquetado
 local falla en este portátil (busca un `output.eszip` que no genera) y además ensucia el
