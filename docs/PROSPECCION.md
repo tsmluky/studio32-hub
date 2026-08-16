@@ -228,6 +228,21 @@ menos cuatro centros con web propia sin tocar —FisioAzuqueca, Fisiobrain, Alan
 Policlínica Acacias—. Es campaña aparte, no se coló en esta: la que estaba pedida decía
 Guadalajara y ampliar la zona por mi cuenta habría falseado lo que se encargó.
 
+**Clínicas dentales · Azuqueca de Henares — agotada a 16/08/2026, con 4 leads.** Pedía
+10; el pueblo no da para tantas. Mismo patrón que fisioterapia en la misma zona: **el
+correo no es el problema, las reseñas citables sí.**
+
+| Negocio | Correo | Por qué se cayó |
+| --- | --- | --- |
+| Dentalius | sí | 27 opiniones en Google (4.7), ninguna con texto y autor localizable en ningún agregador probado |
+| Odonto Azuqueca / DentaLmc | no verificable en su propia web ni aviso legal | Sus 4 valoraciones de Doctoralia son solo estrellas, "el usuario no dejó ninguna opinión escrita" |
+| Antonio Gelpi Prat | no encontrado en ningún directorio | 24 opiniones (5.0) pero sin correo publicado en ningún sitio |
+| Clínica Dental Pérez-Stad | sí, pero personal (Hotmail) | Sin web propia y sin ninguna reseña localizable con autor |
+| Clínica Dental Dra. Nieves Golbano | no verificable | Su dominio no resuelve (dos intentos, con y sin `www`) |
+
+Los cuatro que sí entraron —Policlínica Acacias, Somosierra, Gold Dental, Clínica Dental
+La Paz— tienen todos correo público y reseñas con cita y autor, comprobado uno a uno.
+
 ## Cuánto cuesta una tanda
 
 Verificar un lead de verdad son 2-3 páginas cargadas: su web, sus reseñas, y a veces una
