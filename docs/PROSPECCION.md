@@ -245,6 +245,37 @@ menos cuatro centros con web propia sin tocar —FisioAzuqueca, Fisiobrain, Alan
 Policlínica Acacias—. Es campaña aparte, no se coló en esta: la que estaba pedida decía
 Guadalajara y ampliar la zona por mi cuenta habría falseado lo que se encargó.
 
+**Fisioterapia · Torre del Mar — pedida a 25, servidos 5 el 23/08/2026, queda poco.** El
+pueblo no da para 25: entre Doctoralia, `fisioterapia.io` y búsqueda directa salieron unos
+once centros, y no hay más. Los cinco que entraron —Clínica Fisiomar, ACOSTA fisioterapia
+avanzada y osteopatía, Axarclinic, Clínica Valenzuela y Fisioesmile— tienen todos correo
+público y reseñas con cita y autor, comprobado uno a uno.
+
+**Aquí el correo no fue el cuello de botella, tampoco las reseñas: fue la fuente.** Cinco
+de los seis descartados se caen por no tener ficha en ningún sitio que publique el texto
+de la reseña, no por no tener reseñas. Ver más abajo lo de `sportmedicine.es`, que es lo
+que salvó a cuatro de los cinco que sí entraron.
+
+| Negocio | Correo | Por qué se cayó |
+| --- | --- | --- |
+| AXIO Fisioterapia | sí, `info@axiofisioterapia.com` | 34 reseñas (4.9) y ninguna localizable con texto y autor: los testimonios de su web salen como "Reseña Google" sin firmar y no tiene ficha en Doctoralia ni en sportmedicine.es. **Es el primero a recuperar si aparece la fuente** |
+| Clinica Bonal | no encontrado | 249 opiniones en Doctoralia con citas y autor, pero sin web propia y sin correo en ningún directorio. Lead bueno para llamada o visita, no para correo |
+| Fisioterapia Torre | no | Web propia desde 1999, pero no publica correo ni en contacto ni en aviso legal (su `/contacto/` y `/aviso-legal/` dan 404) |
+| Kineca Clinic | no comprobado | "aún no ha recibido ninguna opinión" en Doctoralia |
+| Clínica Cañaveral Fisioterapia | no comprobado | 1 opinión en Doctoralia |
+| Benalfisio Centro de Fisioterapia | — | Sale en el listado de Torre del Mar pero su ficha lo sitúa en Guadix (18510). No es de la zona |
+
+**Lo que queda sin tocar en Torre del Mar, para otra pasada:** POLICLÍNICAS SALUD 101
+(5.0, 32 reseñas) y Sanurart (5.0, 28), los dos con dirección en el 29740 y ninguno
+investigado. Dan como mucho para dos leads más, así que la campaña se queda abierta pero
+no llegará a 25 ni de lejos.
+
+**Si hace falta más volumen en la Axarquía:** Vélez-Málaga capital está a tres kilómetros
+y tiene centros grandes sin tocar —Fidias Center Vélez (419 opiniones en Doctoralia),
+Neuronax (64), Clínica de Fisioterapia y Osteopatía Máximo, Clinica El Olivar—. Es campaña
+aparte: la pedida decía Torre del Mar, y aunque sea el mismo municipio son dos localidades
+distintas.
+
 **Clínicas dentales · Azuqueca de Henares — agotada a 16/08/2026, con 4 leads.** Pedía
 10; el pueblo no da para tantas. Mismo patrón que fisioterapia en la misma zona: **el
 correo no es el problema, las reseñas citables sí.**
@@ -289,6 +320,23 @@ clínica devuelve fichas vacías y hace pensar que no hay reseñas.
 Si el centro no está en Doctoralia, mirar los **testimonios firmados de su propia web**
 antes de descartarlo: sirven para la puerta, aunque suelen estar sin renovar desde hace
 años y bajan la confianza a `medio`.
+
+**`sportmedicine.es` sí sirve, y es el hallazgo de la pasada del 23/08/2026.** A
+diferencia del resto de agregadores, replica las reseñas de Google **enteras, con nombre
+de autor y fecha**, y con la fecha de la última actualización de la ficha. Salvó cuatro de
+los cinco leads de Torre del Mar, donde ninguna clínica con web moderna tenía ficha en
+Doctoralia. La URL tiene la forma
+`sportmedicine.es/<nombre-del-negocio>-<ciudad>-<id>/` y se encuentra buscando
+`sportmedicine.es "<nombre del negocio>" <ciudad> opiniones`; adivinar el id no funciona.
+Al citarlo, la fuente honesta es "Autor · Google (vía sportmedicine.es), <fecha>", porque
+la reseña es de Google pero no se ha leído en Google. `holisticcenter.es` y
+`fisioterapiavigo.es` replican la misma ficha pero **sin** los textos: solo nota y
+recuento, no valen para la puerta.
+
+**`fisioterapia.io/listados/fisioterapeutas/<provincia>/<ciudad>/` es el mejor censo de un
+pueblo.** No trae reseñas literales, pero lista todos los centros con dirección, nota y
+número de reseñas de Google en una sola página. Sirve para la criba del paso 2 y saca
+negocios que ni Doctoralia ni una búsqueda normal devuelven.
 
 **Los agregadores no sirven**: top-rated.online, cylex, expirit y similares devuelven
 403, y los resúmenes que salen en los resultados de búsqueda vienen parafraseados y sin
