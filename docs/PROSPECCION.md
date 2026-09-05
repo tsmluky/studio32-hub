@@ -165,6 +165,39 @@ Para el importador hace falta además `.env.local` con `SUPABASE_URL` y
 Crear un lead de prueba con una dirección propia como destinatario, aprobarlo y enviarlo.
 Si llega con el pie de baja y la cabecera `List-Unsubscribe`, la cadena funciona.
 
+## La oferta de web: a quién SÍ y a quién NO se le puede escribir
+
+**Comprobado el 05/09/2026.** La intuición natural es buscar negocios **sin web** para
+ofrecerles una. Es la puerta equivocada, y el motivo es sencillo:
+
+> Un negocio sin web tampoco publica correo. Son el mismo negocio.
+
+Verificado en nueve candidatos de Málaga, Zaragoza y Sevilla, todos con muchas reseñas y
+**ninguno con correo público en ninguna fuente primaria**: MB Dental Universitas (296
+opiniones, sin web, solo ficha de Doctoralia), Estética Vanessa Jurado (764 opiniones en
+Treatwell, `vanessajurado.com` **no resuelve**), Piel de Melocotón (336), Duallook (399),
+Aldentista (dominio caído), El Tocador, Marine Zakaryan, Diamonds Beauty Center y Sems.
+
+Son leads buenos y están identificados, pero **no se les llega por correo**. Necesitan
+Instagram, teléfono o visita, y eso no lo hace la Edge Function: es trabajo a mano. Si
+alguna vez se ataca esa lista, hay que sacarla del circuito del Hub.
+
+### Dónde sí funciona la oferta de web
+
+En negocios que **sí tienen web** y esa web está rota, partida o desatendida. Ahí hay
+correo (está en su propia web) y hay evidencia dura, que además es más fácil de defender
+que un juicio de diseño. Los tres patrones que han salido:
+
+| Patrón | Ejemplo real |
+| --- | --- |
+| **Contenido congelado** | Fisiomar Sevilla: el 5 de septiembre su web sigue publicando el horario de verano y unas vacaciones del 3 al 24 de agosto. |
+| **Marca partida en dos dominios** | Skin Harmony Málaga: la web es `skinharmonymalaga.es` y el correo que publica en ella es `@skinharmonyestetica.com`. |
+| **La reputación vive en casa ajena** | Skin Harmony otra vez: 263 opiniones en Treatwell y su ficha no enlaza a su web. También vale para Doctoralia en dental. |
+
+**El ángulo no es "vuestra web es mala".** Es un dato comprobable con fecha: la web dice
+hoy algo que ya no es verdad. Se abre reconociendo lo que está bien hecho y se señala el
+desfase, que es lo que se arregla.
+
 ## Sectores que no funcionan por correo
 
 **Mirar esto antes de aceptar una campaña.** Prospectar un sector de esta lista es
@@ -210,6 +243,15 @@ Dos atajos que ahorran la mitad del tiempo en este sector:
 - **Si no hay correo en contacto, mirar el aviso legal antes de descartar.** Varias lo
   publican solo ahí, a nombre del titular. Cuenta como correo público, pero conviene
   anotarlo en `confianza` porque a veces es una cuenta personal.
+
+**Cuidado con el nombre duplicado entre ciudades.** Comprobado el 05/09/2026 en
+Alicante: una búsqueda de "Clínica Dental Dr. Jorge Fonseca" devolvió un dominio
+(`clinicasdrfonseca.com`) que un resumen de búsqueda daba por bueno, pero al cargar la
+página de verdad resultó ser "Odontomerida", una clínica homónima en Mérida. Hay más de
+un dentista con el mismo nombre y apellido en España. Antes de dar por buena una web,
+cargarla y comprobar que la dirección o la ciudad coinciden con las del negocio que se
+está investigando — si no se puede verificar, se descarta sin subir nada, como pasó
+aquí.
 
 **En fisioterapia el cuello de botella no es el correo, son las reseñas.** Ocho de nueve
 tenían correo público, pero solo cuatro tenían una cita literal con autor localizable, y

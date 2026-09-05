@@ -164,6 +164,18 @@ pese a salir en las mismas búsquedas. Dos dominios que un buscador daba por bue
 que esos leads se descartaron sin subir un email sin verificar de primera mano. Sigue
 `abierta` con 22 por generar.
 
+El 05/09/2026 se sirvió "Clínicas dentales · Alicante capital" (pedía 20, solo clínicas
+privadas independientes, valorando idiomas por el paciente extranjero de la zona):
+**6 leads con sus 6 borradores** — Clínica Dental Benalúa, Clínica Dental UC (Ugedo y
+Chaves), Ridere Estudio Dental, Clínica Dental Novodent, Centro Dental García Lacal y
+Clínica Dental Gallud & Marié. Sigue `abierta` con 14 por generar. El correo no fue el
+cuello de botella (todas las candidatas verificadas lo publicaban) ni tampoco las
+reseñas (Google Maps, no Doctoralia, fue la fuente que más citas literales con autor
+dio en este sector). Trampa nueva encontrada y anotada en `docs/PROSPECCION.md`: un
+negocio puede compartir nombre con otro de una ciudad distinta — `clinicasdrfonseca.com`
+resultó ser una clínica de Mérida, no la de Alicante del mismo nombre, y se descartó sin
+subir nada al no poder verificarlo.
+
 **Desplegar la función:** `npm run fn:deploy`. Lleva `--use-api` porque el empaquetado
 local falla en este portátil (busca un `output.eszip` que no genera) y además ensucia el
 repo con `doc/` y `supabase/.temp/`.
