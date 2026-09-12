@@ -47,6 +47,11 @@ compartido y la decide una persona.
 
 ## Herramientas · Prospección — el ciclo
 
+**12/09: la frase de oferta y un solo tratamiento (tú/vosotros) son puerta, no estilo.**
+29 de 40 borradores en cola no la tenían o la mezclaban con el pronombre del cierre;
+corregidos a mano, y `SKILL.md` (modo C, puntos 2-3) y `outreach-guidelines.md` ya lo
+piden como requisito de entrada. El porqué completo en `DECISIONS.md`.
+
 1. **Hub** — Herramientas › Prospección › "Pedir campaña": sector, zona, oferta,
    cantidad y notas. Nace en estado `pedida`, sin leads.
 2. **Local** — abrir Claude Code y escribir **`/prospectar`**. Lee la
@@ -115,7 +120,7 @@ compartido y la decide una persona.
 | Pulso de Hoy | ✅ cuenta solo leads vivos y muestra la campaña real de los pendientes |
 | Portada y cola dicen lo mismo | ✅ 15/08: 3 y 3, ya sin rodeo — los 7 huérfanos se borraron |
 | Controles de Prospección | ✅ 15/08: sin recorte ni desborde a 375, 900, 1024 y 1280 |
-| Reescribir el correo antes de aprobar | compila y entra en el bundle; **sin probar en el navegador** |
+| Reescribir el correo antes de aprobar | ✅ **probado en producción el 12/09**: 29 borradores reales corregidos a mano desde el editor del Hub |
 
 **La cadena entera está recorrida.** El 12/08 se ejecutó `/prospectar` contra la campaña
 "Fisioterapia · Guadalajara" y subió 4 leads con sus 4 borradores. Sigue `pedida`→`abierta`

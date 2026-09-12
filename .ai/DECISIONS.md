@@ -431,6 +431,42 @@ no dependa de él.
 
 ---
 
+## 2026-09-12 · Diagnosticar no es vender: la oferta pasa a ser obligatoria en el correo
+
+Encontrado revisando la bandeja a mano: de 40 borradores por revisar (varias campañas
+de dentales, fisio y estética), 29 tenían un fallo estructural, no de redacción. El
+correo señalaba el problema con evidencia real y correcta ("son cinco reglas que el
+paciente tiene que acertar antes de llamar", "esas 24 horas en la práctica son cuatro
+días") y nunca decía con qué se resolvía. Terminaba en el cierre de baja fricción
+("Si os interesa, os mando una revisión...") sin haber mencionado antes qué se
+ofrecía. Eso no es un cierre suave, es un correo a medio escribir: le pasa al
+prospecto la carga de adivinar qué se le vende.
+
+De los 29, 18 les faltaba directamente la frase de oferta; los otros 11 sí la tenían
+(`Monto`/`Montamos asistentes de WhatsApp...`) pero mezclaban tú y vosotros dentro del
+mismo correo — el cuerpo se dirige a la clínica ("Os encontré...", "vuestra web...")
+y el cierre venía en tú ("Si te interesa, te paso..."), aparentemente porque esa
+frase final se pega como snippet aparte del resto del cuerpo.
+
+**Se corrigieron los 29 a mano desde el Hub** (editor de Reescribir, que ya existía y
+guarda en `outreach_messages` sin tocar la evidencia) en vez de regenerar la tanda:
+la evidencia y el diagnóstico ya estaban bien, lo único que faltaba era una frase.
+Quedan en `borrador`, nadie los ha aprobado ni enviado.
+
+**La causa**, no el síntoma: `oferta` es un campo de la campaña pensado para
+condicionar el scoring y la búsqueda (`CampaignRequest.tsx`), pero nada obligaba a que
+apareciera en el cuerpo del correo — mandar la oferta al texto dependía por completo
+de que quien redactase se acordara. `skills/studio32-lead-prospector/SKILL.md` (modo
+C, puntos 2 y 3) y `references/outreach-guidelines.md` (estructura de email frío,
+reglas duras) ya dicen explícitamente que la frase de oferta es un requisito de
+puerta, al mismo nivel que el `email` o el `detalle_ancla`, y que el correo usa un
+solo tratamiento de principio a fin. **Deliberadamente no se tocó el cierre de baja
+fricción** ("mini auditoría", nunca "reunión de 15 minutos") — es la regla dura nº4 de
+`outreach-guidelines.md` y sigue vigente; el fallo real nunca fue la fricción del
+cierre, fue la frase que falta antes.
+
+---
+
 ## 2026-08-15 · El correo se puede reescribir, y las citas se enseñan dentro del editor
 
 La skill acierta casi siempre, pero "casi" no basta cuando lo que sale lleva el nombre

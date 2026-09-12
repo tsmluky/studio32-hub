@@ -119,6 +119,10 @@ Un lead **no entra en el JSON** si le falta cualquiera de estas:
 - `detalle_ancla` con fuente real — sin esto el correo es plantilla
 - Al menos un elogio recurrente **con cita literal** — es de donde sale el tono
 - Coherencia: si `confianza.nivel` es `bajo`, dilo, no lo maquilles
+- La frase que conecta el problema con la `oferta` de la campaña — sin ella el correo
+  diagnostica y no vende nada (ver punto 3)
+- Un solo tratamiento, vosotros de principio a fin — revísalo al terminar, no solo al
+  escribir (ver punto 3)
 
 Los descartados se reportan aparte con su motivo en una línea. Son información sobre el
 criterio de búsqueda, no basura.
@@ -141,6 +145,30 @@ se apoya en el detalle ancla y en las palabras que usan sus propios clientes.
 
 Cada afirmación del cuerpo tiene que poder acompañarse de su cita en `evidencia`. Si no
 puedes citarla, no la escribas.
+
+**La `oferta` de la campaña tiene que aparecer en el cuerpo, y en una frase propia — no
+al final de la puerta como checklist.** Un correo que solo diagnostica ("son cinco
+reglas que el paciente tiene que acertar", "esas 24 horas en la práctica son cuatro
+días") y nunca dice con qué se resuelve deja la decisión en manos del prospecto, que es
+justo el trabajo que le corresponde al correo. La frase va **después** del párrafo que
+señala el problema y **antes** del cierre de baja fricción, y traduce la `oferta` al
+caso concreto del lead — no la pega genérica de qué es un asistente de WhatsApp.
+Ejemplo real (Gnadent, el cupo de 20 pacientes repartido a mano):
+
+> Un asistente de WhatsApp con la agenda real delante repartiría ese cupo solo, a
+> cualquier hora, incluido el domingo por la noche, sin que nadie tenga que estar
+> pendiente del teléfono.
+
+Un lead sin esa frase **no sube en modo C**: aplica igual que la puerta del punto 2.
+
+**Un solo tratamiento por correo — "vosotros" o "tú", nunca los dos.** El correo se
+dirige a la clínica o el centro, no a una persona ("Os encontré...", "vuestra web...",
+"estáis cerrados..."): usa **vosotros** de principio a fin, cierre incluido. Es un fallo
+frecuente porque el cierre de baja fricción a veces se redacta aparte del resto del
+cuerpo — "Si **os** interesa, **os** mando..." nunca "Si **te** interesa, **te** paso...".
+Una cita literal de la propia web o reseña del negocio puede contener "tú" o "tus" sin
+que cuente como mezcla (es su voz, no la del correo); lo que no puede pasar es que la
+voz de quien escribe cambie de tratamiento a media carta.
 
 Sigue aplicando `references/outreach-guidelines.md`: nada de emojis, promesas numéricas,
 "espero que estés bien" ni lenguaje de agencia. El test es que el correo sea

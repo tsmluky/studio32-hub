@@ -56,8 +56,11 @@ Estructura:
 1. Asunto: 4-7 palabras, observación o pregunta concreta. Nunca "Propuesta", "Colaboración", "Oportunidad".
 2. Apertura: contexto de cómo llegaste al negocio (1 frase)
 3. Observación específica + ángulo (2-3 frases)
-4. Qué propones (1 frase) — mini auditoría o 3 mejoras
-5. Cierre suave (1 frase)
+4. La oferta que resuelve ESE problema (1 frase) — no es el cierre, es la venta. Sin
+   esta frase el correo diagnostica y nunca dice con qué se arregla, que es el fallo
+   más caro porque dos pasos, 3 y 4, se parecen y es fácil escribir el primero y saltar
+   al cierre sin pasar por el segundo.
+5. Cierre de baja fricción (1 frase) — mini auditoría o 3 mejoras, nunca reunión
 6. Firma
 
 **Ejemplo de asunto bueno:** "Web de [Nombre] — un detalle que vi"
@@ -88,6 +91,8 @@ Vi vuestra presencia online y hay un par de cosas concretas que probablemente os
 3. **Mencionar solo lo verificado**. Si no cargaste la web, no comentes sobre la web. Si no buscaste competencia, no menciones competencia.
 4. **El cierre es bajo**: ofrece mini auditoría, 3 mejoras, una revisión de 1 página. No pidas reunión. No pidas llamada de 30 min. La fricción inicial debe ser mínima.
 5. **Firma**: por defecto "Francisco / Studio32". Si el usuario indica que el outreach lo hace Juanma, "Juanma / Studio32".
+6. **La oferta no es negociable ni opcional**: el mensaje tiene que decir con qué se resuelve el problema que acaba de señalar, en una frase propia del caso — no basta con diagnosticar y dejar que el prospecto pregunte qué se le ofrece. Comprobado el 12/09/2026: una campaña entera salió sin esta frase, diagnóstico perfecto y ninguna oferta, y quedó como una invitación pasiva a que el cliente pidiera más en vez de una venta.
+7. **Un solo tratamiento por mensaje**: si el email se dirige a un negocio (vosotros), todo el cuerpo va en vosotros, cierre incluido — nunca "Os encontré..." arriba y "si te interesa" abajo. El DM/WhatsApp a una persona sí puede ir en tú. No mezclar los dos dentro del mismo mensaje.
 
 ---
 
