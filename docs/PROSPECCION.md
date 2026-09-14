@@ -234,6 +234,14 @@ Doctoralia pasa de 100 opiniones con citas literales y autor— pero de doce can
 con web propia, **cinco no publicaban ninguna dirección de correo**, ni en contacto ni
 en el aviso legal. Cribar por correo primero, como dice el paso 2, y no al revés.
 
+**Correos placeholder de plantilla: parecen correo público y no lo son.** Comprobado el
+14/09/2026 en Alicante: una clínica publicaba `contacto@tuclinica.com` como dirección de
+contacto — el texto de ejemplo de la plantilla web, sin personalizar, que nadie lee en ese
+buzón. Antes de dar un correo por bueno, comprobar que el dominio de la dirección
+coincide con el negocio (no un genérico tipo `tuclinica.com`, `tuempresa.com`) y que no
+hay un segundo correo en la misma web sin relación clara con el nombre de la clínica: si
+lo hay, descartar por no ser fiable en vez de subirlo.
+
 Dos atajos que ahorran la mitad del tiempo en este sector:
 
 - **`doctoralia.es/clinicas/odontologia/<ciudad>` es el mejor punto de partida.** Lista
