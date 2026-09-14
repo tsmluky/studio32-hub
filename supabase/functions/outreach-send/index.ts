@@ -10,6 +10,9 @@
 //   3. A la misma dirección no se le escribe dos veces en la ventana de
 //      cortesía, aunque sean leads distintos.
 //
+// Y antes de las tres, el cupo diario (ver RAMPA_POR_SEMANA): lo que no cabe hoy
+// no se envía ni se marca, se queda aprobado para mañana.
+//
 // Secretos necesarios en Supabase:
 //   SMTP_HOST / SMTP_PORT          servidor de Hostinger (smtp.hostinger.com : 465)
 //   SMTP_USER / SMTP_PASS          la cuenta real: info@studio32.es y su contrasena
@@ -33,6 +36,31 @@ import { SesionImap } from './imap.ts'
 // de una suscripcion ni de verificar el dominio en otro sitio.
 const DIAS_DE_CORTESIA = 60
 const MAXIMO_POR_TANDA = 25
+
+// --- Cupo diario, en rampa ----------------------------------------------------
+//
+// Decidido el 14/09/2026: 10 al día la primera semana, 20 la segunda y 30 a partir de
+// la tercera. El tope cuenta el DOMINIO entero, no a cada socio, porque la reputación
+// que protege es la de studio32.es —la misma de la que salen las citas— y a Gmail le
+// da igual qué alias firme.
+//
+// Vive aquí y no en el Hub a propósito. Un correo que no cabe hoy no se pierde: sigue
+// aprobado y sale mañana. Lo que evita es la ráfaga —150 un viernes tras cuatro días
+// sin enviar nada—, que es justo el patrón que los filtros castigan. Si el cupo
+// dependiera de que cada uno se acordara, la primera semana con prisa se saltaría.
+//
+// Subir de 30 es una decisión, no un ajuste: se toca aquí, se despliega y se apunta
+// en DECISIONS.md. Pasar de ahí desde el dominio principal es lo que se desaconsejó.
+const INICIO_RAMPA = '2026-09-14'
+const RAMPA_POR_SEMANA = [10, 20, 30]
+
+const diaEnMadrid = (fecha: Date) => fecha.toLocaleDateString('en-CA', { timeZone: 'Europe/Madrid' })
+
+function cupoDeHoy(ahora = new Date()) {
+  const dias = Math.floor((Date.parse(diaEnMadrid(ahora)) - Date.parse(INICIO_RAMPA)) / 86_400_000)
+  const semana = Math.max(0, Math.floor(dias / 7))
+  return RAMPA_POR_SEMANA[Math.min(semana, RAMPA_POR_SEMANA.length - 1)]
+}
 
 const allowedOrigins = new Set([
   'https://www.hub.studio32.es',
@@ -265,17 +293,11 @@ Deno.serve(async (request) => {
     }
   }
 
-  let payload: { messageIds?: string[] }
+  let payload: { messageIds?: string[]; soloCupo?: boolean }
   try {
     payload = await request.json()
   } catch {
     return json(request, { error: 'Cuerpo de la petición no válido.' }, 400)
-  }
-
-  const ids = (payload.messageIds ?? []).filter(Boolean)
-  if (!ids.length) return json(request, { error: 'No has indicado ningún mensaje.' }, 400)
-  if (ids.length > MAXIMO_POR_TANDA) {
-    return json(request, { error: `Máximo ${MAXIMO_POR_TANDA} correos por tanda. Es a propósito: enviar de golpe quema el dominio.` }, 400)
   }
 
   const admin = createClient(
@@ -284,9 +306,39 @@ Deno.serve(async (request) => {
     { auth: { autoRefreshToken: false, persistSession: false } },
   )
 
+  // Se cuentan los enviados del día de Madrid, no de las últimas 24 horas: "hoy
+  // quedan 7" tiene que significar lo mismo para quien lo lee en el Hub.
+  const hoy = diaEnMadrid(new Date())
+  const { data: recientes, error: cupoError } = await admin
+    .from('outreach_messages')
+    .select('sent_at')
+    .eq('workspace_id', 'studio32')
+    .eq('status', 'enviado')
+    .gte('sent_at', new Date(Date.now() - 36 * 3_600_000).toISOString())
+  if (cupoError) return json(request, { error: 'No se ha podido comprobar el cupo de hoy.' }, 500)
+  const cupo = { hoy: cupoDeHoy(), usados: (recientes ?? []).filter((r) => diaEnMadrid(new Date(r.sent_at)) === hoy).length }
+  const quedan = () => Math.max(0, cupo.hoy - cupo.usados)
+  const cupoActual = () => ({ ...cupo, quedan: quedan() })
+
+  // El Hub pregunta antes de enviar, para enseñar cuántos caben hoy.
+  if (payload.soloCupo) return json(request, { cupo: cupoActual() })
+
+  const ids = (payload.messageIds ?? []).filter(Boolean)
+  if (!ids.length) return json(request, { error: 'No has indicado ningún mensaje.' }, 400)
+  if (ids.length > MAXIMO_POR_TANDA) {
+    return json(request, { error: `Máximo ${MAXIMO_POR_TANDA} correos por tanda. Es a propósito: enviar de golpe quema el dominio.` }, 400)
+  }
+
   const resultados: Array<{ id: string; estado: string; motivo?: string; copia?: string }> = []
 
   for (const id of ids) {
+    // Frontera 0: el cupo del día. No toca la base: el mensaje sigue aprobado y
+    // entra en la tanda de mañana tal cual.
+    if (quedan() <= 0) {
+      resultados.push({ id, estado: 'aplazado', motivo: 'Cupo de hoy completo. Sigue aprobado para mañana.' })
+      continue
+    }
+
     const { data: mensaje, error: readError } = await admin
       .from('outreach_messages')
       .select('id, lead_id, from_email, reply_to, to_email, to_name, subject, body, status, approved_by')
@@ -394,6 +446,7 @@ Deno.serve(async (request) => {
         .from('outreach_messages')
         .update({ status: 'enviado', provider: 'hostinger-smtp', sent_at: new Date().toISOString(), error: '' })
         .eq('id', id)
+      cupo.usados += 1
 
       await admin
         .from('outreach_leads')
@@ -434,5 +487,6 @@ Deno.serve(async (request) => {
   }
 
   const enviados = resultados.filter((r) => r.estado === 'enviado').length
-  return json(request, { enviados, total: ids.length, resultados })
+  const aplazados = resultados.filter((r) => r.estado === 'aplazado').length
+  return json(request, { enviados, aplazados, total: ids.length, cupo: cupoActual(), resultados })
 })

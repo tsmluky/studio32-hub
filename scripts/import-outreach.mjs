@@ -101,7 +101,7 @@ for (const lead of currentLeads ?? []) {
   byName.set(`${lead.business_name.toLowerCase()}|${lead.postal_code ?? ''}`, lead)
 }
 
-const report = { creados: 0, actualizados: 0, duplicados: 0, protegidos: 0, borradores: 0, omitidos: 0 }
+const report = { creados: 0, actualizados: 0, duplicados: 0, protegidos: 0, borradores: 0, omitidos: 0, sinAscii: [] }
 
 for (const lead of payload.leads) {
   if (!lead.business_name) {
@@ -191,6 +191,14 @@ for (const lead of payload.leads) {
   if (!lead.message?.subject || !lead.message?.body) continue
   if (!row.email) continue
 
+  // Hostinger rechaza las direcciones con tildes o eñes ("553 Must declare SMTPUTF8"):
+  // el único fallido real hasta el 14/09 fue eso. Se para aquí y no en el envío, para
+  // que no ocupe un hueco del cupo diario ni llegue aprobado a una tanda que va a fallar.
+  if (/[^\x00-\x7F]/.test(row.email)) {
+    report.sinAscii.push(`${row.business_name} <${row.email}>`)
+    continue
+  }
+
   const { data: existingMessages, error: messageReadError } = await admin
     .from('outreach_messages')
     .select('id, status')
@@ -247,3 +255,7 @@ console.log(`  posibles duplicados: ${report.duplicados}`)
 console.log(`  con trabajo previo:  ${report.protegidos} (no se tocó su estado)`)
 console.log(`  borradores:          ${report.borradores}`)
 if (report.omitidos) console.log(`  omitidos sin nombre: ${report.omitidos}`)
+if (report.sinAscii.length) {
+  console.log(`  sin borrador por correo con tilde o eñe (Hostinger no lo envía):`)
+  for (const item of report.sinAscii) console.log(`    - ${item}`)
+}

@@ -1189,6 +1189,7 @@ function App() {
               onDiscard={(leadId) => void outreach.discardLead(leadId)}
               onEdit={outreach.updateMessageDraft}
               onSend={outreach.sendApproved}
+              onCupo={outreach.consultarCupo}
             />
           ) : (
             <ProjectView

@@ -503,3 +503,34 @@ Entre 721 y 920px el Hub conserva ahora su modelo de escritorio con un sidebar d
 topbar horizontal y densidad ajustada. El contenido mantiene sus composiciones fluidas
 para no desbordar. La navegación móvil empieza en 720px: el breakpoint representa el
 modo de uso, no una categoría genérica de dispositivo.
+
+---
+
+## 2026-09-14 · Cupo diario en rampa, aplicado en la función de envío
+
+Pancho y Juanma deciden enviar mucho más: 10 al día la primera semana, 20 la segunda y
+30 desde la tercera (`INICIO_RAMPA` = lunes 14/09). Se sigue enviando desde
+`studio32.es` mientras no haya dominio aparte.
+
+**El cupo vive en `outreach-send`, no en el Hub**, porque es quien lo hace cumplir. El
+Hub solo lo pregunta (`{ soloCupo: true }`) para enseñarlo y ofrecer enviar lo que cabe.
+Lo que no cabe se devuelve como `aplazado` **sin tocar la base**: sigue `aprobado` y
+entra en la tanda de mañana.
+
+**Cuenta el dominio entero, no a cada socio.** Los alias no separan reputación: Gmail
+juzga el dominio que firma el DKIM (`studio32.es`) y la IP. Las citas salen por Resend
+con ese mismo dominio, así que una ráfaga de prospección les afecta.
+
+**Día de Madrid, no últimas 24 horas**, para que "hoy quedan 7" signifique lo mismo en
+el Hub que en la cabeza de quien lo lee.
+
+Límite conocido y aceptado: dos personas enviando a la vez pueden pasarse del cupo por
+unos pocos correos (se cuenta al empezar cada petición). Con tres socios y 25 como
+mucho por petición no compensa un bloqueo en base.
+
+Subir de 30 es decisión, no ajuste. Desde el dominio principal se desaconsejó; el paso
+recomendado antes de sostener 30 al día es un dominio aparte solo para prospección, con
+su propia cuenta de correo (no un alias de la cuenta actual, que es una sola para todo).
+
+**De paso:** `import-outreach.mjs` ya no crea borrador para direcciones con caracteres
+no ASCII. El único fallido real (`553 Must declare SMTPUTF8`) fue eso.

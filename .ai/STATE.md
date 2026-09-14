@@ -1,6 +1,6 @@
 # Estado — studio32-hub
 
-> Se **sobrescribe**, no se acumula. Tope ~100 líneas. Última actualización: 2026-08-16.
+> Se **sobrescribe**, no se acumula. Tope ~100 líneas. Última actualización: 2026-09-14.
 
 ## Qué es
 
@@ -92,6 +92,9 @@ piden como requisito de entrada. El porqué completo en `DECISIONS.md`.
   manda sigue siendo el estado en el Hub**, no la carpeta.
 - **Tres fronteras en el envío:** aprobación humana explícita, lista de bajas, y no
   escribir dos veces a la misma dirección en 60 días.
+- **Y un cupo diario por encima (14/09):** 10/20/30 al día por semana desde el 14/09,
+  para todo el dominio. Lo aplica `outreach-send`; lo que no cabe queda aprobado para
+  mañana. Porqué en `DECISIONS.md`.
 - **La huella es esquema compartido con `studio32-agent`.** Si un lead convierte,
   alimenta `templates/<vertical>/`.
 

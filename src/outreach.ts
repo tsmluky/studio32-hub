@@ -62,7 +62,9 @@ export type OutreachLead = {
   huella: Huella | null
 }
 
-export type OutreachEvidencia = { afirmacion: string; cita: string; fuente: string }
+export type CupoDiario = { hoy: number; usados: number; quedan: number }
+
+export type OutreachEvidencia ={ afirmacion: string; cita: string; fuente: string }
 
 export type OutreachMessage = {
   id: string
@@ -267,10 +269,20 @@ export function useOutreach(enabled: boolean) {
     if (sendError) throw new Error('La función de envío todavía no está desplegada.')
     if (data?.error) throw new Error(data.error)
     reload()
-    return data as { enviados: number; total: number; resultados: Array<{ id: string; estado: string; motivo?: string }> }
+    return data as { enviados: number; aplazados: number; total: number; cupo: CupoDiario; resultados: Array<{ id: string; estado: string; motivo?: string }> }
   }
 
-  return { campaigns, leads, messages, status, error, reload, approveMessage, discardLead, updateMessageDraft, sendApproved }
+  // El cupo lo calcula la función, que es quien lo hace cumplir. El Hub solo lo
+  // pregunta para enseñarlo: si lo calculara él también, habría dos rampas que
+  // mantener y acabarían diciendo cosas distintas.
+  const consultarCupo = async () => {
+    if (!supabase) return null
+    const { data, error: cupoError } = await supabase.functions.invoke('outreach-send', { body: { soloCupo: true } })
+    if (cupoError || !data?.cupo) return null
+    return data.cupo as CupoDiario
+  }
+
+  return { campaigns, leads, messages, status, error, reload, approveMessage, discardLead, updateMessageDraft, sendApproved, consultarCupo }
 }
 
 // Pulso para la portada. Deliberadamente NO reutiliza useOutreach: aquí solo

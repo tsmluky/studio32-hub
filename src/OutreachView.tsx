@@ -4,12 +4,16 @@
 // afirmación del correo. Aprobar es la decisión; el envío lo hace después la Edge
 // Function, que es la única que puede marcar un mensaje como enviado.
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { AlertCircle, ArrowRight, Check, CheckCircle2, ChevronRight, Clock3, Send, X, Sparkles, Ban, Pencil } from 'lucide-react'
 import { EmptyState, PageHeading, SectionHeader, StatusBadge } from './ui'
 import CampaignRequest from './CampaignRequest'
 import { darDeBaja, remitentes } from './outreach'
-import type { OutreachCampaign, OutreachLead, OutreachMessage } from './outreach'
+import type { CupoDiario, OutreachCampaign, OutreachLead, OutreachMessage } from './outreach'
+
+// El mismo tope que aplica la función por petición. Si el Hub mandara más, la función
+// rechazaría la tanda entera en vez de enviar las primeras.
+const MAXIMO_POR_TANDA = 25
 import type { HubSyncStatus, MemberId } from './types'
 
 export default function OutreachView({
@@ -24,6 +28,7 @@ export default function OutreachView({
   onDiscard,
   onEdit,
   onSend,
+  onCupo,
 }: {
   campaigns: OutreachCampaign[]
   leads: OutreachLead[]
@@ -35,8 +40,17 @@ export default function OutreachView({
   onApprove: (messageId: string, leadId: string) => void
   onDiscard: (leadId: string) => void
   onEdit: (messageId: string, subject: string, body: string) => Promise<void>
-  onSend: (messageIds: string[]) => Promise<{ enviados: number; total: number }>
+  onSend: (messageIds: string[]) => Promise<{ enviados: number; aplazados?: number; total: number; cupo?: CupoDiario }>
+  onCupo: () => Promise<CupoDiario | null>
 }) {
+  const [cupo, setCupo] = useState<CupoDiario | null>(null)
+  useEffect(() => {
+    let vivo = true
+    void onCupo().then((leido) => vivo && setCupo(leido))
+    return () => { vivo = false }
+    // Una vez al abrir la vista: tras cada envío, la propia respuesta trae el cupo nuevo.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   const [pedirOpen, setPedirOpen] = useState(false)
   const [campaignId, setCampaignId] = useState<string | 'all'>('all')
   const [filter, setFilter] = useState<'review' | 'approved' | 'sent'>('review')
@@ -98,17 +112,30 @@ export default function OutreachView({
 
   const visibleLeads = scopedLeads.filter(matchesFilter)
 
-  const destinatarios = scopedLeads
+  const aprobados = scopedLeads
     .map((lead) => ({ lead, message: latestMessageFor(lead.id) }))
     .filter((item) => item.message?.status === 'aprobado')
     .map((item) => ({ id: item.message!.id, negocio: item.lead.business_name, email: item.message!.to_email }))
+
+  // Solo se ofrece lo que cabe hoy, y así el diálogo lista exactamente lo que va a
+  // salir. El resto sigue aprobado y sale otro día. Si el cupo no se ha podido leer, se
+  // manda como mucho una tanda y la función, que es quien lo hace cumplir, aplaza lo
+  // que sobre.
+  const cabenHoy = Math.min(cupo?.quedan ?? MAXIMO_POR_TANDA, MAXIMO_POR_TANDA)
+  const destinatarios = aprobados.slice(0, cabenHoy)
+  const paraOtroDia = aprobados.length - destinatarios.length
 
   const enviar = async () => {
     setEnviando(true)
     setAviso('')
     try {
       const resultado = await onSend(destinatarios.map((destinatario) => destinatario.id))
-      setAviso(`Enviados ${resultado.enviados} de ${resultado.total}.`)
+      const aplazados = resultado.aplazados ?? 0
+      setAviso(
+        `Enviados ${resultado.enviados} de ${resultado.total}.` +
+          (aplazados ? ` ${aplazados} no cabían en el cupo de hoy y siguen aprobados para mañana.` : ''),
+      )
+      if (resultado.cupo) setCupo(resultado.cupo)
       setConfirmOpen(false)
     } catch (sendError) {
       setAviso(sendError instanceof Error ? sendError.message : 'No se ha podido enviar.')
@@ -230,14 +257,21 @@ export default function OutreachView({
             </button>
           </section>
 
-          {destinatarios.length > 0 && (
+          {aprobados.length > 0 && (
             <section className="outreach-send-bar">
               <span>
-                <strong>{destinatarios.length === 1 ? '1 correo aprobado' : `${destinatarios.length} correos aprobados`}</strong>
-                <small>Revisados y listos. Salen cuando tú lo digas.</small>
+                <strong>{aprobados.length === 1 ? '1 correo aprobado' : `${aprobados.length} correos aprobados`}</strong>
+                <small>
+                  {!cupo
+                    ? 'Revisados y listos. Salen cuando tú lo digas.'
+                    : cupo.quedan === 0
+                      ? `Cupo de hoy completo (${cupo.usados} de ${cupo.hoy}). Siguen aprobados y salen mañana.`
+                      : `Hoy caben ${cupo.quedan} de ${cupo.hoy}.` +
+                        (paraOtroDia ? ` Salen ${destinatarios.length} y ${paraOtroDia} quedan para otro día.` : '')}
+                </small>
               </span>
-              <button className="primary-action" type="button" onClick={() => setConfirmOpen(true)}>
-                <Send size={16} /> Enviar
+              <button className="primary-action" type="button" onClick={() => setConfirmOpen(true)} disabled={destinatarios.length === 0}>
+                <Send size={16} /> {paraOtroDia && destinatarios.length ? `Enviar ${destinatarios.length}` : 'Enviar'}
               </button>
             </section>
           )}
@@ -271,6 +305,7 @@ export default function OutreachView({
       {confirmOpen && (
         <SendConfirmDialog
           destinatarios={destinatarios}
+          paraOtroDia={paraOtroDia}
           enviando={enviando}
           onClose={() => setConfirmOpen(false)}
           onConfirm={() => void enviar()}
@@ -597,11 +632,13 @@ function LeadStory({
 
 function SendConfirmDialog({
   destinatarios,
+  paraOtroDia,
   enviando,
   onClose,
   onConfirm,
 }: {
   destinatarios: Array<{ id: string; negocio: string; email: string }>
+  paraOtroDia: number
   enviando: boolean
   onClose: () => void
   onConfirm: () => void
@@ -614,7 +651,10 @@ function SendConfirmDialog({
             <span className="dialog-icon"><Send size={18} /></span>
             <span>
               <strong id="send-dialog-title">Enviar {destinatarios.length === 1 ? 'un correo' : `${destinatarios.length} correos`}</strong>
-              <small>Salen ahora mismo. No hay forma de recuperarlos.</small>
+              <small>
+                Salen ahora mismo. No hay forma de recuperarlos.
+                {paraOtroDia > 0 && ` Otros ${paraOtroDia} siguen aprobados y no salen hoy.`}
+              </small>
             </span>
           </span>
           <button className="icon-button compact" type="button" onClick={onClose} aria-label="Cerrar" disabled={enviando}><X size={17} /></button>
