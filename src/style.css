@@ -5252,6 +5252,17 @@ button.update-row {
   color: var(--green);
 }
 
+/* Parado solo por un fallo: ámbar, que es "atención", no rojo de error. */
+.outreach-send-bar.is-paused {
+  background: var(--amber-soft);
+  border-color: #ecd9c3;
+}
+
+.outreach-send-bar.is-paused strong,
+.outreach-send-bar.is-paused small {
+  color: var(--amber);
+}
+
 .outreach-aviso {
   margin: 0 0 14px;
   padding: 11px 15px;

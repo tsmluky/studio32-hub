@@ -63,6 +63,7 @@ export type OutreachLead = {
 }
 
 export type CupoDiario = { hoy: number; usados: number; quedan: number }
+export type EnvioAutomatico = { activo: boolean; pausaMotivo: string; franja: string }
 
 export type OutreachEvidencia ={ afirmacion: string; cita: string; fuente: string }
 
@@ -275,14 +276,25 @@ export function useOutreach(enabled: boolean) {
   // El cupo lo calcula la función, que es quien lo hace cumplir. El Hub solo lo
   // pregunta para enseñarlo: si lo calculara él también, habría dos rampas que
   // mantener y acabarían diciendo cosas distintas.
-  const consultarCupo = async () => {
+  const consultarEnvio = async () => {
     if (!supabase) return null
     const { data, error: cupoError } = await supabase.functions.invoke('outreach-send', { body: { soloCupo: true } })
     if (cupoError || !data?.cupo) return null
-    return data.cupo as CupoDiario
+    return { cupo: data.cupo as CupoDiario, automatico: (data.automatico ?? null) as EnvioAutomatico | null }
   }
 
-  return { campaigns, leads, messages, status, error, reload, approveMessage, discardLead, updateMessageDraft, sendApproved, consultarCupo }
+  // Encender limpia el motivo de la última pausa: quien lo enciende ya lo ha leído.
+  const cambiarEnvioAutomatico = async (activo: boolean) => {
+    if (!supabase) throw new Error('Hace falta una sesión conectada.')
+    const { data } = await supabase.auth.getUser()
+    const cambios = activo
+      ? { envio_automatico: true, pausa_motivo: '', updated_by: data.user?.id ?? null }
+      : { envio_automatico: false, updated_by: data.user?.id ?? null }
+    const { error: updateError } = await supabase.from('outreach_settings').update(cambios).eq('workspace_id', 'studio32')
+    if (updateError) throw new Error('No se ha podido cambiar el envío automático.')
+  }
+
+  return { campaigns, leads, messages, status, error, reload, approveMessage, discardLead, updateMessageDraft, sendApproved, consultarEnvio, cambiarEnvioAutomatico }
 }
 
 // Pulso para la portada. Deliberadamente NO reutiliza useOutreach: aquí solo

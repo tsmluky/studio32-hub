@@ -62,6 +62,50 @@ function cupoDeHoy(ahora = new Date()) {
   return RAMPA_POR_SEMANA[Math.min(semana, RAMPA_POR_SEMANA.length - 1)]
 }
 
+// --- Envío programado ----------------------------------------------------------
+//
+// Aprobar es programar (14/09/2026). El reloj de la base llama cada 10 minutos y aquí
+// se decide si toca: interruptor encendido, día laborable, dentro de la franja y por
+// detrás del ritmo del día. El cupo se reparte en línea recta por la franja, así que
+// con 30 al día sale uno cada ~19 minutos en vez de treinta a las 9:30.
+//
+// Solo de lunes a viernes: a una clínica, lo que llega en fin de semana lo lee el
+// lunes enterrado debajo de todo lo demás. Enviar a mano sigue pudiéndose cualquier
+// día, dentro del mismo cupo.
+const DIAS_PROGRAMADOS = new Set(['Mon', 'Tue', 'Wed', 'Thu', 'Fri'])
+const DIAS_PROGRAMADOS_TEXTO = 'de lunes a viernes'
+const FRANJA_MADRID = { desde: 9.5, hasta: 19 }
+const MAXIMO_POR_LLAMADA_PROGRAMADA = 2
+const MARGEN_TRAS_APROBAR_MIN = 30
+
+const textoHora = (hora: number) => `${Math.floor(hora)}:${String(Math.round((hora % 1) * 60)).padStart(2, '0')}`
+
+function cuantosTocanAhora(cupoHoy: number, usadosHoy: number, ahora = new Date()) {
+  const partes = Object.fromEntries(
+    new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Madrid', weekday: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
+      .formatToParts(ahora)
+      .map((parte) => [parte.type, parte.value]),
+  )
+  if (!DIAS_PROGRAMADOS.has(partes.weekday)) return 0
+  const hora = Number(partes.hour) + Number(partes.minute) / 60
+  if (hora < FRANJA_MADRID.desde || hora >= FRANJA_MADRID.hasta) return 0
+  const avance = (hora - FRANJA_MADRID.desde) / (FRANJA_MADRID.hasta - FRANJA_MADRID.desde)
+  const deberianIr = Math.min(cupoHoy, Math.ceil(cupoHoy * avance))
+  return Math.max(0, Math.min(deberianIr - usadosHoy, MAXIMO_POR_LLAMADA_PROGRAMADA))
+}
+
+// El reloj se identifica con un secreto compartido que vive en Vault (lado base) y en
+// OUTREACH_CRON_SECRET (lado función). Sin el secreto puesto, el modo programado no
+// existe: nadie puede colarse enviando una cabecera vacía.
+function esLlamadaDelCron(request: Request) {
+  const esperado = Deno.env.get('OUTREACH_CRON_SECRET')?.trim() ?? ''
+  const recibido = request.headers.get('x-cron-secret')?.trim() ?? ''
+  if (esperado.length < 32 || recibido.length !== esperado.length) return false
+  let diferencia = 0
+  for (let i = 0; i < esperado.length; i++) diferencia |= esperado.charCodeAt(i) ^ recibido.charCodeAt(i)
+  return diferencia === 0
+}
+
 const allowedOrigins = new Set([
   'https://www.hub.studio32.es',
   'https://hub.studio32.es',
@@ -242,8 +286,13 @@ Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders(request) })
   if (request.method !== 'POST') return json(request, { error: 'Método no permitido.' }, 405)
 
-  const user = await requireStudio32Member(request)
-  if (!user) return json(request, { error: 'No tienes acceso a la prospección de Studio32.' }, 403)
+  // Dos formas de llegar aquí: una persona desde el Hub (sesión de miembro) o el reloj
+  // de la base (pg_cron, con el secreto compartido). Ninguna otra.
+  const programado = esLlamadaDelCron(request)
+  if (!programado) {
+    const user = await requireStudio32Member(request)
+    if (!user) return json(request, { error: 'No tienes acceso a la prospección de Studio32.' }, 403)
+  }
 
   const smtpHost = Deno.env.get('SMTP_HOST') ?? 'smtp.hostinger.com'
   const smtpPort = Number(Deno.env.get('SMTP_PORT') ?? 465)
@@ -293,7 +342,7 @@ Deno.serve(async (request) => {
     }
   }
 
-  let payload: { messageIds?: string[]; soloCupo?: boolean }
+  let payload: { messageIds?: string[]; soloCupo?: boolean; programado?: boolean }
   try {
     payload = await request.json()
   } catch {
@@ -320,13 +369,51 @@ Deno.serve(async (request) => {
   const quedan = () => Math.max(0, cupo.hoy - cupo.usados)
   const cupoActual = () => ({ ...cupo, quedan: quedan() })
 
-  // El Hub pregunta antes de enviar, para enseñar cuántos caben hoy.
-  if (payload.soloCupo) return json(request, { cupo: cupoActual() })
+  const { data: ajustes } = await admin
+    .from('outreach_settings')
+    .select('envio_automatico, pausa_motivo')
+    .eq('workspace_id', 'studio32')
+    .maybeSingle()
+  const automatico = {
+    activo: Boolean(ajustes?.envio_automatico),
+    pausaMotivo: ajustes?.pausa_motivo ?? '',
+    franja: `${DIAS_PROGRAMADOS_TEXTO}, de ${textoHora(FRANJA_MADRID.desde)} a ${textoHora(FRANJA_MADRID.hasta)}`,
+  }
 
-  const ids = (payload.messageIds ?? []).filter(Boolean)
-  if (!ids.length) return json(request, { error: 'No has indicado ningún mensaje.' }, 400)
-  if (ids.length > MAXIMO_POR_TANDA) {
-    return json(request, { error: `Máximo ${MAXIMO_POR_TANDA} correos por tanda. Es a propósito: enviar de golpe quema el dominio.` }, 400)
+  // El Hub pregunta antes de enviar, para enseñar cuántos caben hoy y si el envío
+  // automático está encendido.
+  if (payload.soloCupo) return json(request, { cupo: cupoActual(), automatico })
+
+  let ids: string[]
+
+  if (programado) {
+    // El reloj llama cada 10 minutos y la función decide si toca. Cada "no" es una
+    // respuesta normal, no un error: es lo que pasa casi siempre.
+    if (!automatico.activo) return json(request, { programado: true, enviados: 0, motivo: 'Envío automático apagado.' })
+    const tocan = cuantosTocanAhora(cupo.hoy, cupo.usados)
+    if (tocan <= 0) return json(request, { programado: true, enviados: 0, motivo: 'Fuera de franja o al día con el ritmo.', cupo: cupoActual() })
+
+    // Solo lo aprobado hace un rato: el margen deja deshacer una aprobación con prisa
+    // antes de que salga. El más antiguo primero, para que nada se quede atascado.
+    const aprobadoAntesDe = new Date(Date.now() - MARGEN_TRAS_APROBAR_MIN * 60_000).toISOString()
+    const { data: cola, error: colaError } = await admin
+      .from('outreach_messages')
+      .select('id')
+      .eq('workspace_id', 'studio32')
+      .eq('status', 'aprobado')
+      .not('approved_by', 'is', null)
+      .lte('approved_at', aprobadoAntesDe)
+      .order('approved_at', { ascending: true })
+      .limit(tocan)
+    if (colaError) return json(request, { error: 'No se ha podido leer la cola de aprobados.' }, 500)
+    ids = (cola ?? []).map((fila) => fila.id)
+    if (!ids.length) return json(request, { programado: true, enviados: 0, motivo: 'No hay nada aprobado esperando.', cupo: cupoActual() })
+  } else {
+    ids = (payload.messageIds ?? []).filter(Boolean)
+    if (!ids.length) return json(request, { error: 'No has indicado ningún mensaje.' }, 400)
+    if (ids.length > MAXIMO_POR_TANDA) {
+      return json(request, { error: `Máximo ${MAXIMO_POR_TANDA} correos por tanda. Es a propósito: enviar de golpe quema el dominio.` }, 400)
+    }
   }
 
   const resultados: Array<{ id: string; estado: string; motivo?: string; copia?: string }> = []
@@ -395,7 +482,19 @@ Deno.serve(async (request) => {
       .eq('id', mensaje.lead_id)
       .maybeSingle()
 
-    await admin.from('outreach_messages').update({ status: 'enviando' }).eq('id', id)
+    // Se reclama el mensaje de forma atómica: solo pasa a 'enviando' si sigue
+    // 'aprobado'. Con el reloj enviando y una persona pulsando "Enviar" a la vez, sin
+    // esto los dos podrían leerlo aprobado y mandarlo dos veces.
+    const { data: reclamado } = await admin
+      .from('outreach_messages')
+      .update({ status: 'enviando' })
+      .eq('id', id)
+      .eq('status', 'aprobado')
+      .select('id')
+    if (!reclamado?.length) {
+      resultados.push({ id, estado: 'omitido', motivo: 'Otro envío lo ha cogido ya.' })
+      continue
+    }
 
     const enlaceBaja = bajaTexto(lead?.unsubscribe_token ?? id)
     const remitente = mensaje.from_email || remitentePorDefecto
@@ -479,6 +578,20 @@ Deno.serve(async (request) => {
       const motivo = error instanceof Error ? error.message : 'Error desconocido al enviar.'
       await admin.from('outreach_messages').update({ status: 'fallido', error: motivo }).eq('id', id)
       resultados.push({ id, estado: 'fallido', motivo })
+
+      // Freno de emergencia del envío automático: a la primera que el servidor
+      // rechaza un correo, se apaga solo y deja escrito por qué. Un rechazo puede ser
+      // una dirección mala, pero también el aviso de que Hostinger ha empezado a
+      // limitar la cuenta, y seguir enviando a ciegas es lo que convierte un aviso en
+      // un bloqueo. Volver a encenderlo es decisión de una persona, desde el Hub.
+      if (programado) {
+        const cuando = new Date().toLocaleString('es-ES', { timeZone: 'Europe/Madrid', dateStyle: 'short', timeStyle: 'short' })
+        await admin
+          .from('outreach_settings')
+          .update({ envio_automatico: false, pausa_motivo: `Se paró solo el ${cuando}: el servidor rechazó el correo a ${mensaje.to_email} (${motivo}).` })
+          .eq('workspace_id', 'studio32')
+        break
+      }
     }
 
     // Un respiro entre envíos. Una ráfaga es la forma más rápida de que el
@@ -488,5 +601,5 @@ Deno.serve(async (request) => {
 
   const enviados = resultados.filter((r) => r.estado === 'enviado').length
   const aplazados = resultados.filter((r) => r.estado === 'aplazado').length
-  return json(request, { enviados, aplazados, total: ids.length, cupo: cupoActual(), resultados })
+  return json(request, { programado, enviados, aplazados, total: ids.length, cupo: cupoActual(), resultados })
 })

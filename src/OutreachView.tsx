@@ -9,7 +9,7 @@ import { AlertCircle, ArrowRight, Check, CheckCircle2, ChevronRight, Clock3, Sen
 import { EmptyState, PageHeading, SectionHeader, StatusBadge } from './ui'
 import CampaignRequest from './CampaignRequest'
 import { darDeBaja, remitentes } from './outreach'
-import type { CupoDiario, OutreachCampaign, OutreachLead, OutreachMessage } from './outreach'
+import type { CupoDiario, EnvioAutomatico, OutreachCampaign, OutreachLead, OutreachMessage } from './outreach'
 
 // El mismo tope que aplica la función por petición. Si el Hub mandara más, la función
 // rechazaría la tanda entera en vez de enviar las primeras.
@@ -28,7 +28,8 @@ export default function OutreachView({
   onDiscard,
   onEdit,
   onSend,
-  onCupo,
+  onEstadoEnvio,
+  onCambiarAutomatico,
 }: {
   campaigns: OutreachCampaign[]
   leads: OutreachLead[]
@@ -41,16 +42,39 @@ export default function OutreachView({
   onDiscard: (leadId: string) => void
   onEdit: (messageId: string, subject: string, body: string) => Promise<void>
   onSend: (messageIds: string[]) => Promise<{ enviados: number; aplazados?: number; total: number; cupo?: CupoDiario }>
-  onCupo: () => Promise<CupoDiario | null>
+  onEstadoEnvio: () => Promise<{ cupo: CupoDiario; automatico: EnvioAutomatico | null } | null>
+  onCambiarAutomatico: (activo: boolean) => Promise<void>
 }) {
   const [cupo, setCupo] = useState<CupoDiario | null>(null)
+  const [automatico, setAutomatico] = useState<EnvioAutomatico | null>(null)
+  const [cambiandoAutomatico, setCambiandoAutomatico] = useState(false)
+  const leerEstadoEnvio = async () => {
+    const leido = await onEstadoEnvio()
+    if (!leido) return
+    setCupo(leido.cupo)
+    setAutomatico(leido.automatico)
+  }
   useEffect(() => {
-    let vivo = true
-    void onCupo().then((leido) => vivo && setCupo(leido))
-    return () => { vivo = false }
-    // Una vez al abrir la vista: tras cada envío, la propia respuesta trae el cupo nuevo.
+    // Al abrir la vista. Tras cada envío manual la propia respuesta trae el cupo nuevo,
+    // y al pulsar "Actualizar" se vuelve a leer, que es cuando se quiere ver lo que ha
+    // salido solo.
+    void leerEstadoEnvio()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  const alternarAutomatico = async () => {
+    if (!automatico) return
+    setCambiandoAutomatico(true)
+    setAviso('')
+    try {
+      await onCambiarAutomatico(!automatico.activo)
+      await leerEstadoEnvio()
+    } catch (cambioError) {
+      setAviso(cambioError instanceof Error ? cambioError.message : 'No se ha podido cambiar el envío automático.')
+    } finally {
+      setCambiandoAutomatico(false)
+    }
+  }
   const [pedirOpen, setPedirOpen] = useState(false)
   const [campaignId, setCampaignId] = useState<string | 'all'>('all')
   const [filter, setFilter] = useState<'review' | 'approved' | 'sent'>('review')
@@ -171,7 +195,7 @@ export default function OutreachView({
         description="Cada correo trae la evidencia que lo sostiene, para revisarlo sin tener que fiarse."
         meta={
           <>
-            <button className="secondary-action" type="button" onClick={onReload}><ArrowRight size={16} /> Actualizar</button>
+            <button className="secondary-action" type="button" onClick={() => { onReload(); void leerEstadoEnvio() }}><ArrowRight size={16} /> Actualizar</button>
             <button className="primary-action" type="button" onClick={() => setPedirOpen(true)}>
               <Sparkles size={16} /> Pedir campaña
             </button>
@@ -256,6 +280,31 @@ export default function OutreachView({
               <b>{weakCount}</b>
             </button>
           </section>
+
+          {/* El interruptor va siempre a la vista, haya o no aprobados: es lo que dice
+              si los correos salen solos. Si se paró por un fallo, el motivo se lee aquí
+              antes de poder volver a encenderlo. */}
+          {automatico && (
+            <section className={`outreach-send-bar${!automatico.activo && automatico.pausaMotivo ? ' is-paused' : ''}`}>
+              <span>
+                <strong>Envío automático {automatico.activo ? 'encendido' : 'apagado'}</strong>
+                <small>
+                  {automatico.activo
+                    ? `Lo aprobado sale solo ${automatico.franja}, repartido y dentro del cupo. Media hora después de aprobarlo, para poder deshacerlo.`
+                    : automatico.pausaMotivo || 'Lo aprobado solo sale cuando alguien pulsa Enviar.'}
+                </small>
+              </span>
+              <button
+                className={automatico.activo ? 'secondary-action' : 'primary-action'}
+                type="button"
+                onClick={() => void alternarAutomatico()}
+                disabled={cambiandoAutomatico}
+                aria-pressed={automatico.activo}
+              >
+                {cambiandoAutomatico ? 'Cambiando…' : automatico.activo ? 'Pausar' : 'Encender'}
+              </button>
+            </section>
+          )}
 
           {aprobados.length > 0 && (
             <section className="outreach-send-bar">
