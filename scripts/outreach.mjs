@@ -2,6 +2,8 @@
 //
 //   npm run outreach                  ¿qué hay pedido? y el prompt listo para pegar
 //   npm run outreach -- tanda.json    sube esa tanda al Hub
+//   npm run outreach -- --conocidos "zona"      qué negocios de esa zona ya tenemos
+//   npm run outreach -- --cerrar <id> "motivo"  cierra una campaña agotada
 //
 // Antes esto eran dos scripts con nombres distintos, y el paso de en medio quedaba
 // difuso: "pido campaña en el Hub, toco scripts raros en local, aparecen los correos".
@@ -17,12 +19,16 @@ import { fileURLToPath } from 'node:url'
 const aqui = path.dirname(fileURLToPath(import.meta.url))
 const args = process.argv.slice(2)
 const cerrando = args.includes('--cerrar')
-// Con `--cerrar` los sueltos son el id y el motivo, no un archivo que importar.
-const archivo = cerrando ? null : args.find((a) => !a.startsWith('--'))
+const conocidos = args.includes('--conocidos')
+// Con `--cerrar` los sueltos son el id y el motivo, y con `--conocidos` la zona: no un
+// archivo que importar.
+const archivo = cerrando || conocidos ? null : args.find((a) => !a.startsWith('--'))
 
 const destino = cerrando
   ? path.join(aqui, 'cerrar-campana.mjs')
-  : archivo
+  : conocidos
+    ? path.join(aqui, 'outreach-conocidos.mjs')
+    : archivo
     ? path.join(aqui, 'import-outreach.mjs')
     : path.join(aqui, 'outreach-pendientes.mjs')
 

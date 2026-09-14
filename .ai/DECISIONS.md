@@ -534,3 +534,66 @@ su propia cuenta de correo (no un alias de la cuenta actual, que es una sola par
 
 **De paso:** `import-outreach.mjs` ya no crea borrador para direcciones con caracteres
 no ASCII. El único fallido real (`553 Must declare SMTPUTF8`) fue eso.
+
+---
+
+## 2026-09-14 · Envío programado: se automatiza pulsar "Enviar", no aprobar
+
+Pancho quería el envío automático "aunque le pongamos filtros" y le daba miedo. Se
+automatiza **solo el envío de lo ya aprobado**: el 12/09 se corrigieron 29 de 40
+borradores a los que les faltaba la oferta, y sin revisión humana habrían salido.
+
+Cómo:
+
+- **pg_cron + pg_net llaman a `outreach-send` cada 10 min** (`*/10 7-18 * * 1-5` UTC). La
+  función decide si toca; el cron solo llama. Así las reglas viven en un sitio y se
+  cambian desplegando la función, no tocando la base.
+- **El cron se autentica con un secreto compartido** (Vault ↔ `OUTREACH_CRON_SECRET`),
+  comparado en tiempo constante y exigiendo 32+ caracteres: sin secreto puesto, el modo
+  programado no existe. La pasarela pide JWT, así que además lleva la clave anon, también
+  desde Vault para no repetirla en el repo público.
+- **Interruptor en `outreach_settings`, nace apagado.** Tabla propia con RLS y no
+  `hub_states.payload`, que se reescribe entero en cada guardado.
+- **Ritmo en línea recta por la franja** (9:30-19:00 Madrid): con 30 al día, uno cada
+  ~19 min. Como mucho 2 por llamada. Los envíos manuales cuentan: si alguien gasta el cupo
+  por la mañana, el reloj no envía nada ese día.
+- **Solo lunes a viernes.** Pancho contaba con sábados y domingos para llegar a 900 al mes;
+  se le desaconsejó porque a una clínica lo del fin de semana le llega el lunes enterrado.
+  A mano se puede enviar cualquier día. Si se decide lo contrario, es `DIAS_PROGRAMADOS`.
+- **30 minutos de margen tras aprobar**, para poder descartar o editar una aprobación con
+  prisa.
+- **Freno de emergencia:** a la primera que el SMTP rechaza un correo en modo programado,
+  se apaga solo y escribe `pausa_motivo`, que el Hub enseña en ámbar. Un rechazo puede ser
+  una dirección mala, pero también Hostinger empezando a limitar la cuenta. Bajas y
+  cortesía de 60 días no lo disparan: esos no llegan al SMTP.
+- **Reclamo atómico** (`update … where status = 'aprobado' returning`) antes de enviar.
+  Con reloj y persona a la vez, antes los dos podían leer "aprobado" y mandarlo dos veces.
+
+Condiciones para quitar también la aprobación humana, que no se cumplen hoy: rebotes a la
+lista de bajas automáticos, página de bajas, varias semanas sin correcciones en la
+revisión, y dominio aparte para prospección.
+
+---
+
+## 2026-09-14 · `/prospectar` trabaja varias campañas en paralelo
+
+Para sostener 30 envíos al día hacen falta ~30 leads buenos al día, y una pasada daba 6. No
+se sube el tope por campaña (6 y ~25 min, la razón de que las pasadas terminen): se
+lanzan **3 agentes a la vez, uno por campaña**, y quien coordina elige, reparte y resume.
+
+- **Nunca dos campañas del mismo sector en la misma ciudad en una pasada.** El importador
+  deduplica por dominio, pero dos importaciones simultáneas cargan el mapa de dominios
+  antes de que la otra inserte, y los dos agentes habrían investigado la misma clínica.
+- `npm run outreach -- --conocidos "<zona>"` para que cada agente descarte en la criba lo
+  que ya está en la base, antes de gastar tiempo en ello.
+- La cola lista también `abierta` con hueco (`cantidad` − leads de la campaña). Antes solo
+  `pedida`, y una campaña servida una vez desaparecía aunque le faltaran 17.
+- **BANDEJA LLENA a partir de 90 por revisar**: tres días de envío a 30. Generar más no
+  acelera nada si nadie revisa.
+- Solo quien coordina escribe en `docs/PROSPECCION.md` y hace commit: con tres agentes
+  editando el mismo archivo habría conflictos.
+
+La rutina de la app de escritorio (botón "Ejecutar ahora") es la herramienta de Pancho
+para lanzarlo cada mañana. Se eligió frente a un script con `claude -p` porque la CLI
+suelta del portátil tiene la sesión OAuth caducada, y la rutina usa la de la app. Si
+algún día se quiere por script: `claude setup-token` una vez y `CLAUDE_CODE_OAUTH_TOKEN`.

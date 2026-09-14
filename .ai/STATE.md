@@ -54,8 +54,14 @@ piden como requisito de entrada. El porqué completo en `DECISIONS.md`.
 
 1. **Hub** — Herramientas › Prospección › "Pedir campaña": sector, zona, oferta,
    cantidad y notas. Nace en estado `pedida`, sin leads.
-2. **Local** — abrir Claude Code y escribir **`/prospectar`**. Lee la
-   cola él mismo, genera cada tanda y la sube. Sin copiar ni pegar nada.
+2. **Local** — abrir Claude Code y escribir **`/prospectar`** (o `/prospectar 2`). Lee la
+   cola él mismo, **trabaja 3 campañas a la vez con un agente cada una** (14/09), genera
+   cada tanda y la sube. Sin copiar ni pegar nada. En el portátil de Pancho hay además
+   una rutina de la app de escritorio, "Prospectar (Studio32) · tanda de la mañana",
+   que hace lo mismo con un botón; es local de esa máquina, no viaja con el repo.
+   La cola (`npm run outreach`) lista desde el 14/09 también las campañas `abierta` con
+   leads por generar —antes solo las `pedida`, y 16 con trabajo pendiente no se veían—
+   y avisa de **BANDEJA LLENA** a partir de 90 por revisar.
    Corre con la **suscripción**, no por API: es la razón de que este paso sea local y
    no un worker en la nube.
    (`npm run outreach` sigue existiendo para mirar la cola a mano, y
@@ -71,7 +77,11 @@ piden como requisito de entrada. El porqué completo en `DECISIONS.md`.
    Si `/prospectar` sale como comando desconocido, **reinicia Claude Code**: los
    comandos se leen al arrancar la sesión.
 4. **Hub** — se revisa el correo con su evidencia y se aprueba.
-5. **Edge Function `outreach-send`** — envía por SMTP de Hostinger.
+5. **Edge Function `outreach-send`** — envía por SMTP de Hostinger. A mano con
+   "Enviar", o **sola** si el envío automático está encendido en el Hub (14/09): pg_cron
+   la llama cada 10 min y reparte lo aprobado de lunes a viernes, 9:30-19:00 de Madrid,
+   dentro del cupo y con 30 min de margen tras aprobar. A la primera que el SMTP
+   rechaza un correo, se apaga sola y deja el motivo en el Hub.
 
 ## Lo que hay que saber antes de tocarlo
 
@@ -124,6 +134,17 @@ piden como requisito de entrada. El porqué completo en `DECISIONS.md`.
 | Portada y cola dicen lo mismo | ✅ 15/08: 3 y 3, ya sin rodeo — los 7 huérfanos se borraron |
 | Controles de Prospección | ✅ 15/08: sin recorte ni desborde a 375, 900, 1024 y 1280 |
 | Reescribir el correo antes de aprobar | ✅ **probado en producción el 12/09**: 29 borradores reales corregidos a mano desde el editor del Hub |
+| Cupo diario en la función | ✅ desplegado 14/09; la cuenta del día no se ha visto aún con un envío real |
+| pg_cron → función con el secreto | ✅ 14/09: llamada real desde la base, respondió "Envío automático apagado" |
+| Envío automático encendido, enviando de verdad | ❌ **sin probar**: nace apagado; la primera vez que se encienda, mirar el Historial |
+| Interruptor y cupo en la vista | ⚠️ compila y se publicó; no revisado con sesión iniciada |
+| `/prospectar` con 3 agentes en paralelo | ❌ **sin probar** con una pasada real |
+
+**Secretos del envío programado** (fuera del repo, puestos el 14/09): `OUTREACH_CRON_SECRET`
+en la función, y en Vault `outreach_cron_secret` (mismo valor) y `outreach_anon_key`. Si
+se rota uno, se rotan los dos lados o el reloj deja de entrar.
+La migración se aplicó con `npx supabase db query --linked -f <archivo>` porque
+`SUPABASE_DB_URL` está vacía en el `.env` del portátil.
 
 **La cadena entera está recorrida.** El 12/08 se ejecutó `/prospectar` contra la campaña
 "Fisioterapia · Guadalajara" y subió 4 leads con sus 4 borradores. Sigue `pedida`→`abierta`
