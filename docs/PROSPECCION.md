@@ -267,6 +267,21 @@ por eso solo cuatro pasaron la puerta. Al cribar, comprobar el correo **y** que 
 ficha en Doctoralia o testimonios firmados en su web: sin lo segundo el lead se cae igual,
 y se cae después de haber gastado el tiempo.
 
+**Cuidado con los centros multiespecialidad que salen en búsquedas de "clínica dental".**
+Comprobado el 15/09/2026 en Alicante: Critón Salud y Unnic Salud y Bienestar aparecen en
+listados de clínicas dentales, pero sus únicas reseñas verificables eran de medicina
+estética, urología o ginecología — ninguna de odontología. Sin una reseña que hable
+específicamente del servicio dental, no hay huella honesta que escribir: descartar antes
+de invertir tiempo en el resto de la investigación. Mismo patrón, distinto disfraz, que
+Adeslas Fabra i Puig en Barcelona (una clínica de seguro/franquicia que salía en el
+listado de Doctoralia bajo un nombre de calle) y que Espai Salut Sant Gervasi (centro
+multidisciplinar de fisio/psicología/podología, no una clínica dental) — los tres se
+cayeron en la criba inicial, no después de investigarlos a fondo.
+
+El caso de nombre duplicado entre ciudades (documentado el 05/09 con Jorge Fonseca en
+Alicante/Mérida) se repitió el 15/09 con el mismo negocio: sigue sin fuente primaria que
+confirme la sede de Alicante, así que sigue descartado.
+
 Si descubres otro sector muerto, **apúntalo aquí**. Es lo que impide que la siguiente
 pasada vuelva a gastar media hora en lo mismo.
 
