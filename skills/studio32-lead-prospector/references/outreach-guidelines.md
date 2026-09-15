@@ -50,18 +50,26 @@ No:
 
 > ¡Hola! Vi tu negocio y me encantó. En Studio32 ayudamos a negocios como el tuyo a crecer en digital con webs premium y automatización. ¿Hablamos? 🚀
 
-### Email frío — medio (80-120 palabras)
+### Email frío — medio (80-110 palabras sin contar presentación ni firma)
 
-Estructura:
+Estructura acordada con el equipo el 15/09/2026:
 1. Asunto: 4-7 palabras, observación o pregunta concreta. Nunca "Propuesta", "Colaboración", "Oportunidad".
-2. Apertura: contexto de cómo llegaste al negocio (1 frase)
-3. Observación específica + ángulo (2-3 frases)
-4. La oferta que resuelve ESE problema (1 frase) — no es el cierre, es la venta. Sin
-   esta frase el correo diagnostica y nunca dice con qué se arregla, que es el fallo
-   más caro porque dos pasos, 3 y 4, se parecen y es fácil escribir el primero y saltar
-   al cierre sin pasar por el segundo.
-5. Cierre de baja fricción (1 frase) — mini auditoría o 3 mejoras, nunca reunión
-6. Firma
+2. Presentación corta: "Hola, soy [nombre], de Studio32." — **la pone el envío**, no se
+   escribe en el borrador, porque el nombre es el de quien apruebe.
+3. Lo bueno que has visto de ellos: el detalle concreto y comprobable (1-2 frases). Un
+   cumplido que valdría para cualquier clínica ("me gusta el enfoque cercano") no cuenta.
+4. Lo que falla, contado con lo que se ve, sin suponer cómo trabajan por dentro (1-2 frases)
+5. La oferta que resuelve ESE problema, en primera persona: "Es justo lo que montamos: …"
+   (1 frase) — no es el cierre, es la venta. Sin esta frase el correo diagnostica y
+   nunca dice con qué se arregla, que es el fallo más caro porque los pasos 4 y 5 se
+   parecen y es fácil escribir el primero y saltar al cierre sin pasar por el segundo.
+6. Cierre: una pregunta de sí o no para enseñar cómo funciona ("¿Os enseño cómo
+   funciona?"), nunca reunión
+7. "Un saludo y gracias por vuestro tiempo," y la firma, que **también la pone el envío**
+
+Lo que no se ofrece nunca, porque no se puede entregar: **atender llamadas de teléfono**
+(el agente es solo WhatsApp) y **"un ejemplo real" o "clínicas como la vuestra"** (no hay
+clientes todavía; lo que se enseña es una clínica de prueba).
 
 **Ejemplo de asunto bueno:** "Web de [Nombre] — un detalle que vi"
 **Ejemplo de asunto malo:** "Propuesta de colaboración para [Nombre]"
@@ -89,8 +97,8 @@ Vi vuestra presencia online y hay un par de cosas concretas que probablemente os
    - ❌ "No tienes Google Business optimizado"
    - ✅ "Vi que en Maps tenéis 140 reseñas con 4.6 — esa tracción no está aprovechada en la web"
 3. **Mencionar solo lo verificado**. Si no cargaste la web, no comentes sobre la web. Si no buscaste competencia, no menciones competencia.
-4. **El cierre es bajo**: ofrece mini auditoría, 3 mejoras, una revisión de 1 página. No pidas reunión. No pidas llamada de 30 min. La fricción inicial debe ser mínima.
-5. **Firma**: por defecto "Francisco / Studio32". Si el usuario indica que el outreach lo hace Juanma, "Juanma / Studio32".
+4. **El cierre es bajo**: en el correo, enseñar cómo funciona el asistente con una pregunta de sí o no; en WhatsApp o en visita puede ser una mini revisión o 3 mejoras. No pidas reunión. No pidas llamada de 30 min. La fricción inicial debe ser mínima.
+5. **Firma**: en el correo no se escribe (la compone el envío con el nombre de quien aprueba). En WhatsApp y DM, por defecto "Francisco / Studio32"; si el usuario indica que el outreach lo hace Juanma, "Juanma / Studio32".
 6. **La oferta no es negociable ni opcional**: el mensaje tiene que decir con qué se resuelve el problema que acaba de señalar, en una frase propia del caso — no basta con diagnosticar y dejar que el prospecto pregunte qué se le ofrece. Comprobado el 12/09/2026: una campaña entera salió sin esta frase, diagnóstico perfecto y ninguna oferta, y quedó como una invitación pasiva a que el cliente pidiera más en vez de una venta.
 7. **Un solo tratamiento por mensaje**: si el email se dirige a un negocio (vosotros), todo el cuerpo va en vosotros, cierre incluido — nunca "Os encontré..." arriba y "si te interesa" abajo. El DM/WhatsApp a una persona sí puede ir en tú. No mezclar los dos dentro del mismo mensaje.
 

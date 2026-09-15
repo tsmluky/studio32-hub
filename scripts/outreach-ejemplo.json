@@ -45,7 +45,7 @@
       },
       "message": {
         "subject": "Asunto corto y concreto",
-        "body": "Cuerpo del correo. Se apoya en el detalle ancla y en las palabras del cliente. No cita nunca las quejas.",
+        "body": "Cuerpo del correo, sin saludo: el 'Hola, soy…' lo pone el envío. Lo bueno que se vio de ellos, lo que falla, 'Es justo lo que montamos: …' y '¿Os enseño cómo funciona?'. No cita nunca las quejas.\n\nUn saludo y gracias por vuestro tiempo,",
         "evidencia": [
           { "afirmacion": "La frase del correo que hace una afirmación", "cita": "La cita literal que la sostiene.", "fuente": "Autor · directorio" }
         ]

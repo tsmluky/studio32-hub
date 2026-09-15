@@ -4865,6 +4865,19 @@ button.update-row {
   white-space: pre-wrap;
 }
 
+/* Presentación y firma: las pone el envío, no el borrador. */
+.outreach-draft p.outreach-draft-auto {
+  color: var(--muted);
+}
+
+.outreach-draft p.outreach-draft-auto:first-of-type {
+  margin-bottom: 10px;
+}
+
+.outreach-draft p + p.outreach-draft-auto {
+  margin-top: 10px;
+}
+
 .outreach-empty-draft {
   margin: 12px 0 0;
   font-size: 13px;

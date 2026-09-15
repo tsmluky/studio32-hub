@@ -113,7 +113,12 @@ Para los que pasaron la criba, y **como mucho 6**:
 - Sigue `skills/studio32-lead-prospector/SKILL.md` → Modo C para la forma del JSON y la
   huella. **La frase de oferta y un solo tratamiento (tú o vosotros) son requisito de
   entrada**, no estilo: un correo sin ellos no se sube.
-- El cuerpo termina en "Un saludo," **sin nombre**: la firma la pone el envío.
+- El cuerpo **no lleva saludo ni presentación** (empieza por lo que viste del negocio) y
+  termina en "Un saludo y gracias por vuestro tiempo," **sin nombre**: el "Hola, soy…" y
+  la firma los pone el envío con el nombre de quien apruebe.
+- La oferta va en primera persona ("Es justo lo que montamos: …") y el cierre es "¿Os
+  enseño cómo funciona?". **Nunca ofrezcas llamadas de teléfono** (el agente es solo
+  WhatsApp) ni "un ejemplo real".
 
 **Sube en cuanto tengas 2 o 3 listos**, no al final:
 

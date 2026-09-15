@@ -1,6 +1,6 @@
 # Estado — studio32-hub
 
-> Se **sobrescribe**, no se acumula. Tope ~100 líneas. Última actualización: 2026-09-14.
+> Se **sobrescribe**, no se acumula. Tope ~100 líneas. Última actualización: 2026-09-15.
 
 ## Qué es
 
@@ -47,10 +47,15 @@ compartido y la decide una persona.
 
 ## Herramientas · Prospección — el ciclo
 
+**15/09: estructura nueva del correo, acordada con Juanma.** "Hola, soy X, de Studio32."
+(lo pone el envío) → algo bueno y concreto de ellos → lo que falla, comprobado → "Es
+justo lo que montamos: …" en primera persona → "¿Os enseño cómo funciona?" → "Un saludo
+y gracias por vuestro tiempo,". Nunca se ofrecen llamadas (el agente es solo WhatsApp),
+ni "ejemplo real", ni responder en otros idiomas (el tono de cada tenant fija español).
+Los 63 borradores en cola se reescribieron así ese día. Porqué en `DECISIONS.md`.
+
 **12/09: la frase de oferta y un solo tratamiento (tú/vosotros) son puerta, no estilo.**
-29 de 40 borradores en cola no la tenían o la mezclaban con el pronombre del cierre;
-corregidos a mano, y `SKILL.md` (modo C, puntos 2-3) y `outreach-guidelines.md` ya lo
-piden como requisito de entrada. El porqué completo en `DECISIONS.md`.
+Siguen vigentes; `SKILL.md` (modo C) y `outreach-guidelines.md` lo piden como requisito.
 
 1. **Hub** — Herramientas › Prospección › "Pedir campaña": sector, zona, oferta,
    cantidad y notas. Nace en estado `pedida`, sin leads.
@@ -223,8 +228,11 @@ Decidido y hecho el 11/08. Aprobar no es solo un visto bueno: fija tres cosas a 
   `from` del mensaje. Por eso reasignar remitente es seguro por construcción: no hay un
   nombre incrustado en el cuerpo que se quede desfasado.
 
-**La skill NO debe escribir firma.** El cuerpo termina en "Un saludo," y nada más. Si
-alguna vez vuelve a escribirla, saldrá duplicada.
+**La skill NO debe escribir ni saludo ni firma.** El cuerpo empieza por lo que se vio del
+negocio y termina en "Un saludo y gracias por vuestro tiempo," sin nombre. Desde el
+15/09 el envío antepone "Hola, soy X, de Studio32." con el mismo nombre que la firma, y
+quita una línea "Hola… Studio32" si el cuerpo ya la traía, para que no salga doble ni con
+otro nombre. La vista previa del Hub enseña las dos piezas atenuadas.
 
 El nombre se saca del `from` (`Gonzalo · Studio32 <gonzalo@studio32.es>` firma Gonzalo)
 para no mantener una tabla de socios en dos sitios. Ojo: Pancho firma **Francisco**,

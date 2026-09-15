@@ -132,12 +132,38 @@ de abrirse, y ahí se acaba la herramienta.
 
 ### 3. El correo, y qué no puede decir
 
-Se redacta en la voz de quien lo vaya a firmar y **termina en "Un saludo," sin nombre**.
+Se redacta en primera persona (yo) hacia la clínica (vosotros). **Empieza directamente
+por lo que has visto del negocio y termina en "Un saludo y gracias por vuestro tiempo,"
+sin nombre.**
 
-El bloque de firma lo compone el envío a partir del remitente del mensaje. Es así
-porque en el Hub quien aprueba se queda el cliente y el remitente cambia en ese
-momento: si la firma viniera en el cuerpo, saldría un correo despidiéndose de quien no
-es. **No escribas el nombre, ni el estudio, ni la web.**
+La presentación ("Hola, soy Juanma, de Studio32.") y la firma las compone el envío a
+partir del remitente del mensaje. Es así porque en el Hub quien aprueba se queda el
+cliente y el remitente cambia en ese momento: si el nombre viniera en el cuerpo, saldría
+un correo que se presenta como quien no es. **No escribas saludo, ni nombre, ni el
+estudio, ni la web.**
+
+**La estructura, acordada con el equipo el 15/09/2026.** Cuatro partes, en este orden,
+en dos párrafos:
+
+1. **Lo bueno que has visto de ellos** — el detalle ancla. Tiene que ser concreto y
+   comprobable: una frase literal de su web, un paciente que nombra al doctor, años de
+   relación. "Me gusta el enfoque cercano" **no vale**: lo dice la web de casi cualquier
+   clínica y se nota enseguida que es un cumplido de plantilla.
+2. **Lo que falla** — el hueco, contado con lo que has comprobado (solo teléfono en
+   horario, sin reserva online, WhatsApp que es un enlace de chat). **Nada de
+   suposiciones sobre cómo trabajan por dentro** ("seguro que hay mensajes que tardan en
+   responderse"): se les cuenta lo que se ve y la conclusión la sacan ellos.
+3. **Que eso es lo que montáis** — la frase de oferta, en primera persona ("Es justo lo
+   que montamos: …"). Ver abajo.
+4. **Cierre** — una sola pregunta de sí o no para enseñarles cómo funciona: "¿Os enseño
+   cómo funciona?". Ni "podéis escribirme" (les deja el trabajo a ellos) ni "3 mejoras
+   concretas" (eso era vender webs).
+
+**Lo que el agente NO hace y por tanto no se ofrece nunca:** atender llamadas de
+teléfono. Es solo WhatsApp. **Tampoco se habla de "un ejemplo real" ni de "clínicas
+como la vuestra"**: no hay ningún cliente todavía, y lo que se enseña es una clínica de
+prueba. Sí se puede ofrecer: responder y dar cita al momento sobre la agenda real, y
+mandar un recordatorio antes de la cita.
 
 **Las quejas de sus clientes NUNCA se citan al prospecto.** Van en la huella porque
 explican el lead y sirven para una llamada, pero echárselas en cara lo pierde. El correo
@@ -153,11 +179,33 @@ días") y nunca dice con qué se resuelve deja la decisión en manos del prospec
 justo el trabajo que le corresponde al correo. La frase va **después** del párrafo que
 señala el problema y **antes** del cierre de baja fricción, y traduce la `oferta` al
 caso concreto del lead — no la pega genérica de qué es un asistente de WhatsApp.
-Ejemplo real (Gnadent, el cupo de 20 pacientes repartido a mano):
 
-> Un asistente de WhatsApp con la agenda real delante repartiría ese cupo solo, a
-> cualquier hora, incluido el domingo por la noche, sin que nadie tenga que estar
-> pendiente del teléfono.
+**Y tiene que decir que eso lo montáis vosotros.** Hasta el 15/09 la frase era
+impersonal ("Un agente de WhatsApp con vuestra agenda delante podría…"): se leía como un
+consejo, no como algo que se ofrece, y el prospecto terminaba el correo sin que nadie le
+dijera quién lo hace. Ejemplo (Gnadent, el cupo de 20 pacientes repartido a mano):
+
+> Es justo lo que montamos: un asistente de WhatsApp con vuestra agenda real delante que
+> reparte ese cupo solo, a cualquier hora, incluido el domingo por la noche, sin que
+> nadie tenga que estar pendiente del teléfono.
+
+**No repitas la misma frase en todos los correos.** Si diez borradores de la tanda dicen
+"Un agente de WhatsApp con vuestra agenda real delante podría dar esa cita a cualquier
+hora", se nota la plantilla aunque el resto sea único. Lo mismo con el arranque: no
+empieces todos por "Vi…".
+
+Correo completo de referencia (lo que escribe la skill; la presentación y la firma no):
+
+> He visto vuestra web y me gusta cómo os presentáis: «no somos una franquicia, somos una
+> clínica familiar». Se nota en las reseñas, donde los pacientes nombran a vuestro equipo
+> uno por uno. Donde no se ve ese mismo trato es al pedir cita: solo hay teléfono y un
+> enlace de WhatsApp en el que hay que escribir y esperar a que alguien conteste.
+>
+> Es justo lo que montamos: un asistente de WhatsApp que conoce vuestra agenda, da la
+> cita al momento a cualquier hora y manda un recordatorio antes para que no se olvide.
+> ¿Os enseño cómo funciona?
+>
+> Un saludo y gracias por vuestro tiempo,
 
 Un lead sin esa frase **no sube en modo C**: aplica igual que la puerta del punto 2.
 
@@ -227,7 +275,7 @@ a medias.
       },
       "message": {
         "subject": "Asunto de 4-7 palabras, concreto",
-        "body": "80-120 palabras. Termina en \"Un saludo,\" SIN nombre: la firma la pone el envio.",
+        "body": "80-110 palabras. Sin saludo ni presentacion (los pone el envio). Termina en \"Un saludo y gracias por vuestro tiempo,\" SIN nombre.",
         "evidencia": [
           { "afirmacion": "La frase del correo que afirma algo", "cita": "La cita que la sostiene", "fuente": "Autor · Google" }
         ]

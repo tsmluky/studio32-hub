@@ -16,6 +16,18 @@ import type { HubSyncStatus, MemberId } from './types'
  *  a partir del alias: si cambia una dirección aquí, hay que mirar allí. */
 export const remitentes = remitentesJson.remitentes as Record<MemberId, { nombre: string; email: string }>
 
+/** Gemelo de `nombreDelRemitente` de la Edge Function. Si uno cambia, el otro también:
+ *  la vista previa tiene que enseñar el mismo nombre con el que sale el correo. */
+export function nombreDelRemitente(from: string) {
+  const visible = from.split('<')[0].split('·')[0].trim()
+  if (visible) return visible
+  const local = (from.match(/<([^@]+)@/) ?? from.match(/^([^@]+)@/))?.[1] ?? ''
+  return local ? local.charAt(0).toUpperCase() + local.slice(1) : 'Studio32'
+}
+
+/** La línea con la que abre el correo. La pone el envío, no la skill. */
+export const presentacionDe = (nombre: string) => `Hola, soy ${nombre}, de Studio32.`
+
 export type OutreachStatus = 'nuevo' | 'contactado' | 'respondido' | 'reunion' | 'cliente' | 'descartado'
 export type OutreachMessageStatus = 'borrador' | 'aprobado' | 'enviando' | 'enviado' | 'fallido'
 export type ConfianzaNivel = 'alto' | 'medio' | 'bajo'
@@ -70,6 +82,7 @@ export type OutreachEvidencia ={ afirmacion: string; cita: string; fuente: strin
 export type OutreachMessage = {
   id: string
   lead_id: string
+  from_email: string
   subject: string
   body: string
   to_email: string
@@ -107,7 +120,7 @@ export function useOutreach(enabled: boolean) {
           .order('score', { ascending: false }),
         client
           .from('outreach_messages')
-          .select('id, lead_id, subject, body, to_email, status, evidencia')
+          .select('id, lead_id, from_email, subject, body, to_email, status, evidencia')
           .eq('workspace_id', 'studio32')
           .order('created_at', { ascending: false }),
       ])

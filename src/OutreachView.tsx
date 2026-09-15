@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react'
 import { AlertCircle, ArrowRight, Check, CheckCircle2, ChevronRight, Clock3, Send, X, Sparkles, Ban, Pencil } from 'lucide-react'
 import { EmptyState, PageHeading, SectionHeader, StatusBadge } from './ui'
 import CampaignRequest from './CampaignRequest'
-import { darDeBaja, remitentes } from './outreach'
+import { darDeBaja, nombreDelRemitente, presentacionDe, remitentes } from './outreach'
 import type { CupoDiario, EnvioAutomatico, OutreachCampaign, OutreachLead, OutreachMessage } from './outreach'
 
 // El mismo tope que aplica la función por petición. Si el Hub mandara más, la función
@@ -448,6 +448,11 @@ function LeadStory({
   const ancla = huella.detalle_ancla?.detalle ?? ''
   const yo = remitentes[activeMemberId]
   const duenyo = lead.owner_member_id ? remitentes[lead.owner_member_id] : null
+  // Con quién sale el correo: en borrador, quien lo está leyendo (si aprueba, firma él);
+  // una vez aprobado, el remitente que quedó fijado.
+  const firmante = message?.status === 'borrador'
+    ? yo?.nombre ?? ''
+    : message?.from_email ? nombreDelRemitente(message.from_email) : ''
   const decisionLabel = message?.status === 'enviado' || message?.status === 'enviando'
     ? 'Ver correo enviado'
     : message?.status === 'aprobado'
@@ -534,8 +539,9 @@ function LeadStory({
             </label>
 
             <p className="outreach-editor-nota">
-              Termina en «Un saludo,» y nada más: la firma la pone el envío con los datos
-              de quien apruebe. Si la escribes aquí, saldrá dos veces.
+              Empieza directamente por lo que habéis visto del negocio y termina en «Un saludo
+              y gracias por vuestro tiempo,» sin nombre. El «Hola, soy…» y la firma los pone
+              el envío con los datos de quien apruebe: si los escribes aquí, saldrán dos veces.
             </p>
 
             {message.evidencia?.length ? (
@@ -564,7 +570,11 @@ function LeadStory({
         ) : (
           <div className="outreach-draft">
             <span className="outreach-subject">{message.subject}</span>
+            {/* Lo que añade el envío va atenuado: se ve lo que recibirá el negocio, pero
+                queda claro qué parte es del borrador y cuál no se reescribe aquí. */}
+            {firmante && <p className="outreach-draft-auto">{presentacionDe(firmante)}</p>}
             <p>{message.body}</p>
+            {firmante && <p className="outreach-draft-auto">{firmante}{'\n'}Studio32 · Digital Systems</p>}
             {editable && (
               <button type="button" className="outreach-reescribir" onClick={abrirEditor}>
                 <Pencil size={14} /> Reescribir

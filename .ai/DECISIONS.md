@@ -597,3 +597,37 @@ La rutina de la app de escritorio (botón "Ejecutar ahora") es la herramienta de
 para lanzarlo cada mañana. Se eligió frente a un script con `claude -p` porque la CLI
 suelta del portátil tiene la sesión OAuth caducada, y la rutina usa la de la app. Si
 algún día se quiere por script: `claude setup-token` una vez y `CLAUDE_CODE_OAUTH_TOKEN`.
+
+---
+
+## 2026-09-15 · El correo se presenta, y la presentación la pone el envío
+
+Hasta aquí el cuerpo arrancaba en frío ("Vi vuestra web…") y quién escribía no aparecía
+hasta la firma. Juanma propuso la estructura que se adoptó: presentación corta, algo bueno
+de ellos, lo que falla, la solución y la firma.
+
+- **"Hola, soy X, de Studio32." lo compone `outreach-send`**, igual que la firma y por la
+  misma razón: el nombre es el de quien aprueba y no se sabe al generar. Si lo escribiera
+  la skill, un correo aprobado por Gonzalo diría "soy Francisco". Si el cuerpo ya trae una
+  línea `Hola…Studio32`, se quita antes de poner la buena. Solo el nombre, sin "a qué nos
+  dedicamos": eso lo dice la frase de oferta, y la primera línea de la vista previa del
+  buzón se reserva para el detalle del negocio.
+- **La oferta va en primera persona ("Es justo lo que montamos: …").** Antes era
+  impersonal ("Un agente de WhatsApp… podría"), y con una presentación de solo nombre el
+  prospecto terminaba el correo sin que nadie le dijera quién lo hace.
+- **Cierre: "¿Os enseño cómo funciona?"**, una pregunta de sí o no. "3 mejoras concretas"
+  venía de cuando se vendían webs; "podéis escribirme" deja el trabajo al prospecto.
+- **Lo que no se promete**, porque no se puede entregar: atender llamadas (el agente es
+  solo WhatsApp; la propuesta de Juanma lo incluía y él lo retiró), "un ejemplo real" (lo
+  que se enseña es la clínica de prueba) y responder en el idioma del paciente (el tono de
+  cada tenant fija español; varios borradores lo prometían). Tampoco que distinga sedes o
+  especialidades: no está comprobado.
+- **Elogio concreto, no genérico.** "Me gusta el enfoque cercano" vale para cualquier
+  clínica. Se exige una cita literal, un nombre, un dato.
+- **No repetir la misma frase de oferta ni el mismo arranque en toda la tanda.** Los 40
+  borradores de antes eran únicos por separado y idénticos en esqueleto.
+
+Los 63 borradores en cola se reescribieron el mismo día. Los 5 de campañas cuya oferta es
+una web (estética Málaga, fisio Sevilla) ofrecen la web con la misma estructura, porque la
+skill manda que la oferta sea la de la campaña. El único aprobado pendiente no se tocó:
+el texto aprobado es de quien lo aprobó.

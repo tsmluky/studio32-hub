@@ -191,12 +191,22 @@ function nombreDelRemitente(from: string) {
   return local ? local.charAt(0).toUpperCase() + local.slice(1) : 'Studio32'
 }
 
+// La presentación va por el mismo camino que la firma, y por el mismo motivo: lleva el
+// nombre de quien escribe, y ese nombre no se sabe hasta que alguien aprueba (15/09/2026).
+//
+// Si el cuerpo ya trae una línea "Hola, soy…, de Studio32" —la skill se equivoca, o
+// alguien la escribe a mano en el editor—, se quita antes de poner la buena. Mejor que
+// fiarse de que nadie la escriba: duplicada queda mal, y con otro nombre es peor.
+const PRESENTACION_ESCRITA = /^\s*hola[^\n]*studio32[^\n]*\n+/i
+
 function componerCuerpo(body: string, enlaceBaja: string, from: string) {
-  const firma = `\n\n${nombreDelRemitente(from)}\nStudio32 · Digital Systems\nstudio32.es`
+  const nombre = nombreDelRemitente(from)
+  const presentacion = `Hola, soy ${nombre}, de Studio32.\n\n`
+  const firma = `\n\n${nombre}\nStudio32 · Digital Systems\nstudio32.es`
   const pie = enlaceBaja.startsWith('mailto:')
     ? `\n\n—\nStudio32. Si no quieres recibir más correos nuestros, responde con la palabra BAJA.`
     : `\n\n—\nStudio32. Si no quieres recibir más correos nuestros: ${enlaceBaja}`
-  return `${body.trimEnd()}${firma}${pie}`
+  return `${presentacion}${body.replace(PRESENTACION_ESCRITA, '').trim()}${firma}${pie}`
 }
 
 // --- El correo tal y como se guarda en Enviados ------------------------------
