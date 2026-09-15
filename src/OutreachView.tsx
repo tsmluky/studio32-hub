@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react'
 import { AlertCircle, ArrowRight, Check, CheckCircle2, ChevronRight, Clock3, Send, X, Sparkles, Ban, Pencil } from 'lucide-react'
 import { EmptyState, PageHeading, SectionHeader, StatusBadge } from './ui'
 import CampaignRequest from './CampaignRequest'
-import { darDeBaja, nombreDelRemitente, presentacionDe, remitentes } from './outreach'
+import { darDeBaja, nombreDelRemitente, presentacionDe, reescribirConIA, remitentes } from './outreach'
 import type { CupoDiario, EnvioAutomatico, OutreachCampaign, OutreachLead, OutreachMessage } from './outreach'
 
 // El mismo tope que aplica la función por petición. Si el Hub mandara más, la función
@@ -389,17 +389,42 @@ function LeadStory({
   const [cuerpo, setCuerpo] = useState('')
   const [guardando, setGuardando] = useState(false)
   const [errorEdicion, setErrorEdicion] = useState('')
+  const [conIA, setConIA] = useState(false)
+  const [instruccion, setInstruccion] = useState('')
+  const [pidiendoIA, setPidiendoIA] = useState(false)
+  const [avisosIA, setAvisosIA] = useState<string[] | null>(null)
 
   // Reescribir solo tiene sentido mientras el correo no haya salido. Lo enviado es
   // historia y las políticas de la tabla lo prohíben de todos modos.
   const editable = message?.status === 'borrador' || message?.status === 'aprobado'
 
-  const abrirEditor = () => {
+  const abrirEditor = (modoIA = false) => {
     if (!message) return
     setAsunto(message.subject)
     setCuerpo(message.body)
     setErrorEdicion('')
+    setConIA(modoIA)
+    setInstruccion('')
+    setAvisosIA(null)
     setEditando(true)
+  }
+
+  // La IA propone sobre lo que haya en el editor en ese momento, así se puede pedir una
+  // segunda vuelta ("más corto") encima de la primera. Nada se guarda hasta "Guardar".
+  const pedirPropuesta = async () => {
+    if (!message) return
+    setPidiendoIA(true)
+    setErrorEdicion('')
+    try {
+      const propuesta = await reescribirConIA(message.id, instruccion, asunto, cuerpo)
+      setAsunto(propuesta.subject)
+      setCuerpo(propuesta.body)
+      setAvisosIA(propuesta.avisos)
+    } catch (e) {
+      setErrorEdicion(e instanceof Error ? e.message : 'No se ha podido reescribir con IA.')
+    } finally {
+      setPidiendoIA(false)
+    }
   }
 
   const guardar = async () => {
@@ -519,13 +544,41 @@ function LeadStory({
              único que hace fiable la bandeja. Avisar después no sirve de nada;
              teniéndolas delante se reescribe sabiendo qué se puede afirmar. */
           <div className="outreach-editor">
+            {conIA && (
+              <div className="outreach-ia">
+                <label>
+                  <span>Qué quieres cambiar (opcional)</span>
+                  <input
+                    type="text"
+                    value={instruccion}
+                    placeholder="Más corto, quita lo del horario, empieza por las reseñas…"
+                    onChange={(event) => setInstruccion(event.target.value)}
+                    onKeyDown={(event) => { if (event.key === 'Enter' && !pidiendoIA) void pedirPropuesta() }}
+                    disabled={pidiendoIA || guardando}
+                    maxLength={500}
+                  />
+                </label>
+                <button type="button" className="secondary-action" onClick={() => void pedirPropuesta()} disabled={pidiendoIA || guardando}>
+                  <Sparkles size={15} /> {pidiendoIA ? 'Escribiendo…' : avisosIA ? 'Otra propuesta' : 'Proponer'}
+                </button>
+                {avisosIA && (
+                  <p className="outreach-editor-nota">
+                    Propuesta de la IA sobre la evidencia del lead. Léela entera: no se guarda hasta
+                    que pulses «Guardar cambios».
+                  </p>
+                )}
+                {avisosIA?.map((aviso) => (
+                  <p key={aviso} className="outreach-ia-aviso"><AlertCircle size={14} /> {aviso}</p>
+                ))}
+              </div>
+            )}
             <label>
               <span>Asunto</span>
               <input
                 type="text"
                 value={asunto}
                 onChange={(event) => setAsunto(event.target.value)}
-                disabled={guardando}
+                disabled={guardando || pidiendoIA}
               />
             </label>
             <label>
@@ -534,7 +587,7 @@ function LeadStory({
                 rows={12}
                 value={cuerpo}
                 onChange={(event) => setCuerpo(event.target.value)}
-                disabled={guardando}
+                disabled={guardando || pidiendoIA}
               />
             </label>
 
@@ -562,7 +615,7 @@ function LeadStory({
               <button type="button" className="text-button" onClick={() => setEditando(false)} disabled={guardando}>
                 Cancelar
               </button>
-              <button type="button" className="secondary-action" onClick={() => void guardar()} disabled={guardando}>
+              <button type="button" className="secondary-action" onClick={() => void guardar()} disabled={guardando || pidiendoIA}>
                 <Check size={16} /> {guardando ? 'Guardando…' : 'Guardar cambios'}
               </button>
             </div>
@@ -576,9 +629,14 @@ function LeadStory({
             <p>{message.body}</p>
             {firmante && <p className="outreach-draft-auto">{firmante}{'\n'}Studio32 · Digital Systems</p>}
             {editable && (
-              <button type="button" className="outreach-reescribir" onClick={abrirEditor}>
-                <Pencil size={14} /> Reescribir
-              </button>
+              <div className="outreach-reescribir-fila">
+                <button type="button" className="outreach-reescribir" onClick={() => abrirEditor()}>
+                  <Pencil size={14} /> Reescribir
+                </button>
+                <button type="button" className="outreach-reescribir" onClick={() => abrirEditor(true)}>
+                  <Sparkles size={14} /> Reescribir con IA
+                </button>
+              </div>
             )}
           </div>
         )

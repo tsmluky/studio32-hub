@@ -631,3 +631,30 @@ Los 63 borradores en cola se reescribieron el mismo día. Los 5 de campañas cuy
 una web (estética Málaga, fisio Sevilla) ofrecen la web con la misma estructura, porque la
 skill manda que la oferta sea la de la campaña. El único aprobado pendiente no se tocó:
 el texto aprobado es de quien lo aprobó.
+
+---
+
+## 2026-09-15 · "Reescribir con IA" propone, no guarda, y usa OpenAI
+
+Botón al lado de "Reescribir". Abre el editor con una instrucción opcional ("más corto",
+"quita lo del horario") y la Edge Function `outreach-rewrite` devuelve asunto y cuerpo.
+
+- **No escribe en la base.** La propuesta cae en el editor y se guarda con "Guardar
+  cambios", o no se guarda. Aprobar sigue siendo de una persona, y ahora también lo que
+  escribe la IA pasa por sus ojos antes de existir.
+- **OpenAI y no Claude**, decidido por Pancho: `/prospectar` usa la suscripción en local y
+  aquí hace falta una clave de API en la nube. Se reutiliza `OPENAI_API_KEY` del agente
+  (misma cuenta, céntimos por reescritura), copiada a los secretos de Supabase. Modelo:
+  `OPENAI_REWRITE_MODEL` si existe, si no `OPENAI_MODEL` (hoy `gpt-4o-mini`). Si la
+  calidad se queda corta, se sube el modelo con ese secreto, sin tocar código.
+- **Las reglas viven dentro de la función**, resumidas de `SKILL.md` y
+  `outreach-guidelines.md`. Si cambian allí, hay que cambiarlas aquí.
+- **Lo que no se puede confiar al modelo se arregla en código:** quita un saludo inicial,
+  pone la despedida exacta. Lo dudoso (llamadas, "ejemplo real", idiomas, "tú", largo)
+  vuelve como aviso visible en el editor, no como bloqueo: decide quien revisa.
+- Lee con la sesión de quien llama, no con la clave de servicio: las políticas de
+  `outreach_*` ya limitan la lectura a miembros.
+
+Probado el 15/09 contra dos borradores reales (sin guardar): respeta estructura,
+instrucción, oferta de web cuando la campaña es de web, y despedida. Tiende a repetir "Es
+justo lo que montamos" y a colar alguna suposición suave; los avisos no lo detectan todo.

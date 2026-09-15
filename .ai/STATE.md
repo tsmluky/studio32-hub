@@ -53,6 +53,9 @@ justo lo que montamos: …" en primera persona → "¿Os enseño cómo funciona?
 y gracias por vuestro tiempo,". Nunca se ofrecen llamadas (el agente es solo WhatsApp),
 ni "ejemplo real", ni responder en otros idiomas (el tono de cada tenant fija español).
 Los 63 borradores en cola se reescribieron así ese día. Porqué en `DECISIONS.md`.
+Mismo día: **botón "Reescribir con IA"** en cada borrador (función `outreach-rewrite`,
+OpenAI con la clave del agente, `npm run fn:deploy:rewrite`). Propone en el editor y no
+guarda nada por sí sola.
 
 **12/09: la frase de oferta y un solo tratamiento (tú/vosotros) son puerta, no estilo.**
 Siguen vigentes; `SKILL.md` (modo C) y `outreach-guidelines.md` lo piden como requisito.

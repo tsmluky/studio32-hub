@@ -28,6 +28,24 @@ export function nombreDelRemitente(from: string) {
 /** La línea con la que abre el correo. La pone el envío, no la skill. */
 export const presentacionDe = (nombre: string) => `Hola, soy ${nombre}, de Studio32.`
 
+export type PropuestaIA = { subject: string; body: string; avisos: string[] }
+
+/** Pide a la función `outreach-rewrite` una propuesta de asunto y cuerpo. No guarda nada:
+ *  la propuesta cae en el editor y se guarda con el botón de siempre, o no se guarda. */
+export async function reescribirConIA(messageId: string, instruccion: string, subject: string, body: string): Promise<PropuestaIA> {
+  if (!supabase) throw new Error('Reescribir con IA necesita una sesión conectada.')
+  const { data, error } = await supabase.functions.invoke('outreach-rewrite', { body: { messageId, instruccion, subject, body } })
+  // Con un código de error, supabase-js no rellena `data`: el motivo que escribió la
+  // función viene en la respuesta cruda, y es el que sirve enseñar ("falta la clave"…).
+  if (error && 'context' in error && error.context instanceof Response) {
+    const motivo = await error.context.json().then((r: { error?: string } | null) => r?.error).catch(() => '')
+    if (motivo) throw new Error(motivo)
+  }
+  if (data?.error) throw new Error(data.error)
+  if (error || !data?.body) throw new Error('La reescritura con IA no ha respondido. Prueba otra vez en un momento.')
+  return { subject: data.subject, body: data.body, avisos: data.avisos ?? [] }
+}
+
 export type OutreachStatus = 'nuevo' | 'contactado' | 'respondido' | 'reunion' | 'cliente' | 'descartado'
 export type OutreachMessageStatus = 'borrador' | 'aprobado' | 'enviando' | 'enviado' | 'fallido'
 export type ConfianzaNivel = 'alto' | 'medio' | 'bajo'
