@@ -228,6 +228,11 @@ una carga automatizada. Se descartaron por no poder verificar la cadena exacta, 
 falta de correo real. Si vuelve a pasar, probar el aviso legal (a veces está en texto
 plano ahí aunque en contacto esté ofuscado) antes de descartar.
 
+**Confirmado el 18/09/2026:** el atajo del aviso legal funciona. Cosméticaclub (Valencia)
+seguía con el correo de contacto ofuscado por Cloudflare, pero su aviso legal lo publicaba
+en texto plano — se pudo verificar y subir. Onírika en cambio lo tiene ofuscado en los dos
+sitios y sigue sin poder verificarse.
+
 **En clínicas dentales el cuello de botella es justo el contrario: el correo.**
 Comprobado el 15/08/2026 en Valencia: reseñas sobran —cualquier clínica con ficha en
 Doctoralia pasa de 100 opiniones con citas literales y autor— pero de doce candidatas
@@ -281,6 +286,12 @@ cayeron en la criba inicial, no después de investigarlos a fondo.
 El caso de nombre duplicado entre ciudades (documentado el 05/09 con Jorge Fonseca en
 Alicante/Mérida) se repitió el 15/09 con el mismo negocio: sigue sin fuente primaria que
 confirme la sede de Alicante, así que sigue descartado.
+
+**La misma confusión pasa dentro de la misma ciudad, entre negocios familiares.**
+Comprobado el 18/09/2026 en Málaga: "Clínica Cuevas Queipo" aparece con ese apellido en
+al menos dos direcciones distintas (Especería 11 y Velázquez 52), cada una con su propio
+correo. Sin una fuente primaria que diga cuál es cuál, se descarta entera en vez de
+adivinar y arriesgarse a escribirle a la clínica equivocada.
 
 Si descubres otro sector muerto, **apúntalo aquí**. Es lo que impide que la siguiente
 pasada vuelva a gastar media hora en lo mismo.
