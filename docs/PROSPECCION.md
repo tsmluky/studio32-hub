@@ -367,6 +367,24 @@ correo no es el problema, las reseñas citables sí.**
 Los cuatro que sí entraron —Policlínica Acacias, Somosierra, Gold Dental, Clínica Dental
 La Paz— tienen todos correo público y reseñas con cita y autor, comprobado uno a uno.
 
+**Clínicas dentales · Murcia capital — pasada del 19/09/2026, 3 leads.** Aquí el cuello
+de botella no es el correo ni las reseñas: es que **casi todas las clínicas independientes
+ya tienen botón de WhatsApp en su web**, y la oferta (agente de WhatsApp para dar cita)
+pierde el hueco. De unas 30 candidatas, 17 cayeron solo por eso. Al cribar, mirar si la
+web enseña WhatsApp antes de investigar reseñas. Sin investigar quedaron Ronda Levante,
+Cora del Val, Más Bermejo, Ortodental y Arg Dental.
+
+**Clínicas dentales · Granada capital — pasada del 19/09/2026, 3 leads.** Cayeron por
+grupo/franquicia (Corral & Vargas, Clident, Marta García), por sedes fuera de la capital
+(Armilla) o por reseñas antiguas y anónimas en Doctoralia (2011-2021). Tres de los
+correos que entraron son de Gmail/Yahoo, con confianza `medio`.
+
+**Clínicas dentales · Valladolid capital — pasada del 19/09/2026, 5 leads.** El listado de
+`doctoralia.es/clinicas/odontologia/valladolid` da pocas reseñas por clínica pequeña: rinde
+más entrar por la web de cada una. Los correos Gmail personales y el correo de la agencia
+que hizo la web (que aparece en el pie) no cuentan como correo del negocio. Queda por
+investigar la segunda página del listado.
+
 ## Cuánto cuesta una tanda
 
 Verificar un lead de verdad son 2-3 páginas cargadas: su web, sus reseñas, y a veces una
