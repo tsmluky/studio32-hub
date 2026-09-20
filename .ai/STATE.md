@@ -20,7 +20,8 @@ nada. Comprobado el 15/08.
   escritorio. La barra móvil queda reservada para 720px o menos.
 - Sistema visual renovado el 13/08: fondo cálido, verde Studio32, superficies con
   profundidad ligera, tipografía más legible y el mismo ritmo en todas las vistas.
-- Tablas: `workspaces`, `workspace_members`, `hub_states` y `outreach_*` (4).
+- Tablas: `workspaces`, `workspace_members`, `hub_states` y `outreach_*` (5, con `outreach_settings`).
+- **Base de datos (20/09): el Hub comparte proyecto Supabase con el agente** (`studio32-agent-platform`, ref `qtmjtgimrzennkoqrslr`). El proyecto antiguo `studio32-hub` está obsoleto. Las migraciones del Hub viven ahora en `studio32-agent/supabase/migrations` (0006-0009); las de este repo son solo historia.
 - Repo hermano `studio32-hub-agent` (bot de Telegram, en Railway).
 
 ## Aviso: esto se construyó tres veces

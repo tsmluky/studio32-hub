@@ -83,7 +83,7 @@ Despliegue de la función:
 
 ```bash
 npx supabase login
-npx supabase functions deploy google-calendar --project-ref wwhinwxedcvpxprmcsta
+npx supabase functions deploy google-calendar --project-ref qtmjtgimrzennkoqrslr
 ```
 
 Las citas creadas, modificadas o eliminadas desde el Hub se escriben directamente en Google Calendar. Las fechas de tareas permanecen en el Hub y se muestran superpuestas en la vista mensual.
