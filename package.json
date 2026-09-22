@@ -14,8 +14,8 @@
     "supabase:reset-state": "node scripts/reset-hub-state.mjs",
     "supabase:migrate": "node --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/apply-migrations.mjs",
     "outreach": "node --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/outreach.mjs",
-    "fn:deploy": "supabase functions deploy outreach-send --project-ref qtmjtgimrzennkoqrslr --use-api",
-    "fn:deploy:rewrite": "supabase functions deploy outreach-rewrite --project-ref qtmjtgimrzennkoqrslr --use-api",
+    "fn:deploy": "supabase functions deploy outreach-send --project-ref wwhinwxedcvpxprmcsta --use-api",
+    "fn:deploy:rewrite": "supabase functions deploy outreach-rewrite --project-ref wwhinwxedcvpxprmcsta --use-api",
     "outreach:probar": "node --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/probar-envio.mjs"
   },
   "devDependencies": {

@@ -102,7 +102,7 @@ Desplegar la función:
 
 ```
 npx supabase login
-npx supabase functions deploy outreach-send --project-ref qtmjtgimrzennkoqrslr
+npx supabase functions deploy outreach-send --project-ref wwhinwxedcvpxprmcsta
 ```
 
 Secretos necesarios en Supabase → Edge Functions → Secrets:

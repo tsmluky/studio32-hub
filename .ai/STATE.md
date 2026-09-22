@@ -21,7 +21,7 @@ nada. Comprobado el 15/08.
 - Sistema visual renovado el 13/08: fondo cálido, verde Studio32, superficies con
   profundidad ligera, tipografía más legible y el mismo ritmo en todas las vistas.
 - Tablas: `workspaces`, `workspace_members`, `hub_states` y `outreach_*` (5, con `outreach_settings`).
-- **Base de datos (20/09): el Hub comparte proyecto Supabase con el agente** (`studio32-agent-platform`, ref `qtmjtgimrzennkoqrslr`). El proyecto antiguo `studio32-hub` está obsoleto. Las migraciones del Hub viven ahora en `studio32-agent/supabase/migrations` (0006-0009); las de este repo son solo historia.
+- **Base de datos (22/09): este proyecto (`studio32-hub`, ref `wwhinwxedcvpxprmcsta`) es ahora el único proyecto Supabase de todo el ecosistema** — agente, panel y Hub juntos. El 20/09 el Hub se había movido a `studio32-agent-platform`; ese proyecto se borró por error el 21/09 (nunca lo toques desde aquí, ya no existe) y el esquema del agente se reaplicó sobre este. Las migraciones propias del Hub (0006-0009 en `studio32-agent/supabase/migrations`, copiadas allí el 20/09) quedan sin efecto: este repo vuelve a ser dueño de las suyas (`supabase/migrations`, las 4 originales). Detalle del incidente en `studio32-agent/.ai/DECISIONS.md` (22/09) y `Studio32/reportes/2026-09-22-incidente-supabase.md`.
 - Repo hermano `studio32-hub-agent` (bot de Telegram, en Railway).
 
 ## Aviso: esto se construyó tres veces
