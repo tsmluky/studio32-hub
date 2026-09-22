@@ -87,3 +87,11 @@ npx supabase functions deploy google-calendar --project-ref wwhinwxedcvpxprmcsta
 ```
 
 Las citas creadas, modificadas o eliminadas desde el Hub se escriben directamente en Google Calendar. Las fechas de tareas permanecen en el Hub y se muestran superpuestas en la vista mensual.
+
+## 22/09/2026 · Repuntado tras el borrado accidental de Supabase
+
+Las variables `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` de Cloudflare Pages
+seguían apuntando a `studio32-agent-platform` (borrado el 21/09) aunque el
+código del repo ya apuntaba a `studio32-hub` — las variables de Cloudflare no
+viajan con el commit, hay que tocarlas a mano en el panel. Corregidas y
+redesplegado. Detalle en `Studio32/reportes/2026-09-22-incidente-supabase.md`.
