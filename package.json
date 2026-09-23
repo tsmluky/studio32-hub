@@ -16,7 +16,8 @@
     "outreach": "node --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/outreach.mjs",
     "fn:deploy": "supabase functions deploy outreach-send --project-ref wwhinwxedcvpxprmcsta --use-api",
     "fn:deploy:rewrite": "supabase functions deploy outreach-rewrite --project-ref wwhinwxedcvpxprmcsta --use-api",
-    "outreach:probar": "node --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/probar-envio.mjs"
+    "outreach:probar": "node --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/probar-envio.mjs",
+    "outreach:recuperar": "node --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/recuperar-fallidos.mjs"
   },
   "devDependencies": {
     "@types/react": "^19.2.17",
