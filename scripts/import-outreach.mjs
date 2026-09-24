@@ -18,6 +18,7 @@
 
 import { readFile } from 'node:fs/promises'
 import { createClient } from '@supabase/supabase-js'
+import { normalizarTipografia, revisarCorreo } from '../supabase/functions/_shared/reglas-correo.js'
 
 const url = process.env.SUPABASE_URL
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -101,7 +102,7 @@ for (const lead of currentLeads ?? []) {
   byName.set(`${lead.business_name.toLowerCase()}|${lead.postal_code ?? ''}`, lead)
 }
 
-const report = { creados: 0, actualizados: 0, duplicados: 0, protegidos: 0, borradores: 0, omitidos: 0, sinAscii: [] }
+const report = { creados: 0, actualizados: 0, duplicados: 0, protegidos: 0, borradores: 0, omitidos: 0, sinAscii: [], noPasan: [] }
 
 for (const lead of payload.leads) {
   if (!lead.business_name) {
@@ -220,11 +221,17 @@ for (const lead of payload.leads) {
     reply_to: payload.campaign.reply_to ?? payload.campaign.from_email ?? '',
     to_email: row.email,
     to_name: row.business_name,
-    subject: lead.message.subject,
-    body: lead.message.body,
+    // Comillas rectas y sin tipografía de máquina desde que nace: son las reglas del envío.
+    subject: normalizarTipografia(lead.message.subject),
+    body: normalizarTipografia(lead.message.body),
     evidencia: lead.message.evidencia ?? [],
     status: 'borrador',
   }
+
+  // Sube igual, porque quien revisa puede arreglarlo en el Hub, pero se avisa ya: tal
+  // como está, el envío lo pararía.
+  const problemas = revisarCorreo({ subject: message.subject, body: message.body, to_email: message.to_email })
+  if (problemas.length) report.noPasan.push(`${row.business_name}: ${problemas.join(' ')}`)
 
   if (untouched) {
     const { error } = await admin.from('outreach_messages').update(message).eq('id', untouched.id)
@@ -258,4 +265,8 @@ if (report.omitidos) console.log(`  omitidos sin nombre: ${report.omitidos}`)
 if (report.sinAscii.length) {
   console.log(`  sin borrador por correo con tilde o eñe (Hostinger no lo envía):`)
   for (const item of report.sinAscii) console.log(`    - ${item}`)
+}
+if (report.noPasan.length) {
+  console.log(`  borradores que el envío pararía tal como están (arréglalos antes de aprobar):`)
+  for (const item of report.noPasan) console.log(`    - ${item}`)
 }

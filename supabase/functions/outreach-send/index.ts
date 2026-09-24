@@ -26,6 +26,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { SMTPClient } from 'https://deno.land/x/denomailer@1.6.0/mod.ts'
 import { SesionImap } from './imap.ts'
+import { normalizarTipografia, revisarCorreo } from '../_shared/reglas-correo.js'
 
 // Se envia por SMTP del propio Hostinger y no por una API de terceros.
 //
@@ -454,6 +455,21 @@ Deno.serve(async (request) => {
       continue
     }
 
+    // Frontera 1b: la revisión automática (24/09/2026). Nada sale con un hueco de
+    // plantilla, la firma escrita, una promesa que no se cumple o tipografía de máquina,
+    // lo haya aprobado quien lo haya aprobado. Primero se normaliza lo que es seguro
+    // cambiar solo (comillas «» por "", "…" por "..."), y se envía ESA versión; lo que
+    // no se puede arreglar sin reescribir, como una raya, se para aquí.
+    const asuntoRevisado = normalizarTipografia(mensaje.subject)
+    const cuerpoRevisado = normalizarTipografia(mensaje.body)
+    const problemas = revisarCorreo({ subject: asuntoRevisado, body: cuerpoRevisado, to_email: mensaje.to_email })
+    if (problemas.length) {
+      const motivo = `No pasa la revisión automática: ${problemas.join(' ')}`
+      await admin.from('outreach_messages').update({ status: 'fallido', error: motivo }).eq('id', id).eq('status', 'aprobado')
+      resultados.push({ id, estado: 'bloqueado', motivo })
+      continue
+    }
+
     // Frontera 2: la lista de bajas. Es innegociable.
     const { data: baja } = await admin
       .from('outreach_suppressions')
@@ -517,7 +533,7 @@ Deno.serve(async (request) => {
     // Se calcula una sola vez y se usa en el envío y en la copia. Si cada uno lo
     // compusiera por su cuenta, la copia podría acabar diciendo algo distinto de lo
     // que recibió el prospecto, que es peor que no tener copia.
-    const cuerpoFinal = componerCuerpo(mensaje.body, enlaceBaja, remitente)
+    const cuerpoFinal = componerCuerpo(cuerpoRevisado, enlaceBaja, remitente)
 
     try {
       // Una conexion por mensaje. Son 25 como mucho y con pausa entre ellos: no
@@ -532,7 +548,7 @@ Deno.serve(async (request) => {
           from: remitente,
           to: mensaje.to_email,
           replyTo: mensaje.reply_to || remitente,
-          subject: mensaje.subject,
+          subject: asuntoRevisado,
           content: cuerpoFinal,
           headers: { 'List-Unsubscribe': `<${enlaceBaja}>` },
         })
@@ -574,7 +590,7 @@ Deno.serve(async (request) => {
           de: remitente,
           para: mensaje.to_email,
           responderA: mensaje.reply_to || remitente,
-          asunto: mensaje.subject,
+          asunto: asuntoRevisado,
           cuerpo: cuerpoFinal,
           enlaceBaja,
         }))

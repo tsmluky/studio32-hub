@@ -689,3 +689,35 @@ lleva el nombre del negocio: "Pedir cita en X" es lo que escribiría una persona
 
 El límite sube de 80-110 a 90-140 palabras para que quepa la frase nueva; los 40 quedaron
 entre 100 y 138.
+
+---
+
+## 2026-09-24 · Revisión automática en el envío, y tipografía de persona
+
+`outreach-send` revisa cada correo justo antes de enviarlo con las reglas de
+`supabase/functions/_shared/reglas-correo.js`, lo haya aprobado quien lo haya aprobado. El
+que no pasa se marca `fallido` con el motivo y no sale. Es el paso que faltaba para poder
+quitar algún día la aprobación humana: la forma ya no depende de que alguien la mire.
+
+**Qué comprueba** (solo forma; la verdad de lo que se afirma sigue siendo la evidencia):
+marcadores de plantilla (`[...]`, `{x}`, `TODO`), puntos suspensivos fuera de una cita,
+saludo o firma escritos, despedida exacta al final, menos de tres párrafos o párrafos
+repetidos, 50-180 palabras, llamadas, "ejemplo real", precios, promesas numéricas,
+exclamaciones y emojis, mezcla de tú y vosotros, que falte la frase de oferta, y
+destinatario con tildes. Lo que va entre comillas no cuenta: es la voz de una reseña.
+
+**Tipografía.** Pancho pidió comillas normales en vez de « » y evitar los caracteres
+típicos de IA. Se normaliza solo lo que no cambia el sentido (« » “ ” → ", … → ..., espacios
+invisibles fuera) en el importador, en "Reescribir con IA" y en el propio envío. **La raya
+(— –) no se cambia sola**, porque según la frase pide coma, dos puntos o punto: se para.
+Los 61 pendientes se normalizaron en la base el 24/09; el único aprobado con raya se
+corrigió a mano con dos puntos.
+
+**Un solo archivo en JavaScript plano**, sin tipos ni dependencias, porque lo importan
+Deno (las dos funciones) y Node (importador y `npm run outreach:revisar`). Así la regla
+que avisa al reescribir, la que avisa al importar y la que para el envío son la misma.
+
+**Calibrado contra lo ya enviado:** de los 35 correos enviados desde el 15/09, los que no
+pasarían son los que llevan raya, "Un saludo," en vez de la despedida actual, o
+corresponden a la estructura anterior. Primer falso positivo encontrado y corregido: la
+regla de relleno cazaba la palabra "todo".

@@ -129,6 +129,10 @@ Para los que pasaron la criba, y **como mucho 6**:
 - El asunto es corto y llano, con el nombre del negocio: "Pedir cita en X", "Las citas en
   X", "El WhatsApp de X". Nada de ganchos ni asuntos ingeniosos: eso es lo que suena a
   generado.
+- **Tipografía de persona, no de máquina.** Comillas rectas " " para citar (nunca « » ni
+  “ ”), tres puntos y no el carácter …, y **ninguna raya (— o –)**: coma, dos puntos o
+  punto. El envío para cualquier correo con una raya, así que un borrador con ella no
+  llegará a salir. Antes de subir, `npm run outreach:revisar` dice qué pararía el envío.
 
 **Sube en cuanto tengas 2 o 3 listos**, no al final:
 

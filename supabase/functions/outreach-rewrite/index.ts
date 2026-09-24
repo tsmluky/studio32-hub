@@ -13,6 +13,7 @@
 //   OPENAI_REWRITE_MODEL           opcional; si no, OPENAI_MODEL; si no, gpt-4o-mini
 
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { normalizarTipografia, revisarCorreo } from '../_shared/reglas-correo.js'
 
 const DESPEDIDA = 'Un saludo y gracias por vuestro tiempo,'
 
@@ -58,6 +59,7 @@ REGLAS DURAS:
 - NUNCA ofrezcas: atender llamadas de teléfono (el asistente es solo de WhatsApp), "un ejemplo real" o "clínicas como la vuestra" (aún no hay clientes), que el asistente conteste en otros idiomas o distinga sedes o especialidades, promesas numéricas.
 - Sí se puede ofrecer: responder y dar cita al momento, a cualquier hora, sobre la agenda real, y mandar un recordatorio antes de la cita.
 - Sin emojis, sin exclamaciones, sin lenguaje de agencia ("potenciamos", "transformamos"), sin "espero que estéis bien", sin viñetas.
+- Escribe como una persona en un correo: comillas rectas " " (nunca « » ni “ ”), tres puntos y no el carácter …, y NUNCA rayas (— o –): usa coma, dos puntos o punto.
 - Entre 90 y 140 palabras sin contar la despedida.
 - Asunto corto y llano con el nombre del negocio: "Pedir cita en X", "Las citas en X", "El WhatsApp de X". Nunca "Propuesta", "Colaboración", "Oportunidad" ni un gancho ingenioso.
 
@@ -66,11 +68,6 @@ Si te llega una INSTRUCCIÓN de la persona que revisa, aplícala siempre que no 
 Responde SOLO con un objeto JSON: {"subject": "...", "body": "..."}. En "body" los párrafos van separados por una línea en blanco (\\n\\n).`
 
 const PRESENTACION_ESCRITA = /^\s*(hola|buenos d[ií]as|buenas)[^\n]*\n+/i
-const PROHIBIDO: Array<[RegExp, string]> = [
-  [/atender llamadas|atiende (las )?llamadas|coger (las )?llamadas|coge (las )?llamadas|whatsapp y (las )?llamadas/i, 'ofrece atender llamadas, y el asistente es solo de WhatsApp'],
-  [/ejemplo real|cl[ií]nicas como la vuestra|centros como el vuestro/i, 'promete un ejemplo real o clientes que no hay'],
-  [/en (su|vuestro|cualquier|el) idioma|en varios idiomas|en (ingl[eé]s|franc[eé]s|ruso|alem[aá]n) (al|con el) paciente/i, 'promete contestar en otros idiomas, y hoy el asistente habla español'],
-]
 
 type Huella = {
   detalle_ancla?: { detalle?: string; fuente?: string }
@@ -182,15 +179,13 @@ Deno.serve(async (request) => {
   // Se arregla aquí en vez de confiar en que el modelo lo respete siempre.
   let cuerpo = propuesta.body.replace(PRESENTACION_ESCRITA, '').trim()
   cuerpo = cuerpo.replace(/\n+\s*un saludo[^\n]*$/i, '').trim()
-  cuerpo = `${cuerpo}\n\n${DESPEDIDA}`
+  cuerpo = normalizarTipografia(`${cuerpo}\n\n${DESPEDIDA}`)
+  const asunto = normalizarTipografia(propuesta.subject.trim())
 
-  // Avisos, no bloqueos: quien revisa decide, pero lo ve antes de guardar.
-  const avisos: string[] = []
-  const sinCitas = cuerpo.replace(/«[^»]*»|"[^"]*"/g, '')
-  for (const [patron, motivo] of PROHIBIDO) if (patron.test(sinCitas)) avisos.push(`Revisa: ${motivo}.`)
-  if (/\b(te|tu|tus|contigo)\b/i.test(sinCitas)) avisos.push('Revisa: parece que mezcla «tú» con «vosotros».')
-  const palabras = cuerpo.replace(DESPEDIDA, '').split(/\s+/).filter(Boolean).length
-  if (palabras > 150) avisos.push(`Revisa: tiene ${palabras} palabras, más de las 140 recomendadas.`)
+  // Avisos, no bloqueos: quien revisa decide, pero lo ve antes de guardar. Son las mismas
+  // reglas con las que `outreach-send` para un correo, así que lo que aquí sale como
+  // aviso, allí no saldría.
+  const avisos = revisarCorreo({ subject: asunto, body: cuerpo }).map((problema: string) => `Revisa: ${problema}`)
 
-  return json(request, { subject: propuesta.subject.trim(), body: cuerpo, avisos, modelo })
+  return json(request, { subject: asunto, body: cuerpo, avisos, modelo })
 })

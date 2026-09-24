@@ -168,6 +168,12 @@ partes, en este orden, en cuatro párrafos (1 y 2 van juntos):
    funcionaría el asistente en vuestra clínica?" (o "vuestro centro"). Ni "podéis
    escribirme" (les deja el trabajo a ellos) ni "3 mejoras concretas".
 
+**La tipografía, de persona** (24/09/2026): comillas rectas " " para citar, nunca « » ni
+“ ”; tres puntos y no el carácter …; y ninguna raya (— o –) en el correo, ni en el asunto:
+coma, dos puntos o punto. Son lo primero que delata un texto generado. `outreach-send`
+revisa cada correo antes de enviarlo (`supabase/functions/_shared/reglas-correo.js`) y
+para el que no cumpla.
+
 **El asunto**: corto, llano y con el nombre del negocio — "Pedir cita en X", "Las citas
 en X", "El WhatsApp de X". Lo que suena a generado es el asunto ingenioso o recargado, no
 el personalizado. Tampoco el genérico "Os escribimos de Studio32", que no dice de qué va.
@@ -209,8 +215,8 @@ empieces todos por "Vi…".
 
 Correo completo de referencia (lo que escribe la skill; la presentación y la firma no):
 
-> He visto vuestra web y me gusta cómo os presentáis: «no somos una franquicia, somos una
-> clínica familiar». Se nota en las reseñas, donde los pacientes nombran a vuestro equipo
+> He visto vuestra web y me gusta cómo os presentáis: "no somos una franquicia, somos una
+> clínica familiar". Se nota en las reseñas, donde los pacientes nombran a vuestro equipo
 > uno por uno. Donde no se ve ese mismo trato es al pedir cita: solo hay teléfono y un
 > enlace de WhatsApp en el que hay que escribir y esperar a que alguien conteste.
 >
