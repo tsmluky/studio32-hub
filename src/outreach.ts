@@ -93,7 +93,9 @@ export type OutreachLead = {
 }
 
 export type CupoDiario = { hoy: number; usados: number; quedan: number }
-export type EnvioAutomatico = { activo: boolean; pausaMotivo: string; franja: string }
+// `aprobacion`, `margenHoras` y `firma` (24/09): si los borradores que pasan la revisión se
+// aprueban solos, tras cuántas horas sin tocarse y quién los firma.
+export type EnvioAutomatico = { activo: boolean; pausaMotivo: string; franja: string; aprobacion?: boolean; margenHoras?: number; firma?: string }
 
 export type OutreachEvidencia ={ afirmacion: string; cita: string; fuente: string }
 
@@ -106,6 +108,9 @@ export type OutreachMessage = {
   to_email: string
   status: OutreachMessageStatus
   evidencia: OutreachEvidencia[] | null
+  /** Último cambio: de aquí cuenta el margen de la aprobación automática. */
+  updated_at: string
+  aprobacion_automatica: boolean
 }
 
 export function useOutreach(enabled: boolean) {
@@ -138,7 +143,7 @@ export function useOutreach(enabled: boolean) {
           .order('score', { ascending: false }),
         client
           .from('outreach_messages')
-          .select('id, lead_id, from_email, subject, body, to_email, status, evidencia')
+          .select('id, lead_id, from_email, subject, body, to_email, status, evidencia, updated_at, aprobacion_automatica')
           .eq('workspace_id', 'studio32')
           .order('created_at', { ascending: false }),
       ])

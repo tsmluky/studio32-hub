@@ -95,6 +95,106 @@ function cuantosTocanAhora(cupoHoy: number, usadosHoy: number, ahora = new Date(
   return Math.max(0, Math.min(deberianIr - usadosHoy, MAXIMO_POR_LLAMADA_PROGRAMADA))
 }
 
+// --- Aprobación automática con margen (24/09/2026) ---------------------------
+//
+// Decidido por Pancho: un borrador que pasa la revisión automática y lleva
+// `margen_aprobacion_horas` sin tocarse se aprueba solo, firmado por `firma_miembro`. El
+// margen cuenta desde el último cambio (`updated_at`), así que editar un borrador le
+// devuelve su ventana entera: el equipo siempre tiene ese tiempo para leer el texto que
+// va a salir, descartarlo o cambiarlo.
+//
+// Lo que ninguna regla puede comprobar es que lo que se dice del negocio sea verdad; eso
+// lo sigue sosteniendo la evidencia de la skill. Es el riesgo que se aceptó a cambio de
+// no depender de que alguien apruebe 30 correos al día.
+//
+// No se aprueba más de dos días de cupo por delante: lo que no hace falta todavía se
+// queda como borrador, que es como se ve en el Hub que aún se puede tocar.
+const DIAS_DE_COLA_APROBADA = 2
+
+type AjustesAprobacion = {
+  aprobacion_automatica?: boolean
+  margen_aprobacion_horas?: number
+  firma_miembro?: string
+  firma_from?: string
+}
+
+async function aprobarLosQueToca(admin: ReturnType<typeof createClient>, ajustes: AjustesAprobacion | null, cupoHoy: number) {
+  const resultado = { aprobados: 0, retenidos: [] as string[] }
+  if (!ajustes?.aprobacion_automatica) return resultado
+
+  const firmaFrom = ajustes.firma_from?.trim() ?? ''
+  const firmaEmail = firmaFrom.match(/<([^>]+)>/)?.[1] ?? ''
+  const { data: firmante } = await admin
+    .from('workspace_members')
+    .select('user_id')
+    .eq('workspace_id', 'studio32')
+    .eq('member_id', ajustes.firma_miembro ?? '')
+    .maybeSingle()
+  if (!firmante?.user_id || !firmaEmail) {
+    console.error('Aprobación automática sin firmante válido: revisa firma_miembro y firma_from.')
+    return resultado
+  }
+
+  const { count: enCola } = await admin
+    .from('outreach_messages')
+    .select('id', { count: 'exact', head: true })
+    .eq('workspace_id', 'studio32')
+    .eq('status', 'aprobado')
+  const hueco = cupoHoy * DIAS_DE_COLA_APROBADA - (enCola ?? 0)
+  if (hueco <= 0) return resultado
+
+  const margenHoras = Math.min(168, Math.max(1, ajustes.margen_aprobacion_horas ?? 24))
+  const limite = new Date(Date.now() - margenHoras * 3_600_000).toISOString()
+  const { data: candidatos } = await admin
+    .from('outreach_messages')
+    .select('id, lead_id, subject, body, to_email, outreach_leads!inner(status)')
+    .eq('workspace_id', 'studio32')
+    .eq('status', 'borrador')
+    .lte('updated_at', limite)
+    .neq('outreach_leads.status', 'descartado')
+    .order('updated_at', { ascending: true })
+    .limit(hueco)
+
+  for (const mensaje of candidatos ?? []) {
+    const subject = normalizarTipografia(mensaje.subject)
+    const body = normalizarTipografia(mensaje.body)
+    const problemas = revisarCorreo({ subject, body, to_email: mensaje.to_email })
+    // No pasa: se queda en borrador para que lo arregle una persona. No se marca
+    // fallido porque no ha fallado nada; simplemente no se puede aprobar solo.
+    if (problemas.length) {
+      resultado.retenidos.push(`${mensaje.id}: ${problemas.join(' ')}`)
+      continue
+    }
+    // La condición sobre `updated_at` se repite en la escritura: si alguien lo ha editado
+    // entre la lectura y aquí, no se aprueba el texto que esa persona está cambiando.
+    const { data: aprobado } = await admin
+      .from('outreach_messages')
+      .update({
+        status: 'aprobado',
+        subject,
+        body,
+        approved_by: firmante.user_id,
+        approved_at: new Date().toISOString(),
+        from_email: firmaFrom,
+        reply_to: firmaEmail,
+        aprobacion_automatica: true,
+      })
+      .eq('id', mensaje.id)
+      .eq('status', 'borrador')
+      .lte('updated_at', limite)
+      .select('id')
+    if (!aprobado?.length) continue
+    // Igual que al aprobar en el Hub: quien firma se queda el cliente.
+    await admin.from('outreach_leads').update({ owner_member_id: ajustes.firma_miembro }).eq('id', mensaje.lead_id)
+    resultado.aprobados += 1
+  }
+
+  if (resultado.aprobados || resultado.retenidos.length) {
+    console.log(`Aprobación automática: ${resultado.aprobados} aprobados, ${resultado.retenidos.length} retenidos.`, resultado.retenidos)
+  }
+  return resultado
+}
+
 // El reloj se identifica con un secreto compartido que vive en Vault (lado base) y en
 // OUTREACH_CRON_SECRET (lado función). Sin el secreto puesto, el modo programado no
 // existe: nadie puede colarse enviando una cabecera vacía.
@@ -382,13 +482,16 @@ Deno.serve(async (request) => {
 
   const { data: ajustes } = await admin
     .from('outreach_settings')
-    .select('envio_automatico, pausa_motivo')
+    .select('envio_automatico, pausa_motivo, aprobacion_automatica, margen_aprobacion_horas, firma_miembro, firma_from')
     .eq('workspace_id', 'studio32')
     .maybeSingle()
   const automatico = {
     activo: Boolean(ajustes?.envio_automatico),
     pausaMotivo: ajustes?.pausa_motivo ?? '',
     franja: `${DIAS_PROGRAMADOS_TEXTO}, de ${textoHora(FRANJA_MADRID.desde)} a ${textoHora(FRANJA_MADRID.hasta)}`,
+    aprobacion: Boolean(ajustes?.aprobacion_automatica),
+    margenHoras: ajustes?.margen_aprobacion_horas ?? 24,
+    firma: nombreDelRemitente(ajustes?.firma_from ?? ''),
   }
 
   // El Hub pregunta antes de enviar, para enseñar cuántos caben hoy y si el envío
@@ -401,6 +504,12 @@ Deno.serve(async (request) => {
     // El reloj llama cada 10 minutos y la función decide si toca. Cada "no" es una
     // respuesta normal, no un error: es lo que pasa casi siempre.
     if (!automatico.activo) return json(request, { programado: true, enviados: 0, motivo: 'Envío automático apagado.' })
+
+    // Primero se aprueba lo que ha cumplido su margen, y después se envía. Va aquí, detrás
+    // del interruptor: si el envío se ha pausado solo por un fallo, tampoco se decide nada
+    // solo hasta que una persona lo vuelva a encender.
+    await aprobarLosQueToca(admin, ajustes, cupo.hoy)
+
     const tocan = cuantosTocanAhora(cupo.hoy, cupo.usados)
     if (tocan <= 0) return json(request, { programado: true, enviados: 0, motivo: 'Fuera de franja o al día con el ritmo.', cupo: cupoActual() })
 
@@ -449,7 +558,8 @@ Deno.serve(async (request) => {
       continue
     }
 
-    // Frontera 1: aprobación humana. Sin esto no sale nada.
+    // Frontera 1: aprobado, a mano en el Hub o solo tras su margen (aprobarLosQueToca).
+    // Sin aprobador no sale nada.
     if (mensaje.status !== 'aprobado' || !mensaje.approved_by) {
       resultados.push({ id, estado: 'omitido', motivo: 'El mensaje no está aprobado.' })
       continue

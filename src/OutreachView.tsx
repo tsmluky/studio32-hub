@@ -10,6 +10,14 @@ import { EmptyState, PageHeading, SectionHeader, StatusBadge } from './ui'
 import CampaignRequest from './CampaignRequest'
 import { darDeBaja, nombreDelRemitente, presentacionDe, reescribirConIA, remitentes } from './outreach'
 import type { CupoDiario, EnvioAutomatico, OutreachCampaign, OutreachLead, OutreachMessage } from './outreach'
+// Las mismas reglas con las que la función de envío para un correo: lo que aquí sale
+// como "no saldría", allí no sale.
+import { normalizarTipografia, revisarCorreo } from '../supabase/functions/_shared/reglas-correo.js'
+
+type AprobacionAutomatica = { margenHoras: number; firma: string }
+
+const fechaCorta = (fecha: Date) =>
+  fecha.toLocaleString('es-ES', { weekday: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Madrid' })
 
 // El mismo tope que aplica la función por petición. Si el Hub mandara más, la función
 // rechazaría la tanda entera en vez de enviar las primeras.
@@ -290,7 +298,10 @@ export default function OutreachView({
                 <strong>Envío automático {automatico.activo ? 'encendido' : 'apagado'}</strong>
                 <small>
                   {automatico.activo
-                    ? `Lo aprobado sale solo ${automatico.franja}, repartido y dentro del cupo. Media hora después de aprobarlo, para poder deshacerlo.`
+                    ? `Lo aprobado sale solo ${automatico.franja}, repartido y dentro del cupo. Media hora después de aprobarlo, para poder deshacerlo.` +
+                      (automatico.aprobacion
+                        ? ` Y los borradores que pasan la revisión se aprueban solos ${automatico.margenHoras ?? 24} horas después de su último cambio, firmados por ${automatico.firma || 'Francisco'}. Para frenar uno, edítalo (el plazo vuelve a empezar) o descártalo.`
+                        : '')
                     : automatico.pausaMotivo || 'Lo aprobado solo sale cuando alguien pulsa Enviar.'}
                 </small>
               </span>
@@ -335,6 +346,7 @@ export default function OutreachView({
                 key={lead.id}
                 lead={lead}
                 message={latestMessageFor(lead.id)}
+                aprobacionAutomatica={automatico?.activo && automatico.aprobacion ? { margenHoras: automatico.margenHoras ?? 24, firma: automatico.firma || 'Francisco' } : null}
                 onApprove={onApprove}
                 onDiscard={onDiscard}
                 onEdit={onEdit}
@@ -368,6 +380,7 @@ function LeadStory({
   lead,
   message,
   activeMemberId,
+  aprobacionAutomatica,
   onApprove,
   onDiscard,
   onEdit,
@@ -375,6 +388,7 @@ function LeadStory({
   lead: OutreachLead
   message?: OutreachMessage
   activeMemberId: MemberId
+  aprobacionAutomatica: AprobacionAutomatica | null
   onApprove: (messageId: string, leadId: string) => void
   onDiscard: (leadId: string) => void
   onEdit: (messageId: string, subject: string, body: string) => Promise<void>
@@ -478,6 +492,12 @@ function LeadStory({
   const firmante = message?.status === 'borrador'
     ? yo?.nombre ?? ''
     : message?.from_email ? nombreDelRemitente(message.from_email) : ''
+  const problemasEnvio = message
+    ? revisarCorreo({ subject: normalizarTipografia(message.subject), body: normalizarTipografia(message.body), to_email: message.to_email })
+    : []
+  const aprobacionSola = message?.updated_at && aprobacionAutomatica
+    ? new Date(Date.parse(message.updated_at) + aprobacionAutomatica.margenHoras * 3_600_000)
+    : null
   const decisionLabel = message?.status === 'enviado' || message?.status === 'enviando'
     ? 'Ver correo enviado'
     : message?.status === 'aprobado'
@@ -704,6 +724,22 @@ function LeadStory({
       ) : duenyo ? (
         <p className="outreach-signer is-owned">
           Cliente de <strong>{duenyo.nombre}</strong>. El correo sale de {duenyo.email}.
+          {message?.aprobacion_automatica && ' Se aprobó solo, tras su margen sin cambios.'}
+        </p>
+      ) : null}
+
+      {/* Lo que la función de envío pararía, dicho antes de aprobar. Y si se aprueban
+          solos, cuándo le toca a este: es lo que hay que saber para poder frenarlo. */}
+      {message && (message.status === 'borrador' || message.status === 'aprobado') && problemasEnvio.length > 0 ? (
+        <p className="outreach-warning">
+          <AlertCircle size={15} /> Tal como está no saldría: {problemasEnvio.join(' ')}
+        </p>
+      ) : message?.status === 'borrador' && aprobacionAutomatica && !editando ? (
+        <p className="outreach-signer">
+          {aprobacionSola && aprobacionSola > new Date()
+            ? <>Si nadie lo toca, se aprueba solo el <strong>{fechaCorta(aprobacionSola)}</strong> y lo firma {aprobacionAutomatica.firma}.</>
+            : <>Ya ha cumplido su margen: se aprobará solo en la próxima pasada del envío y lo firmará {aprobacionAutomatica.firma}.</>}
+          {' '}Editarlo reinicia el plazo; descartarlo lo frena.
         </p>
       ) : null}
 

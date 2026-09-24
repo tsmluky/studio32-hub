@@ -721,3 +721,37 @@ que avisa al reescribir, la que avisa al importar y la que para el envío son la
 pasarían son los que llevan raya, "Un saludo," en vez de la despedida actual, o
 corresponden a la estructura anterior. Primer falso positivo encontrado y corregido: la
 regla de relleno cazaba la palabra "todo".
+
+---
+
+## 2026-09-24 · Aprobación automática con margen de 24 horas, firmada por Francisco
+
+Con la revisión automática ya en el envío, Pancho decide quitar el paso manual de aprobar:
+para llegar a 30 correos al día hacían falta 30 aprobaciones al día, y el envío llevaba
+dos semanas a 4-5 diarios con cupo de 20 por falta de aprobados.
+
+- **Margen de 24 horas desde el último cambio** (`updated_at`), no desde que se creó.
+  Editar un borrador reinicia el plazo: el texto que sale siempre ha estado un día a la
+  vista. Descartarlo lo frena. El Hub enseña en cada borrador cuándo se aprobará solo, y
+  lo que la revisión pararía.
+- **Firma Francisco** (`firma_miembro` + `firma_from` en `outreach_settings`), y se queda
+  el lead, igual que al aprobar a mano. El `from` va aparte porque `workspace_members`
+  guarda el correo de acceso (pancho@), no el alias de firma (francisco@).
+- **La hace `outreach-send` en cada pasada del reloj**, detrás del interruptor de envío
+  automático: si el envío se pausó solo por un fallo, tampoco se aprueba nada solo.
+- **Como mucho dos días de cupo aprobados en cola.** Lo demás sigue en borrador, que es
+  como se ve en el Hub que aún se puede tocar.
+- `approved_by` se rellena con el usuario de quien firma, porque el envío exige aprobador;
+  `outreach_messages.aprobacion_automatica` es lo que dice que no lo pulsó una persona.
+- Lo que no pasa la revisión se queda en borrador, sin marcarlo fallido: no ha fallado
+  nada, solo no se puede aprobar solo.
+
+**Riesgo aceptado:** ninguna regla comprueba que lo que el correo dice del negocio sea
+verdad; lo sostiene la evidencia de la skill. Antes lo miraba una persona.
+
+**Volumen:** se queda en 30 al día (la rampa del 14/09 llega el lunes 28/09). Pasar de ahí
+desde studio32.es sigue desaconsejado; antes, dos semanas a 30 e informes DMARC para ver
+si los correos llegan (hoy `p=none` sin `rua`: no hay forma de saberlo).
+
+Migración: `20260924120000_outreach_aprobacion_automatica.sql`, aplicada con
+`supabase db query --linked --project-ref …` porque `SUPABASE_DB_URL` está vacía en `.env`.

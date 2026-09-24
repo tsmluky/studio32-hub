@@ -48,6 +48,14 @@ compartido y la decide una persona.
 
 ## Herramientas · Prospección — el ciclo
 
+**24/09: aprobación automática encendida.** Un borrador que pasa la revisión automática
+(`_shared/reglas-correo.js`, que también aplica el envío a todo) y lleva 24 h sin tocarse
+se aprueba solo, firmado por Francisco. Editarlo reinicia el plazo; descartarlo lo frena.
+Se apaga con `aprobacion_automatica` en `outreach_settings` (aún no hay botón en el Hub;
+el Hub sí enseña en cada borrador cuándo se aprobará y qué pararía la revisión).
+`npm run outreach:revisar` pasa las reglas a la cola sin enviar. Cupo: 30/día desde el
+28/09 y ahí se queda. Porqué en `DECISIONS.md`.
+
 **24/09: el correo menciona también los otros servicios, y el asunto lleva el nombre del
 negocio.** Tras la oferta, una frase "Aparte del asistente, también hacemos…" (webs con
 reserva, ficha de Google, correo con el nombre del negocio), ligada a un hueco de la huella
