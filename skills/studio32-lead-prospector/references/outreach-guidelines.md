@@ -50,10 +50,12 @@ No:
 
 > ¡Hola! Vi tu negocio y me encantó. En Studio32 ayudamos a negocios como el tuyo a crecer en digital con webs premium y automatización. ¿Hablamos? 🚀
 
-### Email frío — medio (80-110 palabras sin contar presentación ni firma)
+### Email frío — medio (90-140 palabras sin contar presentación ni firma)
 
-Estructura acordada con el equipo el 15/09/2026:
-1. Asunto: 4-7 palabras, observación o pregunta concreta. Nunca "Propuesta", "Colaboración", "Oportunidad".
+Estructura acordada con el equipo el 15/09/2026 y ampliada el 24/09/2026:
+1. Asunto: corto y llano, con el nombre del negocio ("Pedir cita en X", "Las citas en X",
+   "El WhatsApp de X"). Nunca "Propuesta", "Colaboración", "Oportunidad", ni un gancho
+   ingenioso: es lo que suena a generado.
 2. Presentación corta: "Hola, soy [nombre], de Studio32." — **la pone el envío**, no se
    escribe en el borrador, porque el nombre es el de quien apruebe.
 3. Lo bueno que has visto de ellos: el detalle concreto y comprobable (1-2 frases). Un
@@ -63,15 +65,18 @@ Estructura acordada con el equipo el 15/09/2026:
    (1 frase) — no es el cierre, es la venta. Sin esta frase el correo diagnostica y
    nunca dice con qué se arregla, que es el fallo más caro porque los pasos 4 y 5 se
    parecen y es fácil escribir el primero y saltar al cierre sin pasar por el segundo.
-6. Cierre: una pregunta de sí o no para enseñar cómo funciona ("¿Os enseño cómo
-   funciona?"), nunca reunión
-7. "Un saludo y gracias por vuestro tiempo," y la firma, que **también la pone el envío**
+6. Los otros servicios, en una frase: "Aparte del asistente, también hacemos…" (webs con
+   reserva online, ficha de Google, correo con el nombre del negocio). Ligada a un hueco
+   de la huella si lo hay, y ese hueco va a `evidencia`; genérica si no. Nunca una lista.
+7. Cierre, en su propio párrafo: una pregunta de sí o no que nombra el asistente ("¿Os
+   enseño cómo funcionaría el asistente en vuestra clínica?"), nunca reunión
+8. "Un saludo y gracias por vuestro tiempo," y la firma, que **también la pone el envío**
 
 Lo que no se ofrece nunca, porque no se puede entregar: **atender llamadas de teléfono**
 (el agente es solo WhatsApp) y **"un ejemplo real" o "clínicas como la vuestra"** (no hay
 clientes todavía; lo que se enseña es una clínica de prueba).
 
-**Ejemplo de asunto bueno:** "Web de [Nombre] — un detalle que vi"
+**Ejemplo de asunto bueno:** "Pedir cita en [Nombre]"
 **Ejemplo de asunto malo:** "Propuesta de colaboración para [Nombre]"
 
 ### Visita presencial / guion de llamada — 4-6 frases, hablado

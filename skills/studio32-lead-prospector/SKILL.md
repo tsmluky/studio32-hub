@@ -142,8 +142,8 @@ cliente y el remitente cambia en ese momento: si el nombre viniera en el cuerpo,
 un correo que se presenta como quien no es. **No escribas saludo, ni nombre, ni el
 estudio, ni la web.**
 
-**La estructura, acordada con el equipo el 15/09/2026.** Cuatro partes, en este orden,
-en dos párrafos:
+**La estructura, acordada con el equipo el 15/09/2026 y ampliada el 24/09/2026.** Cinco
+partes, en este orden, en cuatro párrafos (1 y 2 van juntos):
 
 1. **Lo bueno que has visto de ellos** — el detalle ancla. Tiene que ser concreto y
    comprobable: una frase literal de su web, un paciente que nombra al doctor, años de
@@ -155,9 +155,22 @@ en dos párrafos:
    responderse"): se les cuenta lo que se ve y la conclusión la sacan ellos.
 3. **Que eso es lo que montáis** — la frase de oferta, en primera persona ("Es justo lo
    que montamos: …"). Ver abajo.
-4. **Cierre** — una sola pregunta de sí o no para enseñarles cómo funciona: "¿Os enseño
-   cómo funciona?". Ni "podéis escribirme" (les deja el trabajo a ellos) ni "3 mejoras
-   concretas" (eso era vender webs).
+4. **Los otros servicios, en una sola frase** — "Aparte del asistente, también hacemos…":
+   webs con reserva online, la ficha de Google o el correo con el nombre del negocio. Si
+   la huella tiene un hueco que encaje, la frase se liga a él y ese hueco entra en
+   `evidencia` ("…webs con reserva propia, para que la cita no tenga que pasar por
+   Doctoralia"; "…y con pacientes que llegan hablando inglés, tener la vuestra también en
+   inglés puede ayudar"). Si no hay ninguno, se queda genérica ("…por si en algún momento
+   os lo planteáis"). Nunca una lista, y nunca en tono de reproche: la oferta principal
+   sigue siendo la del párrafo anterior.
+5. **Cierre, en su propio párrafo** — una sola pregunta de sí o no que nombra el
+   asistente, para que no se lea como si hablara de las webs: "¿Os enseño cómo
+   funcionaría el asistente en vuestra clínica?" (o "vuestro centro"). Ni "podéis
+   escribirme" (les deja el trabajo a ellos) ni "3 mejoras concretas".
+
+**El asunto**: corto, llano y con el nombre del negocio — "Pedir cita en X", "Las citas
+en X", "El WhatsApp de X". Lo que suena a generado es el asunto ingenioso o recargado, no
+el personalizado. Tampoco el genérico "Os escribimos de Studio32", que no dice de qué va.
 
 **Lo que el agente NO hace y por tanto no se ofrece nunca:** atender llamadas de
 teléfono. Es solo WhatsApp. **Tampoco se habla de "un ejemplo real" ni de "clínicas
@@ -203,7 +216,11 @@ Correo completo de referencia (lo que escribe la skill; la presentación y la fi
 >
 > Es justo lo que montamos: un asistente de WhatsApp que conoce vuestra agenda, da la
 > cita al momento a cualquier hora y manda un recordatorio antes para que no se olvide.
-> ¿Os enseño cómo funciona?
+>
+> Aparte del asistente, también hacemos webs con reserva de cita online, por si en algún
+> momento os lo planteáis.
+>
+> ¿Os enseño cómo funcionaría el asistente en vuestra clínica?
 >
 > Un saludo y gracias por vuestro tiempo,
 
@@ -274,7 +291,7 @@ a medias.
         "confianza": { "nivel": "alto", "no_encontrado": ["Lo que no se pudo verificar"] }
       },
       "message": {
-        "subject": "Asunto de 4-7 palabras, concreto",
+        "subject": "Asunto corto y llano con el nombre del negocio: Pedir cita en X",
         "body": "80-110 palabras. Sin saludo ni presentacion (los pone el envio). Termina en \"Un saludo y gracias por vuestro tiempo,\" SIN nombre.",
         "evidencia": [
           { "afirmacion": "La frase del correo que afirma algo", "cita": "La cita que la sostiene", "fuente": "Autor · Google" }
@@ -334,7 +351,7 @@ Para cada lead del Top 3, genera mensajes en estos formatos:
 | Canal | Longitud objetivo |
 |---|---|
 | WhatsApp / DM Instagram — **corto** | 2-3 líneas, 40-60 palabras |
-| Email frío — **medio** | 80-120 palabras, asunto + cuerpo |
+| Email frío — **medio** | 90-140 palabras, asunto + cuerpo |
 | Visita presencial / llamada — **guion** | 4-6 frases, hablado |
 
 **Reglas de redacción** (ver `references/outreach-guidelines.md` para detalle completo):

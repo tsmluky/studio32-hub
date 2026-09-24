@@ -658,3 +658,34 @@ Botón al lado de "Reescribir". Abre el editor con una instrucción opcional ("m
 Probado el 15/09 contra dos borradores reales (sin guardar): respeta estructura,
 instrucción, oferta de web cuando la campaña es de web, y despedida. Tiende a repetir "Es
 justo lo que montamos" y a colar alguna suposición suave; los avisos no lo detectan todo.
+
+---
+
+## 2026-09-24 · El correo menciona los otros servicios, en una frase y después de la oferta
+
+Pancho quería que el correo dijera que Studio32 hace más cosas que el asistente, sin
+perder naturalidad. Se descartaron dos formas:
+
+- **"Somos una empresa de desarrollo de soluciones digitales" al principio.** La primera
+  línea es la que se ve en la bandeja antes de abrir, y lo que hace que se abra es que
+  habla de ellos. Además, "soluciones" es la palabra de folleto que la lista negra ya veta.
+- **Una lista de servicios en el cuerpo.** Diluye la oferta, que desde el 12/09 es
+  obligatoria y única.
+
+Lo que se hizo: una sola frase después de la oferta, "Aparte del asistente, también
+hacemos…", ligada a un hueco comprobado de la huella cuando lo hay (correo en Gmail,
+reserva a través de Doctoralia, web solo en español) y genérica cuando no. Solo servicios
+que se pueden entregar ya y que la web pública anuncia: webs con reserva, ficha de Google,
+correo con dominio propio. Nada que roce lo que el asistente no hace (idiomas, sedes,
+especialidades), aunque se hable de la web: se lee igual como promesa. El precedente que
+lo apoya es Centro COI, que respondió a un correo del asistente y acabó interesado en la web.
+
+El cierre pasa a su propio párrafo y nombra el asistente; si siguiera pegado a la frase de
+las webs, "¿Os enseño cómo funciona?" no se sabría a qué se refiere.
+
+**El asunto** deja de ser "Os escribimos de Studio32" (los 40 en cola lo llevaban; no sale
+de ningún archivo versionado). Lo que suena a generado es el asunto ingenioso, no el que
+lleva el nombre del negocio: "Pedir cita en X" es lo que escribiría una persona.
+
+El límite sube de 80-110 a 90-140 palabras para que quepa la frase nueva; los 40 quedaron
+entre 100 y 138.

@@ -116,9 +116,19 @@ Para los que pasaron la criba, y **como mucho 6**:
 - El cuerpo **no lleva saludo ni presentación** (empieza por lo que viste del negocio) y
   termina en "Un saludo y gracias por vuestro tiempo," **sin nombre**: el "Hola, soy…" y
   la firma los pone el envío con el nombre de quien apruebe.
-- La oferta va en primera persona ("Es justo lo que montamos: …") y el cierre es "¿Os
-  enseño cómo funciona?". **Nunca ofrezcas llamadas de teléfono** (el agente es solo
-  WhatsApp) ni "un ejemplo real".
+- La oferta va en primera persona ("Es justo lo que montamos: …"). **Nunca ofrezcas
+  llamadas de teléfono** (el agente es solo WhatsApp) ni "un ejemplo real".
+- Después de la oferta, **una sola frase con los otros servicios**, que empieza por
+  "Aparte del asistente, también hacemos…": webs con reserva online, la ficha de Google o
+  el correo con el nombre del negocio. Si la huella tiene un hueco que encaje (correo en
+  Gmail, reserva a través de Doctoralia, web solo en español…), la frase se liga a él y
+  ese hueco va a `evidencia`. Si no, se queda genérica. Nunca una lista ni un reproche.
+- El cierre va en su propio párrafo y nombra el asistente, para que no se confunda con
+  las webs: "¿Os enseño cómo funcionaría el asistente en vuestra clínica?" (o "vuestro
+  centro").
+- El asunto es corto y llano, con el nombre del negocio: "Pedir cita en X", "Las citas en
+  X", "El WhatsApp de X". Nada de ganchos ni asuntos ingeniosos: eso es lo que suena a
+  generado.
 
 **Sube en cuanto tengas 2 o 3 listos**, no al final:
 

@@ -41,12 +41,13 @@ function json(request: Request, payload: unknown, status = 200) {
 // references/outreach-guidelines.md, resumidas. Si cambian allí, hay que mirarlas aquí.
 const REGLAS = `Reescribes correos de prospección en frío de Studio32, un estudio que monta sistemas digitales para negocios locales. Escribes en español de España.
 
-ESTRUCTURA (dos párrafos y la despedida):
+ESTRUCTURA (cuatro párrafos y la despedida):
 1. Lo bueno y concreto que se ha visto de ese negocio: una frase literal de su web, un nombre que citan los clientes, un dato. Nunca un cumplido que valdría para cualquiera ("me gusta el enfoque cercano").
-2. Lo que falla, contado solo con lo comprobado. Sin suposiciones sobre cómo trabajan por dentro ("seguro que hay mensajes que tardan…").
+2. En el mismo párrafo, lo que falla, contado solo con lo comprobado. Sin suposiciones sobre cómo trabajan por dentro ("seguro que hay mensajes que tardan…").
 3. Nuevo párrafo: que eso lo resolvemos nosotros, en primera persona ("Es justo lo que montamos: …"), aplicado a su caso concreto y basado en la OFERTA de la campaña.
-4. En el mismo párrafo, una única pregunta de sí o no. Si la oferta es un asistente/agente: "¿Os enseño cómo funciona?" o una variante. Si la oferta es una web: "¿Os enseño cómo quedaría la vuestra?".
-5. Última línea, exactamente: "${DESPEDIDA}"
+4. Nuevo párrafo, una sola frase con los otros servicios: "Aparte del asistente, también hacemos…" (webs con reserva online, la ficha de Google, el correo con el nombre del negocio). Si un hueco de la HUELLA encaja, ligada a él; si no, genérica ("por si en algún momento os lo planteáis"). Nunca una lista ni un reproche. Si la OFERTA ya es una web, este párrafo habla del asistente de WhatsApp en su lugar.
+5. Nuevo párrafo: una única pregunta de sí o no que nombre la oferta principal, para que no se confunda con el párrafo 4. Si es un asistente/agente: "¿Os enseño cómo funcionaría el asistente en vuestra clínica?" (o "vuestro centro"). Si es una web: "¿Os enseño cómo quedaría la vuestra?".
+6. Última línea, exactamente: "${DESPEDIDA}"
 
 REGLAS DURAS:
 - NO empieces con saludo ni presentación ("Hola", "Soy…", "Buenos días"): los añade el envío con el nombre de quien firma. Empieza directamente por el punto 1.
@@ -54,11 +55,11 @@ REGLAS DURAS:
 - Trato de vosotros al negocio de principio a fin; quien escribe habla en primera persona (yo / nosotros). Nunca "tú" fuera de una cita literal.
 - Cada afirmación sobre el negocio tiene que salir de la EVIDENCIA o la HUELLA que se te dan. No inventes cifras, nombres, horarios ni citas.
 - NUNCA cites las quejas de sus clientes.
-- NUNCA ofrezcas: atender llamadas de teléfono (el asistente es solo de WhatsApp), "un ejemplo real" o "clínicas como la vuestra" (aún no hay clientes), contestar en otros idiomas, distinguir sedes o especialidades, promesas numéricas.
+- NUNCA ofrezcas: atender llamadas de teléfono (el asistente es solo de WhatsApp), "un ejemplo real" o "clínicas como la vuestra" (aún no hay clientes), que el asistente conteste en otros idiomas o distinga sedes o especialidades, promesas numéricas.
 - Sí se puede ofrecer: responder y dar cita al momento, a cualquier hora, sobre la agenda real, y mandar un recordatorio antes de la cita.
 - Sin emojis, sin exclamaciones, sin lenguaje de agencia ("potenciamos", "transformamos"), sin "espero que estéis bien", sin viñetas.
-- Entre 80 y 110 palabras sin contar la despedida.
-- Asunto de 4 a 7 palabras, concreto. Nunca "Propuesta", "Colaboración" ni "Oportunidad".
+- Entre 90 y 140 palabras sin contar la despedida.
+- Asunto corto y llano con el nombre del negocio: "Pedir cita en X", "Las citas en X", "El WhatsApp de X". Nunca "Propuesta", "Colaboración", "Oportunidad" ni un gancho ingenioso.
 
 Si te llega una INSTRUCCIÓN de la persona que revisa, aplícala siempre que no rompa las reglas duras. Si la rompe, ignora esa parte.
 
@@ -189,7 +190,7 @@ Deno.serve(async (request) => {
   for (const [patron, motivo] of PROHIBIDO) if (patron.test(sinCitas)) avisos.push(`Revisa: ${motivo}.`)
   if (/\b(te|tu|tus|contigo)\b/i.test(sinCitas)) avisos.push('Revisa: parece que mezcla «tú» con «vosotros».')
   const palabras = cuerpo.replace(DESPEDIDA, '').split(/\s+/).filter(Boolean).length
-  if (palabras > 120) avisos.push(`Revisa: tiene ${palabras} palabras, más de las 110 recomendadas.`)
+  if (palabras > 150) avisos.push(`Revisa: tiene ${palabras} palabras, más de las 140 recomendadas.`)
 
   return json(request, { subject: propuesta.subject.trim(), body: cuerpo, avisos, modelo })
 })
