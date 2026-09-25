@@ -19,10 +19,6 @@ import { createClient } from '@supabase/supabase-js'
 
 const WORKSPACE = 'studio32'
 
-// Por encima de esto por revisar, generar más solo alarga la cola: con 30 envíos al
-// día son tres días de trabajo esperando a una persona. `/prospectar` lo respeta.
-const BANDEJA_LLENA = 90
-
 const url = process.env.SUPABASE_URL
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
@@ -58,9 +54,6 @@ const porRevisar = mensajes.filter((m) => m.status === 'borrador').length
 const aprobados = mensajes.filter((m) => m.status === 'aprobado').length
 
 console.log(`\nBandeja: ${porRevisar} por revisar · ${aprobados} aprobados esperando envío.`)
-if (porRevisar >= BANDEJA_LLENA) {
-  console.log(`BANDEJA LLENA (${BANDEJA_LLENA} o más por revisar): no generes más hasta que se revise.`)
-}
 
 const conHueco = campanas
   .filter((c) => !/^prueba\b/i.test(c.name.trim()))

@@ -12,13 +12,13 @@ suscripción es de todas juntas.
 
 ## Regla que manda sobre todas: esto tiene que terminar
 
-Cada campaña de la pasada da **como mucho 6 leads y unos 25 minutos**. Nunca 20, aunque la
-campaña pida 20: verificar de verdad son 2-3 páginas por negocio, y una tanda que no
-termina no sube nada y no sirve de nada. Seis sólidos son una tanda buena; lo que falte
-se completa en otra pasada.
+Cada campaña de la pasada da **como mucho 30 leads**, y nunca más de los que le falten.
+Verificar de verdad son 2-3 páginas por negocio, así que 30 es una pasada larga: por eso
+se sube **de dos en dos o de tres en tres** según salen (B2), nunca al final. Si la pasada
+se corta, lo subido ya está en el Hub; lo que falte se completa en otra.
 
 Trabajar tres campañas a la vez **no cambia esa regla por campaña**: multiplica cuántas se
-avanzan, no cuánto se estira cada una. Así una pasada da ~18 leads en el tiempo de una.
+avanzan, no cuánto se estira cada una. Así una pasada da hasta ~90 leads.
 
 No apruebes ni envíes nada, nunca. Eso lo hace una persona en el Hub.
 
@@ -33,8 +33,6 @@ git pull --rebase
 npm run outreach
 ```
 
-- Si dice **BANDEJA LLENA**, para y dilo: generar más solo alarga la cola sin que salga
-  nada. Lo que hace falta es que alguien revise.
 - Si no hay campañas con leads por generar, dilo y para.
 
 ### A2. Elige las campañas
@@ -58,7 +56,7 @@ Con la herramienta de agentes, **todos en el mismo mensaje** para que corran en 
 > Eres uno de varios agentes generando prospección para Studio32 a la vez. Tu campaña,
 > y solo esa:
 > - Campaña: `<id>` — `<nombre>`
-> - Sector: `<sector>` · Zona: `<zona>` · Faltan: `<n>` (tú haces como mucho 6)
+> - Sector: `<sector>` · Zona: `<zona>` · Faltan: `<n>` (tú haces como mucho 30, y nunca más de los que faltan)
 > - Oferta: `<oferta>` · Notas: `<notas o "ninguna">`
 >
 > Trabaja en el repo `studio32-hub` (`<ruta absoluta del repo en esta máquina>`). Lee
@@ -94,19 +92,21 @@ Este es el paso que ahorra el tiempo. **No te lances a fondo con cada negocio.**
    ```bash
    npm run outreach -- --conocidos "<zona>"
    ```
-2. Una búsqueda para sacar 10-12 candidatos del sector y la zona que **no** estén en esa
-   lista.
+2. Saca candidatos del sector y la zona que **no** estén en esa lista, por rondas de
+   10-12: la criba tira más de la mitad, así que para 30 leads harán falta varias. Cuando
+   una fuente se agote (el listado no da más páginas), pasa a la siguiente.
 3. Descarta de entrada: cadenas, franquicias, y los que no tengan web propia.
 4. **Comprueba que hay correo público** antes de nada más. Sin correo el lead no puede
    entrar, así que investigarlo es tiempo tirado. El correo tiene que ser una dirección sin
    tildes ni eñes: el servidor no las envía y el importador las descarta.
 
-Si tras la criba quedan menos de 3 con correo, **para ahí**: ciérrala (B3) explicándolo y
-no sigas.
+Si tras la primera ronda quedan menos de 3 con correo, **para ahí**: ciérrala (B3)
+explicándolo y no sigas. Si en rondas posteriores la zona deja de dar candidatos nuevos,
+para también: la zona está agotada, dilo al terminar aunque no llegues a 30.
 
 ### B2. Investiga y sube, de dos en dos
 
-Para los que pasaron la criba, y **como mucho 6**:
+Para los que pasaron la criba, y **como mucho 30** (nunca más de los que falten):
 
 - Carga su web y busca sus reseñas. Nada inventado: ni correos, ni teléfonos, ni
   recuentos, ni citas. Si no lo has leído, no lo escribes.

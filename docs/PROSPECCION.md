@@ -388,7 +388,8 @@ investigar la segunda página del listado.
 ## Cuánto cuesta una tanda
 
 Verificar un lead de verdad son 2-3 páginas cargadas: su web, sus reseñas, y a veces una
-búsqueda para el correo. Con la criba previa, **una pasada razonable son 6 leads**.
+búsqueda para el correo. Desde el 25/09/2026 cada campaña da **hasta 30 leads por
+pasada** (antes 6), así que la pasada es larga y subir según salen es obligatorio.
 
 Pedir 20 en una campaña está bien —es lo que se querría— pero se sirven en varias
 pasadas. Una tanda que no termina no sube nada: el importador solo escribe cuando se le

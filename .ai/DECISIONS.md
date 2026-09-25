@@ -588,8 +588,9 @@ lanzan **3 agentes a la vez, uno por campaña**, y quien coordina elige, reparte
   que ya está en la base, antes de gastar tiempo en ello.
 - La cola lista también `abierta` con hueco (`cantidad` − leads de la campaña). Antes solo
   `pedida`, y una campaña servida una vez desaparecía aunque le faltaran 17.
-- **BANDEJA LLENA a partir de 90 por revisar**: tres días de envío a 30. Generar más no
-  acelera nada si nadie revisa.
+- ~~BANDEJA LLENA a partir de 90 por revisar~~ — **quitado el 25/09/2026** a petición del
+  equipo, junto con subir el tope por campaña de 6 a 30 leads por pasada: prefieren
+  volumen en la bandeja y revisar a su ritmo antes que frenar la generación.
 - Solo quien coordina escribe en `docs/PROSPECCION.md` y hace commit: con tres agentes
   editando el mismo archivo habría conflictos.
 
