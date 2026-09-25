@@ -7,8 +7,8 @@
 //
 //   1. Nadie sale sin aprobación humana explícita.
 //   2. Nadie en la lista de bajas recibe nada, pase lo que pase.
-//   3. A la misma dirección no se le escribe dos veces en la ventana de
-//      cortesía, aunque sean leads distintos.
+//   3. A un negocio se le escribe una sola vez, para siempre: ni a la misma
+//      dirección, ni a otra de su dominio propio, ni a otro lead con su teléfono.
 //
 // Y antes de las tres, el cupo diario (ver RAMPA_POR_SEMANA): lo que no cabe hoy
 // no se envía ni se marca, se queda aprobado para mañana.
@@ -35,7 +35,6 @@ import { normalizarTipografia, revisarCorreo } from '../_shared/reglas-correo.js
 // exactamente lo que hace el webmail. Asi el correo sale del dominio propio, las
 // respuestas caen en la bandeja real y no hay un proveedor intermedio que dependa
 // de una suscripcion ni de verificar el dominio en otro sitio.
-const DIAS_DE_CORTESIA = 60
 const MAXIMO_POR_TANDA = 25
 
 // --- Cupo diario, en rampa ----------------------------------------------------
@@ -116,6 +115,64 @@ type AjustesAprobacion = {
   margen_aprobacion_horas?: number
   firma_miembro?: string
   firma_from?: string
+}
+
+// Buzones gratuitos: su dominio es de millones de personas, no del negocio.
+const DOMINIOS_GRATUITOS = new Set(['gmail.com', 'googlemail.com', 'hotmail.com', 'hotmail.es', 'outlook.com', 'outlook.es', 'live.com', 'yahoo.com', 'yahoo.es', 'icloud.com', 'me.com', 'msn.com', 'telefonica.net', 'movistar.es'])
+
+const escaparLike = (texto: string) => texto.replace(/[\\%_]/g, (c) => '\\' + c)
+
+// Devuelve por qué no se puede escribir a este negocio, o '' si nunca se le escribió.
+async function yaSeLeEscribio(admin: ReturnType<typeof createClient>, id: string, leadId: string, toEmail: string, telefono: string) {
+  const email = toEmail.trim().toLowerCase()
+  const dominio = email.split('@')[1] ?? ''
+  const hechos = ['enviado', 'enviando']
+
+  const { data: mismaDireccion } = await admin
+    .from('outreach_messages')
+    .select('id')
+    .eq('workspace_id', 'studio32')
+    .in('status', hechos)
+    .ilike('to_email', escaparLike(email))
+    .neq('id', id)
+    .limit(1)
+  if (mismaDireccion?.length) return `ya recibió un correo en ${email}`
+
+  const { data: otrosDelLead } = await admin
+    .from('outreach_messages')
+    .select('id')
+    .eq('workspace_id', 'studio32')
+    .in('status', hechos)
+    .eq('lead_id', leadId)
+    .neq('id', id)
+    .limit(1)
+  if (otrosDelLead?.length) return 'este lead ya recibió un correo'
+
+  if (dominio && !DOMINIOS_GRATUITOS.has(dominio)) {
+    const { data: mismoDominio } = await admin
+      .from('outreach_messages')
+      .select('to_email')
+      .eq('workspace_id', 'studio32')
+      .in('status', hechos)
+      .ilike('to_email', `%@${escaparLike(dominio)}`)
+      .neq('id', id)
+      .limit(1)
+    if (mismoDominio?.length) return `ya se escribió a ${mismoDominio[0].to_email}, del mismo dominio`
+  }
+
+  if (telefono.length >= 9) {
+    const { data: mismoTelefono } = await admin
+      .from('outreach_leads')
+      .select('id, outreach_messages!inner(id)')
+      .eq('workspace_id', 'studio32')
+      .eq('phone_digits', telefono)
+      .neq('id', leadId)
+      .in('outreach_messages.status', hechos)
+      .limit(1)
+    if (mismoTelefono?.length) return 'ya se escribió a otro lead con el mismo teléfono'
+  }
+
+  return ''
 }
 
 async function aprobarLosQueToca(admin: ReturnType<typeof createClient>, ajustes: AjustesAprobacion | null, cupoHoy: number) {
@@ -594,29 +651,22 @@ Deno.serve(async (request) => {
       continue
     }
 
-    // Frontera 3: no repetir a la misma persona. Va por dirección y no por
-    // lead, porque dos leads distintos pueden compartir buzón.
-    const desde = new Date(Date.now() - DIAS_DE_CORTESIA * 86_400_000).toISOString()
-    const { data: previos } = await admin
-      .from('outreach_messages')
-      .select('id')
-      .eq('workspace_id', 'studio32')
-      .eq('status', 'enviado')
-      .ilike('to_email', mensaje.to_email)
-      .gte('sent_at', desde)
-      .limit(1)
-
-    if (previos?.length) {
-      await admin.from('outreach_messages').update({ status: 'fallido', error: `Ya se escribió a esta dirección en los últimos ${DIAS_DE_CORTESIA} días.` }).eq('id', id)
-      resultados.push({ id, estado: 'bloqueado', motivo: 'Ya se le escribió hace poco.' })
-      continue
-    }
-
     const { data: lead } = await admin
       .from('outreach_leads')
-      .select('unsubscribe_token')
+      .select('unsubscribe_token, phone_digits')
       .eq('id', mensaje.lead_id)
       .maybeSingle()
+
+    // Frontera 3: un solo correo por dirección y por negocio, para siempre (25/09/2026:
+    // se mandaron dos a la misma cuenta). Cuenta también 'enviando': uno a medias puede
+    // haber salido. Y mira el negocio, no solo el buzón: mismo dominio de correo
+    // propio o mismo teléfono es el mismo negocio aunque la dirección cambie.
+    const repetido = await yaSeLeEscribio(admin, mensaje.id, mensaje.lead_id, mensaje.to_email, lead?.phone_digits ?? '')
+    if (repetido) {
+      await admin.from('outreach_messages').update({ status: 'fallido', error: `Ya se le escribió a este negocio: ${repetido}.` }).eq('id', id)
+      resultados.push({ id, estado: 'bloqueado', motivo: `Ya se le escribió: ${repetido}.` })
+      continue
+    }
 
     // Se reclama el mensaje de forma atómica: solo pasa a 'enviando' si sigue
     // 'aprobado'. Con el reloj enviando y una persona pulsando "Enviar" a la vez, sin

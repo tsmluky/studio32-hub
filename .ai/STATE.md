@@ -88,7 +88,9 @@ Siguen vigentes; `SKILL.md` (modo C) y `outreach-guidelines.md` lo piden como re
    que hace lo mismo con un botón; es local de esa máquina, no viaja con el repo.
    La cola (`npm run outreach`) lista desde el 14/09 también las campañas `abierta` con
    leads por generar —antes solo las `pedida`, y 16 con trabajo pendiente no se veían—.
-   Desde el 25/09 cada campaña da hasta 30 leads por pasada y ya no hay tope de bandeja.
+   Desde el 25/09 cada campaña da hasta 30 leads por pasada, la cantidad pedida ya no es
+   techo, no hay tope de bandeja, y `/prospectar` crea campañas (`--crear`) si faltan.
+   Un correo por negocio para siempre: lo aplican el importador y `outreach-send`.
    Corre con la **suscripción**, no por API: es la razón de que este paso sea local y
    no un worker en la nube.
    (`npm run outreach` sigue existiendo para mirar la cola a mano, y

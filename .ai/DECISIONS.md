@@ -756,3 +756,23 @@ si los correos llegan (hoy `p=none` sin `rua`: no hay forma de saberlo).
 
 Migración: `20260924120000_outreach_aprobacion_automatica.sql`, aplicada con
 `supabase db query --linked --project-ref …` porque `SUPABASE_DB_URL` está vacía en `.env`.
+
+## 2026-09-25 · Un correo por negocio, para siempre, y volumen sin techo
+
+Se mandaron dos correos a la misma cuenta. En la base cada dirección tiene una sola fila,
+así que no fueron dos borradores: fue el mismo mensaje saliendo dos veces. La vía
+probable es `recuperar-fallidos`, que devolvía a la cola los fallos por "timeout" o
+"connection". Un corte así puede llegar **después** de que el servidor aceptara el
+correo, y recuperarlo lo reenviaba. Desde ahora solo se recupera el 535 (contraseña
+rechazada), que falla antes de entregar nada.
+
+Además, la frontera del envío pasa de "no dos veces a la misma dirección en 60 días" a
+"una vez por negocio, para siempre": misma dirección (sin distinguir mayúsculas), mismo
+dominio propio (los buzones gratuitos no cuentan como negocio), mismo lead o mismo
+teléfono. Cuenta `enviando` como enviado, porque uno a medias puede haber salido. El
+importador aplica lo mismo antes de crear el borrador, para que no ocupe la bandeja.
+
+El mismo día, a petición del equipo (20 envíos al día, 30 la semana siguiente): la
+cantidad pedida de una campaña deja de ser techo, cada campaña da hasta 30 por pasada,
+se quita el tope de 90 por revisar y `/prospectar` puede abrir campañas nuevas con
+`npm run outreach -- --crear` cuando no hay bastantes.

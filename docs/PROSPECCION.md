@@ -71,8 +71,11 @@ repositorio es público. El ejemplo del repo usa un negocio ficticio a propósit
 - **Ningún correo sale sin aprobación humana.** `approved_by` es obligatorio y solo la Edge
   Function con la clave de servicio puede marcar algo como enviado.
 - **Nadie de la lista de bajas recibe nada.** Frontera dura en el envío.
-- **A la misma dirección no se escribe dos veces en 60 días**, aunque sean leads distintos:
-  dos leads pueden compartir buzón.
+- **A un negocio se le escribe una sola vez, para siempre.** Ni a la misma dirección, ni a
+  otra de su mismo dominio propio (`info@` y `citas@` de la misma clínica), ni a otro lead
+  con su teléfono. Lo comprueban el importador (no crea el borrador) y el envío (lo
+  bloquea). Antes era "no dos veces en 60 días", y el 25/09/2026 se mandaron dos correos
+  a la misma cuenta.
 - **Máximo 25 por tanda, con pausa entre envíos.** Una ráfaga quema la reputación del
   dominio, y ese dominio también manda los avisos de citas de los clientes.
 - **Reimportar no borra trabajo comercial.** Un lead que ya salió de "nuevo" conserva su

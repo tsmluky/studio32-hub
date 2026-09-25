@@ -34,11 +34,14 @@ const admin = createClient(url, serviceRoleKey, {
   auth: { autoRefreshToken: false, persistSession: false },
 })
 
+// Solo lo que falla ANTES de entregar: con la contraseña rechazada no sale nada. Un
+// timeout o una conexión cortada puede llegar después de que el servidor aceptara el
+// correo, y recuperarlo lo mandaba dos veces (25/09/2026). Esos no se tocan nunca.
+//
 // Fallos del servidor, no del correo. Se amplía cuando aparezca uno nuevo que también
 // merezca reintento; por defecto no se recupera nada que no esté en esta lista.
 const FALLOS_DEL_SERVIDOR = [
   { patron: /535|authentication failed/i, que: 'el servidor rechazó la contraseña' },
-  { patron: /timeout|connection|refused/i, que: 'no se pudo conectar con el servidor' },
 ]
 
 const { data: fallidos, error } = await admin

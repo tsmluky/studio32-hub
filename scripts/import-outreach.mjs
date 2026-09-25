@@ -102,7 +102,39 @@ for (const lead of currentLeads ?? []) {
   byName.set(`${lead.business_name.toLowerCase()}|${lead.postal_code ?? ''}`, lead)
 }
 
-const report = { creados: 0, actualizados: 0, duplicados: 0, protegidos: 0, borradores: 0, omitidos: 0, sinAscii: [], noPasan: [] }
+// Quién tiene ya un correo vivo (no fallido). Se consulta por dirección, por dominio
+// propio y por lead, para no volver a escribir al mismo negocio por otra puerta.
+const { data: mensajesVivos, error: vivosError } = await admin
+  .from('outreach_messages')
+  .select('lead_id, to_email, status')
+  .eq('workspace_id', workspaceId)
+  .neq('status', 'fallido')
+if (vivosError) throw vivosError
+
+const GRATUITOS = new Set(['gmail.com', 'googlemail.com', 'hotmail.com', 'hotmail.es', 'outlook.com', 'outlook.es', 'live.com', 'yahoo.com', 'yahoo.es', 'icloud.com', 'me.com', 'msn.com', 'telefonica.net', 'movistar.es'])
+const vivosPorEmail = new Map()
+const vivosPorDominio = new Map()
+const leadsConCorreo = new Set()
+for (const m of mensajesVivos ?? []) {
+  const email = m.to_email.trim().toLowerCase()
+  const dominio = email.split('@')[1] ?? ''
+  vivosPorEmail.set(email, m)
+  if (dominio && !GRATUITOS.has(dominio)) vivosPorDominio.set(dominio, m)
+  leadsConCorreo.add(m.lead_id)
+}
+
+function yaEscrito(email, leadId, duplicadoDe) {
+  const e = email.trim().toLowerCase()
+  const dominio = e.split('@')[1] ?? ''
+  const mismo = vivosPorEmail.get(e)
+  if (mismo && mismo.lead_id !== leadId) return `esa dirección ya tiene un correo (${mismo.status})`
+  const delDominio = vivosPorDominio.get(dominio)
+  if (delDominio && delDominio.lead_id !== leadId) return `ya hay un correo a ${delDominio.to_email} (${delDominio.status})`
+  if (duplicadoDe && leadsConCorreo.has(duplicadoDe)) return 'es duplicado de un negocio que ya tiene correo'
+  return ''
+}
+
+const report = { creados: 0, actualizados: 0, duplicados: 0, protegidos: 0, borradores: 0, omitidos: 0, sinAscii: [], noPasan: [], yaContactados: [] }
 
 for (const lead of payload.leads) {
   if (!lead.business_name) {
@@ -200,6 +232,14 @@ for (const lead of payload.leads) {
     continue
   }
 
+  // Un correo por negocio, para siempre: si esta dirección, su dominio propio o el
+  // negocio del que es duplicado ya tienen un correo en marcha o enviado, no nace otro.
+  const yaTiene = yaEscrito(row.email, leadId, row.duplicate_of)
+  if (yaTiene) {
+    report.yaContactados.push(`${row.business_name} <${row.email}>: ${yaTiene}`)
+    continue
+  }
+
   const { data: existingMessages, error: messageReadError } = await admin
     .from('outreach_messages')
     .select('id, status')
@@ -241,6 +281,12 @@ for (const lead of payload.leads) {
     if (error) throw error
   }
   report.borradores += 1
+  const nuevo = { lead_id: leadId, to_email: row.email, status: 'borrador' }
+  const e = row.email.trim().toLowerCase()
+  vivosPorEmail.set(e, nuevo)
+  const d = e.split('@')[1] ?? ''
+  if (d && !GRATUITOS.has(d)) vivosPorDominio.set(d, nuevo)
+  leadsConCorreo.add(leadId)
 }
 
 // Una campaña pedida desde el Hub sigue en 'pedida' hasta que aterriza su tanda. Si no
@@ -265,6 +311,10 @@ if (report.omitidos) console.log(`  omitidos sin nombre: ${report.omitidos}`)
 if (report.sinAscii.length) {
   console.log(`  sin borrador por correo con tilde o eñe (Hostinger no lo envía):`)
   for (const item of report.sinAscii) console.log(`    - ${item}`)
+}
+if (report.yaContactados.length) {
+  console.log(`  sin borrador porque a ese negocio ya se le escribe (un correo por negocio):`)
+  for (const item of report.yaContactados) console.log(`    - ${item}`)
 }
 if (report.noPasan.length) {
   console.log(`  borradores que el envío pararía tal como están (arréglalos antes de aprobar):`)

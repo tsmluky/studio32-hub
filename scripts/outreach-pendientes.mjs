@@ -55,25 +55,26 @@ const aprobados = mensajes.filter((m) => m.status === 'aprobado').length
 
 console.log(`\nBandeja: ${porRevisar} por revisar · ${aprobados} aprobados esperando envío.`)
 
+// La cantidad pedida es orientativa, no un techo: una campaña sigue en la cola hasta que
+// se cierra por zona agotada, aunque ya haya servido lo que pidió.
 const conHueco = campanas
   .filter((c) => !/^prueba\b/i.test(c.name.trim()))
   .map((c) => ({ ...c, llevan: generados.get(c.id) ?? 0 }))
   .map((c) => ({ ...c, faltan: Math.max(0, c.cantidad - c.llevan) }))
-  .filter((c) => c.faltan > 0)
 
 if (!conHueco.length) {
-  console.log('\nNo hay campañas con leads por generar. Se piden desde el Hub: Herramientas → Prospección → Pedir campaña.')
+  console.log('\nNo hay campañas abiertas. Se piden desde el Hub (Herramientas → Prospección → Pedir campaña) o con npm run outreach -- --crear.')
   process.exit(0)
 }
 
-console.log(`\n${conHueco.length} campaña(s) con leads por generar:\n`)
+console.log(`\n${conHueco.length} campaña(s) abiertas:\n`)
 
 for (const [i, c] of conHueco.entries()) {
   const pedidaEl = new Date(c.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })
   console.log(`${'─'.repeat(72)}`)
   console.log(`${i + 1}. ${c.name}`)
   console.log(`   id: ${c.id}`)
-  console.log(`   ${c.status} · pedida el ${pedidaEl} · llevan ${c.llevan} de ${c.cantidad}, faltan ${c.faltan}`)
+  console.log(`   ${c.status} · pedida el ${pedidaEl} · llevan ${c.llevan} de ${c.cantidad} pedidos${c.faltan ? `, faltan ${c.faltan}` : ', pedido cubierto: sigue hasta agotar la zona'}`)
   console.log(`   sector: ${c.sector} · zona: ${c.city}`)
   if (c.oferta) console.log(`   oferta: ${c.oferta}`)
   if (c.notas) console.log(`   notas:  ${c.notas}`)

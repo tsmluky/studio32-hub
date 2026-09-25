@@ -12,7 +12,8 @@ suscripción es de todas juntas.
 
 ## Regla que manda sobre todas: esto tiene que terminar
 
-Cada campaña de la pasada da **como mucho 30 leads**, y nunca más de los que le falten.
+Cada campaña de la pasada da **como mucho 30 leads**. La cantidad que se pidió en el Hub
+es orientativa, no un techo: una campaña sigue dando hasta que su zona se agota.
 Verificar de verdad son 2-3 páginas por negocio, así que 30 es una pasada larga: por eso
 se sube **de dos en dos o de tres en tres** según salen (B2), nunca al final. Si la pasada
 se corta, lo subido ya está en el Hub; lo que falte se completa en otra.
@@ -33,7 +34,6 @@ git pull --rebase
 npm run outreach
 ```
 
-- Si no hay campañas con leads por generar, dilo y para.
 
 ### A2. Elige las campañas
 
@@ -46,7 +46,15 @@ exprimidas".
   agentes investigando la misma clínica y dos importaciones subiéndola a la vez.
 - Si una campaña es de un sector o zona que ya consta como muerto, no la asignes: ciérrala
   tú (`npm run outreach -- --cerrar <id> "motivo"`) y elige otra.
-- Si hay menos campañas válidas que el número pedido, trabaja las que haya.
+- Si hay menos campañas válidas que el número pedido, **crea las que falten** en vez de
+  quedarte corto: un sector que funciona (clínicas dentales, fisioterapia, centros de
+  estética) en una capital de provincia que no tenga ya campaña de ese sector, con la
+  oferta y las notas de las campañas hermanas:
+  ```bash
+  npm run outreach -- --crear "Clínicas dentales" "Córdoba capital" "<oferta>" "<notas>"
+  ```
+  Nunca en una zona de "Zonas ya exprimidas" ni en un sector de "Sectores que no
+  funcionan por correo". Di en el resumen cuáles creaste.
 
 ### A3. Lanza un agente por campaña, todos a la vez
 
@@ -56,7 +64,7 @@ Con la herramienta de agentes, **todos en el mismo mensaje** para que corran en 
 > Eres uno de varios agentes generando prospección para Studio32 a la vez. Tu campaña,
 > y solo esa:
 > - Campaña: `<id>` — `<nombre>`
-> - Sector: `<sector>` · Zona: `<zona>` · Faltan: `<n>` (tú haces como mucho 30, y nunca más de los que faltan)
+> - Sector: `<sector>` · Zona: `<zona>` · Faltan: `<n>` (tú haces como mucho 30, aunque falten menos)
 > - Oferta: `<oferta>` · Notas: `<notas o "ninguna">`
 >
 > Trabaja en el repo `studio32-hub` (`<ruta absoluta del repo en esta máquina>`). Lee
@@ -71,6 +79,9 @@ Con la herramienta de agentes, **todos en el mismo mensaje** para que corran en 
 
 Cuando vuelvan todos:
 
+- **Un correo por negocio, para siempre.** El importador ya no crea borrador para una
+  dirección, un dominio propio o un negocio que ya tenga correo, y el envío lo bloquea
+  aunque se cuele. Si el importador lista alguno como "ya se le escribe", cuéntalo.
 - Cuántos leads subieron en total y cómo quedó la bandeja (vuelve a lanzar
   `npm run outreach` y copia la línea "Bandeja: …").
 - Por campaña: cuántos subieron, **cuáles cayeron y por qué** (es lo más útil: dice si el
@@ -106,7 +117,7 @@ para también: la zona está agotada, dilo al terminar aunque no llegues a 30.
 
 ### B2. Investiga y sube, de dos en dos
 
-Para los que pasaron la criba, y **como mucho 30** (nunca más de los que falten):
+Para los que pasaron la criba, y **como mucho 30**:
 
 - Carga su web y busca sus reseñas. Nada inventado: ni correos, ni teléfonos, ni
   recuentos, ni citas. Si no lo has leído, no lo escribes.
