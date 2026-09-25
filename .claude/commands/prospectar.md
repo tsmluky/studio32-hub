@@ -70,7 +70,8 @@ Con la herramienta de agentes, **todos en el mismo mensaje** para que corran en 
 > Trabaja en el repo `studio32-hub` (`<ruta absoluta del repo en esta máquina>`). Lee
 > `.claude/commands/prospectar.md` → **Parte B** y síguela entera, al pie de la letra.
 > Tu archivo JSON se llama `tanda-<id corto de la campaña>.json` y va en
-> `<carpeta temporal de la sesión>`, nunca en el repo.
+> `<carpeta temporal de la sesión>/<id corto de la campaña>/`, nunca en el repo. Esa
+> subcarpeta es solo tuya: todo lo que descargues o generes va ahí dentro.
 >
 > Cuando termines, responde SOLO con: cuántos leads subiste, cuáles cayeron y por qué
 > (una línea cada uno), si cerraste la campaña y cuántos le faltan.
@@ -157,6 +158,11 @@ añadiendo leads: reimportar los primeros no los duplica.
 
 Escribe el JSON en la carpeta temporal de la sesión, nunca en el repo: lleva datos de
 contacto de negocios reales y el repositorio es público.
+
+**Trabaja solo en tu subcarpeta** (`<carpeta temporal>/<id corto de la campaña>/`), y no
+leas ni importes nada de fuera de ella. Los agentes de una pasada comparten la carpeta
+temporal: el 25/09/2026 un agente importó los borradores de otro y dos leads de Zaragoza
+acabaron en la campaña de Sevilla.
 
 ### B3. Si la campaña no da para más, ciérrala
 

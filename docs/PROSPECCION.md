@@ -223,6 +223,18 @@ tratamiento (`tratamiento-tratamientos-faciales`, etc.) listan el centro, su not
 su número de opiniones y el enlace a su ficha, que sí trae opiniones literales con
 nombre y fecha — igual de fiable que Doctoralia para dentales.
 
+**Actualizado el 25/09/2026: Treatwell cambió el formato del listado.** La ruta de arriba
+con `tipo-centro-wellness/en-valencia-valencia-es` ya da 404. La que funciona es
+`treatwell.es/establecimientos/servicios-grupo-facial/oferta-tipo-local/en-<ciudad>-<comunidad>-es/pagina-N/`
+(en Valencia, `en-valencia-comunidad-de-valencia-es`). **Fresha** (`fresha.com/es/a/<slug>`)
+sirve de segunda fuente: sus fichas, igual que las de Treatwell, traen las reseñas con
+autor y fecha en el JSON-LD de la página, y su campo `sameAs` da la web del negocio.
+
+**En estética la mayoría de las fichas con muchas reseñas no tienen web propia.** En
+Valencia, unas 30 fichas de Treatwell con buen volumen se cayeron solo por eso. Rinde más
+sacar candidatas buscando webs por barrio y cruzarlas después con Treatwell o Fresha que
+recorrer el listado ficha a ficha.
+
 **Nuevo obstáculo de correo, distinto a "no publican":** dos candidatas (Onírika,
 Cosméticaclub) tienen correo en su web, pero protegido con ofuscación Cloudflare
 (`/cdn-cgi/l/email-protection`) — un humano lo ve al cargar la página porque el
@@ -235,6 +247,12 @@ plano ahí aunque en contacto esté ofuscado) antes de descartar.
 seguía con el correo de contacto ofuscado por Cloudflare, pero su aviso legal lo publicaba
 en texto plano — se pudo verificar y subir. Onírika en cambio lo tiene ofuscado en los dos
 sitios y sigue sin poder verificarse.
+
+**Resuelto del todo el 25/09/2026: el correo ofuscado se puede leer exacto.** No hace falta
+navegador: en el código de la página, el atributo `data-cfemail` guarda la dirección
+cifrada con un XOR sencillo, donde el primer byte es la clave. Decodificarlo da la cadena
+literal, así que cuenta como correo verificado. Así se confirmaron en Coslada dos webs
+distintas como la misma clínica.
 
 **En clínicas dentales el cuello de botella es justo el contrario: el correo.**
 Comprobado el 15/08/2026 en Valencia: reseñas sobran —cualquier clínica con ficha en
@@ -388,6 +406,34 @@ más entrar por la web de cada una. Los correos Gmail personales y el correo de 
 que hizo la web (que aparece en el pie) no cuentan como correo del negocio. Queda por
 investigar la segunda página del listado.
 
+**Clínicas dentales · Coslada — agotada a 25/09/2026, con 9 leads de 40 pedidos.** El
+pueblo no da para más. Aquí no falló el correo: fallaron **los dominios muertos** (cinco
+clínicas con la web caída o el dominio ocupado por otro, y sin correo) y **las reseñas sin
+autor citable** (siete). Casi todas las que entraron tienen un fallo visible en la web
+(texto de relleno de la plantilla, varias webs para una misma clínica, web parada desde
+2021), que encaja con la oferta de web. Mismo patrón que Azuqueca: en los pueblos del
+Corredor del Henares el cuello de botella son las reseñas y los dominios, no el correo.
+
+**Clínicas dentales · Sevilla capital — pasada del 25/09/2026, pedido cubierto (20 de 20).**
+La ficha de clínica en Doctoralia se queda casi siempre en 0 opiniones: las reseñas están
+en las fichas de cada dentista, que lista `doctoralia.es/dentista/sevilla`. A partir de la
+página 10 de ese listado solo salen repetidos, así que la zona está **casi agotada** para
+la oferta de agente. Ojo con los municipios del Aljarafe (Tomares, Bormujos, Mairena,
+Montequinto): salen en los listados de Sevilla y no son la capital.
+
+**Clínicas dentales · Zaragoza capital — pasada del 25/09/2026, pedido cubierto (20 de 20).**
+Como en Murcia, **alrededor de la mitad de las clínicas independientes ya tiene WhatsApp**
+en la web (23 cayeron solo por eso). La zona **no** está agotada: quedan unas 15 clínicas
+con correo y sin WhatsApp por trabajar (Talia Gil, Elena Lamaña, Esteban Castán, Calanda,
+Carlos Mur, Tres Jiménez, Longas y Valdés, Doctores Navarro, entre otras). En Zaragoza,
+Doctoralia casi no tiene opiniones; ver `topdentistas.com` más abajo. `dentistasdezaragoza.es`
+está desactualizado: la mitad de sus dominios ya no existen.
+
+**Centros de estética · Valencia — pasada del 25/09/2026, 28 de 40.** El rendimiento cayó
+a 1 o 2 leads por ronda: casi todas las fichas de Treatwell en Valencia con más de 40
+reseñas ya están revisadas, y lo que queda en su mayoría no tiene web ni correo. Para las
+12 que faltan, buscar webs por barrio (ver arriba) en vez de volver al listado.
+
 ## Cuánto cuesta una tanda
 
 Verificar un lead de verdad son 2-3 páginas cargadas: su web, sus reseñas, y a veces una
@@ -405,8 +451,8 @@ ciegas. Ir directo a la fuente que funciona por sector:
 
 | Sector | Fuente que sí da citas literales |
 | --- | --- |
-| Clínicas dentales, medicina estética | `doctoralia.es/clinicas/<slug>` |
-| Centros de estética, peluquería | `treatwell.es/establecimiento/<slug>` |
+| Clínicas dentales, medicina estética | `doctoralia.es/clinicas/<slug>`, y si la ficha está vacía, `topdentistas.com` |
+| Centros de estética, peluquería | `treatwell.es/establecimiento/<slug>`, y si no está, `fresha.com/es/a/<slug>` |
 | Fisioterapia | `doctoralia.es`, pero **por profesional, no por centro** |
 
 **En fisioterapia las opiniones cuelgan del fisioterapeuta, no de la clínica.** El centro
@@ -435,6 +481,23 @@ recuento, no valen para la puerta.
 pueblo.** No trae reseñas literales, pero lista todos los centros con dirección, nota y
 número de reseñas de Google en una sola página. Sirve para la criba del paso 2 y saca
 negocios que ni Doctoralia ni una búsqueda normal devuelven.
+
+**`topdentistas.com` es el `sportmedicine.es` de las clínicas dentales**, hallazgo del
+25/09/2026. `topdentistas.com/dentistas/<ciudad>` hace a la vez de censo y de fuente:
+copia las reseñas de Google con nombre completo, fecha y recuento, y enlaza la web de cada
+clínica. Salvó 11 de los 18 leads de Zaragoza, donde Doctoralia casi no tiene opiniones.
+También vale la ficha `topdentistas.com.es/es-es/i/<id>-<slug>/`. Se cita como
+"Autor · Google (vía topdentistas.com), <fecha>". `sonrisalista.com` y `docdental.es`
+**no** valen: esconden el autor o parafrasean.
+
+**El widget de Trustindex que muchas webs incrustan también sirve.** Muestra reseñas de
+Google con autor, y se cita como "Autor · Google (vía la web del negocio)".
+
+**Para saber si una web ya tiene WhatsApp, leer el código y no un resumen.** Muchas lo
+meten con un plugin de chat (joinchat, ar-contactus) que solo aparece en el código, y los
+resúmenes automáticos lo pasan por alto. Fiarse de los enlaces `wa.me`, `api.whatsapp` o
+del plugin: la palabra "whatsapp" sola suele ser el botón de compartir y da falsos
+positivos.
 
 **Los agregadores no sirven**: top-rated.online, cylex, expirit y similares devuelven
 403, y los resúmenes que salen en los resultados de búsqueda vienen parafraseados y sin
