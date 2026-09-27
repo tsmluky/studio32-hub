@@ -1,6 +1,6 @@
 # Estado — studio32-hub
 
-> Se **sobrescribe**, no se acumula. Tope ~100 líneas. Última actualización: 2026-09-24.
+> Se **sobrescribe**, no se acumula. Tope ~100 líneas. Última actualización: 2026-09-27.
 
 ## Qué es
 
@@ -55,6 +55,16 @@ Se apaga con `aprobacion_automatica` en `outreach_settings` (aún no hay botón 
 el Hub sí enseña en cada borrador cuándo se aprobará y qué pararía la revisión).
 `npm run outreach:revisar` pasa las reglas a la cola sin enviar. Cupo: 30/día desde el
 28/09 y ahí se queda. Porqué en `DECISIONS.md`.
+
+**27/09: "no se envía nada" en fin de semana es el diseño, no un fallo.** El cron
+(`*/10 7-18 * * 1-5`) no llama a la función ni un sábado ni un domingo; confirmado en
+`cron.job_run_details` (última fila del viernes 25 a las 18:10 UTC, ninguna el sábado ni
+el domingo). Fuera de eso apareció y se corrigió un problema real: una sesión de
+sobremesa redesplegó `outreach-rewrite` el 24/09 con checkout viejo, 11 min después de
+que `main` llevara ya el commit que cambiaba el asunto, y pisó esa decisión en el
+servidor. `outreach-rewrite` y `outreach-send` redesplegados ya sincronizados con `main`.
+**Antes de tocar prospección: `git pull --rebase` primero, siempre** (la regla de más
+abajo, que esto acaba de incumplir). Detalle completo en `DECISIONS.md`.
 
 **24/09: el correo menciona también los otros servicios, y el asunto lleva el nombre del
 negocio.** Tras la oferta, una frase "Aparte del asistente, también hacemos…" (webs con

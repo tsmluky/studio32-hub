@@ -776,3 +776,32 @@ El mismo día, a petición del equipo (20 envíos al día, 30 la semana siguient
 cantidad pedida de una campaña deja de ser techo, cada campaña da hasta 30 por pasada,
 se quita el tope de 90 por revisar y `/prospectar` puede abrir campañas nuevas con
 `npm run outreach -- --crear` cuando no hay bastantes.
+
+## 2026-09-27 · "No se envía nada automático" era el fin de semana, más un despliegue viejo pisando el nuevo
+
+Pancho reportó que el 26 y el 27 (sábado y domingo) tuvo que enviar a mano porque no
+había salido nada solo. **No es un fallo: `outreach-envio-programado` (pg_cron) tiene
+`* * 1-5` en el propio cron — no llama a la función ningún sábado ni domingo.**
+`cron.job_run_details` lo confirma: última ejecución el viernes 25 a las 18:10 UTC, cero
+filas el sábado y el domingo. Es la misma regla de "de lunes a viernes" del 14/09, y
+sigue teniendo sentido (un correo que llega en fin de semana lo lee el lunes enterrado).
+
+De paso apareció un problema real, de otra sesión (la de sobremesa, sin `git pull` antes
+de tocar prospección — la regla que ya pedía STATE.md): el 24/09 a las 11:22 UTC esa
+sesión desplegó `outreach-rewrite` con el checkout viejo (asunto fijo "Os escribimos de
+Studio32"), **11 minutos después** de que este repo llevara ya en `main` el commit
+`377870a` que revertía justo eso (el asunto lleva el nombre del negocio). Ese redeploy
+pisó en el servidor la decisión del mismo día. Detectado comparando
+`supabase functions list` (`updated_at` de `outreach-rewrite`) contra la hora del commit.
+Se corrigió: `git checkout` de los archivos que esa sesión tenía sin commitear
+(`SKILL.md`, `outreach-guidelines.md`, `output-template.md`, `redactor-outreach.md`,
+`outreach-ejemplo.json`, `outreach-rewrite/index.ts`, este archivo), `git pull --ff-only`
+para traer los 6 commits que faltaban, y redeploy de `outreach-rewrite` **y**
+`outreach-send` con el código ya sincronizado.
+
+Y un hallazgo menor, sin acción: 3 borradores se aprobaron solos el viernes a las 11:30
+(pasado el cupo del día, agotado a las 9:48), se quedaron en `aprobado` sin que el cron
+llegara a tocarlos, y siguieron así todo el fin de semana sin que nadie los mandara —
+hasta que Pancho los envió a mano hoy. Es el propio diseño (cola por `approved_at`,
+el más antiguo primero) funcionando bien: lo que no cabe un día espera al siguiente
+laborable. Aquí "el siguiente laborable" cayó después de un fin de semana entero.
