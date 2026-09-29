@@ -434,6 +434,20 @@ a 1 o 2 leads por ronda: casi todas las fichas de Treatwell en Valencia con más
 reseñas ya están revisadas, y lo que queda en su mayoría no tiene web ni correo. Para las
 12 que faltan, buscar webs por barrio (ver arriba) en vez de volver al listado.
 
+**Fisioterapia · Sevilla capital (oferta de web) — pasada del 28/09/2026, pedido cubierto
+(22 de 20).** La zona no está agotada, pero lo que queda sin mirar tiene menos reseñas. Se
+cayeron sobre todo webs bien cuidadas **sin un fallo concreto que señalar** (seis), centros
+multiespecialidad o de terapias holísticas, y centros con muchas reseñas pero sin web (y
+por tanto sin correo). Comprobaciones que sí dieron fallo demostrable para la oferta de web:
+
+- Texto de plantilla sin cambiar en la portada ("Lorem ipsum", "Click edit button to
+  change this text", "Añade aquí tu texto de cabecera", testimonios firmados "Designer").
+- La caja de reseñas incrustada ("Basado en N reseñas") congelada muy por debajo del
+  recuento real de Google.
+- El dominio del correo del aviso legal: uno antiguo puede estar ya en manos de otro.
+- **Antes de dar un dominio por muerto, probar también por http**: alguno solo redirige
+  por http y falla por https.
+
 ## Cuánto cuesta una tanda
 
 Verificar un lead de verdad son 2-3 páginas cargadas: su web, sus reseñas, y a veces una
@@ -476,6 +490,12 @@ Al citarlo, la fuente honesta es "Autor · Google (vía sportmedicine.es), <fech
 la reseña es de Google pero no se ha leído en Google. `holisticcenter.es` y
 `fisioterapiavigo.es` replican la misma ficha pero **sin** los textos: solo nota y
 recuento, no valen para la puerta.
+
+**En una capital, `sportmedicine.es/<provincia>/<ciudad>/` es además el mejor censo de
+fisioterapia** (366 centros en Sevilla, con recuento de reseñas), y cada ficha da la web del
+centro. Hallazgo del 28/09/2026. curl y WebFetch se cortan en ese sitio; desde una pestaña
+del navegador ya abierta en sportmedicine, `fetch()` + `DOMParser` lee decenas de fichas
+de una vez.
 
 **`fisioterapia.io/listados/fisioterapeutas/<provincia>/<ciudad>/` es el mejor censo de un
 pueblo.** No trae reseñas literales, pero lista todos los centros con dirección, nota y
