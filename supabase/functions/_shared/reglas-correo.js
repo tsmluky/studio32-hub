@@ -119,3 +119,78 @@ export function revisarCorreo(correo) {
 
   return problemas
 }
+
+// ---------------------------------------------------------------------------------------
+// Pauta de estilo del 02/10/2026: evidencia, fricción, solución, pregunta.
+//
+// A diferencia de `revisarCorreo`, esto NO para el envío. Son avisos: lo enseñan el
+// importador, "Reescribir con IA" y `npm run outreach:revisar`, y decide quien revisa.
+// Entran como aviso y no como puerta porque no se han calibrado contra la cola real, y una
+// puerta nueva puede dejar en `fallido` borradores que ya estaban aprobados con la pauta
+// anterior. Cuando se hayan medido (`npm run outreach:revisar -- todos`), las que no den
+// falsos positivos suben a `revisarCorreo`, como se hizo el 24/09 con los 35 enviados.
+// ---------------------------------------------------------------------------------------
+
+/** Palabra o expresión entera: `\b` no sirve con tildes, así que se mira que no la rodeen letras. */
+const palabra = (alternativas) => new RegExp(`(?<![\\p{L}])(?:${alternativas})(?![\\p{L}])`, 'iu')
+
+const AVISOS_DE_ESTILO = [
+  // Una sola oferta. Las webs, el SEO y lo demás se enseñan cuando contestan, no en el primer correo.
+  [palabra('aparte del asistente|además del asistente|también hacemos|también montamos|SEO|marketing|agentes? de voz'),
+    'ofrece algo más que la oferta de la campaña: en el primer correo va un solo producto'],
+  [palabra('potenciar|potenciamos|revolucion\\p{L}*|transformar|transformamos|siguiente nivel|maximiz\\p{L}*|exponencial\\p{L}*|innovador\\p{L}*|última generación|omnicanal|funnel|sinergias?|conversiones'),
+    'usa lenguaje de agencia o de marketing'],
+  [palabra('API|webhooks?|Supabase|Twilio|LLM|REST|infraestructura'),
+    'habla de la técnica: a la clínica le interesa el resultado, no cómo está hecho'],
+  [palabra('IA|inteligencia artificial'),
+    'vende "IA": la clínica compra respuestas rápidas y citas, y de IA se habla si preguntan'],
+  // Lo que no podemos saber desde fuera. Se describe lo que se ve, no lo que pasa por dentro.
+  [palabra('estáis perdiendo|perdéis (pacientes|citas|clientes|dinero)|se os escapan|se os pasan|recepción (está )?saturada|no (se )?contestáis|no (se )?respondéis|hasta el día siguiente|los pacientes esperan|nadie (contesta|responde|atiende)|seguro que (se|os|hay|tenéis|estáis)'),
+    'afirma algo que no se puede comprobar desde fuera: describe lo que se ve, no lo que pasa por dentro'],
+  [palabra('anticuad\\p{L}*|obsolet\\p{L}*|ineficien\\p{L}*|gestionáis mal|estáis gestionando mal|vuestra web (está mal|es mala)'),
+    'critica al negocio: plantéalo como una oportunidad'],
+  // Cumplidos que valdrían para cualquier clínica; solo valen pegados a un dato concreto.
+  [palabra('se nota que (cuidáis|os importa)|se nota vuestr\\p{L}*|cuidáis (mucho|tanto)|clínica increíble|llamado (mucho )?la atención|nos encanta|gran reputación|compromiso con la excelencia|enfoque profesional'),
+    'tiene un cumplido que valdría para cualquier clínica: tiene que ir con un dato concreto'],
+  [palabra('reunión|videollamada|demo|30 minutos|agendar'),
+    'pide una reunión, una llamada o una demo: el primer correo solo pide permiso para enseñarlo'],
+]
+
+const AVISOS_DE_ASUNTO = [
+  [palabra('propuesta|colaboración|oportunidad|oferta|gratis|automatiza\\p{L}*|aumenta\\p{L}*|revoluciona\\p{L}*|IA'), 'suena a campaña'],
+]
+
+/**
+ * Devuelve los avisos de estilo; vacía si el correo sigue la pauta. No son motivo para parar
+ * el envío.
+ * @param {{ subject?: string, body?: string }} correo
+ * @returns {string[]}
+ */
+export function revisarEstilo(correo) {
+  const avisos = []
+  const asunto = String(correo.subject ?? '').trim()
+  const cuerpo = String(correo.body ?? '').replace(/\r\n/g, '\n').trim()
+  if (!cuerpo) return avisos
+
+  for (const [patron, motivo] of AVISOS_DE_ASUNTO) if (patron.test(asunto)) avisos.push(`El asunto ${motivo}.`)
+
+  const propio = sinCitas(cuerpo)
+  for (const [patron, motivo] of AVISOS_DE_ESTILO) if (patron.test(propio)) avisos.push(`El cuerpo ${motivo}.`)
+
+  // El destinatario tiene que poder entenderlo en unos quince segundos.
+  const palabras = cuerpo.replace(DESPEDIDA, '').split(/\s+/).filter(Boolean).length
+  if (palabras < 80 || palabras > 160) avisos.push(`Tiene ${palabras} palabras, y la pauta es de 100 a 140 (se admite de 80 a 160).`)
+
+  // Cuatro párrafos: personalización, fricción, solución, pregunta. Más es que cabe de todo.
+  const parrafos = cuerpo.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean)
+  const contenido = parrafos.at(-1) === DESPEDIDA ? parrafos.slice(0, -1) : parrafos
+  if (contenido.length > 4) avisos.push(`Tiene ${contenido.length} párrafos antes de la despedida: una personalización, una fricción, una solución y una pregunta.`)
+
+  // El cierre es una pregunta corta, y la única.
+  const cierre = contenido.at(-1) ?? ''
+  if (!/\?\s*$/.test(cierre)) avisos.push('El último párrafo no es una pregunta: el cierre es una sola pregunta de sí o no.')
+  else if (cierre.split(/\s+/).length > 30) avisos.push('El cierre es largo: una pregunta corta, que se conteste con un sí.')
+  if ((propio.match(/\?/g) ?? []).length > 1) avisos.push('Tiene más de una pregunta: el cierre es una sola.')
+
+  return avisos
+}

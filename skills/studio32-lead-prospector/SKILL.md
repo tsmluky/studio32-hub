@@ -119,6 +119,9 @@ Un lead **no entra en el JSON** si le falta cualquiera de estas:
 - `detalle_ancla` con fuente real — sin esto el correo es plantilla
 - Al menos un elogio recurrente **con cita literal** — es de donde sale el tono
 - Coherencia: si `confianza.nivel` es `bajo`, dilo, no lo maquilles
+- Una fricción **que hayas visto tú** en el camino a pedir cita (reserva que no se cierra
+  al momento, formulario, solo teléfono…), con su fuente. Si no hay ninguna concreta y
+  observada, no se inventa una: el lead no sube
 - La frase que conecta el problema con la `oferta` de la campaña — sin ella el correo
   diagnostica y no vende nada (ver punto 3)
 - Un solo tratamiento, vosotros de principio a fin — revísalo al terminar, no solo al
@@ -142,31 +145,46 @@ cliente y el remitente cambia en ese momento: si el nombre viniera en el cuerpo,
 un correo que se presenta como quien no es. **No escribas saludo, ni nombre, ni el
 estudio, ni la web.**
 
-**La estructura, acordada con el equipo el 15/09/2026 y ampliada el 24/09/2026.** Cinco
-partes, en este orden, en cuatro párrafos (1 y 2 van juntos):
+**La estructura, pauta del 02/10/2026** (sustituye a la del 15/09, ampliada el 24/09):
+**evidencia → fricción → solución → pregunta.** Cuatro partes, cuatro párrafos y la
+despedida. Una personalización, una fricción, una solución y una pregunta: se investiga
+mucho y se escribe poco, y lo que sobre se queda en la huella. Las reglas completas, la
+jerarquía de evidencias y los ejemplos están en `references/outreach-guidelines.md`; léelo
+antes de redactar.
 
-1. **Lo bueno que has visto de ellos** — el detalle ancla. Tiene que ser concreto y
-   comprobable: una frase literal de su web, un paciente que nombra al doctor, años de
-   relación. "Me gusta el enfoque cercano" **no vale**: lo dice la web de casi cualquier
-   clínica y se nota enseguida que es un cumplido de plantilla.
-2. **Lo que falla** — el hueco, contado con lo que has comprobado (solo teléfono en
-   horario, sin reserva online, WhatsApp que es un enlace de chat). **Nada de
-   suposiciones sobre cómo trabajan por dentro** ("seguro que hay mensajes que tardan en
-   responderse"): se les cuenta lo que se ve y la conclusión la sacan ellos.
-3. **Que eso es lo que montáis** — la frase de oferta, en primera persona ("Es justo lo
-   que montamos: …"). Ver abajo.
-4. **Los otros servicios, en una sola frase** — "Aparte del asistente, también hacemos…":
-   webs con reserva online, la ficha de Google o el correo con el nombre del negocio. Si
-   la huella tiene un hueco que encaje, la frase se liga a él y ese hueco entra en
-   `evidencia` ("…webs con reserva propia, para que la cita no tenga que pasar por
-   Doctoralia"; "…y con pacientes que llegan hablando inglés, tener la vuestra también en
-   inglés puede ayudar"). Si no hay ninguno, se queda genérica ("…por si en algún momento
-   os lo planteáis"). Nunca una lista, y nunca en tono de reproche: la oferta principal
-   sigue siendo la del párrafo anterior.
-5. **Cierre, en su propio párrafo** — una sola pregunta de sí o no que nombra el
-   asistente, para que no se lea como si hablara de las webs: "¿Os enseño cómo
-   funcionaría el asistente en vuestra clínica?" (o "vuestro centro"). Ni "podéis
-   escribirme" (les deja el trabajo a ellos) ni "3 mejoras concretas".
+1. **Personalización: UNA evidencia** — el detalle ancla, o el elogio, que más
+   difícilmente valdría para otra clínica: una reseña llamativa, un tratamiento concreto que
+   citan, miembros del equipo nombrados, una especialización, que el doctor forma a otros
+   profesionales, tecnología, trayectoria, nº y nota de reseñas (aproximadamente en ese
+   orden). Concreta y comprobable, 1-2 frases, con su dato. "Me gusta el enfoque cercano"
+   **no vale**: lo dice la web de casi cualquier clínica. Y no una lista de todo lo
+   encontrado: una sola.
+2. **Fricción: UNA, la que tú has visto** — contada desde lo que encuentra el paciente al
+   pedir cita ("Sin embargo, al pedir cita, encuentra teléfono, WhatsApp y correo, pero no
+   una forma de dejar la cita cerrada en ese momento"). Prioridad: reserva que no se puede
+   cerrar al momento, necesidad de una persona para saber la disponibilidad, nada fuera de
+   horario, demasiados pasos, formulario sin respuesta inmediata. **Observación, no
+   suposición**: se cuenta lo que se ve, nunca cómo trabajan por dentro ("seguro que hay
+   mensajes que tardan", "estáis perdiendo pacientes", "la recepción está saturada"). Si no
+   sabes si el WhatsApp contesta solo, no digas que no lo hace: di que no aparece una forma
+   de consultar la disponibilidad y dejar la cita cerrada. El correo tiene que seguir siendo
+   razonable aunque ya lo lleven bien por dentro, y nunca critica su web ni su sistema.
+3. **Solución — la frase de oferta**, en primera persona y ligada a ESA fricción: "Es justo
+   lo que montamos: …". Se dice solo lo que responde a la fricción (agenda real y cita
+   cerrada; respuesta a cualquier hora; conversación por WhatsApp sin pasos; preguntas
+   frecuentes, disponibilidad y recordatorio) y nunca la lista de funciones. Sin técnica
+   (API, webhook, LLM) y sin "IA" como argumento. Empieza por "Es justo lo que montamos en
+   Studio32:". Ver abajo.
+4. **Pregunta, en su propio párrafo** — una sola, de sí o no: "¿Os enseño cómo funcionaría
+   aplicado a vuestra clínica?" (o "vuestro centro"; también "¿Os enseño cómo quedaría en
+   vuestro caso?"). Ni "podéis escribirme" (les deja el trabajo a ellos), ni "3 mejoras
+   concretas", ni reunión, llamada o demo.
+
+**Un solo producto.** Desde el 02/10 ya no hay frase de "otros servicios": no se menciona
+ninguna web, SEO, ficha de Google, correo con dominio ni marketing. Se enseñan cuando
+contestan. Si la `oferta` de la campaña es una web, esa web es el único producto y la
+fricción tiene que ser la que esa web arregla; la estructura es la misma. **100-140
+palabras** sin la despedida (se admite de 80 a 160).
 
 **La tipografía, de persona** (24/09/2026): comillas rectas " " para citar, nunca « » ni
 “ ”; tres puntos y no el carácter …; y ninguna raya (— o –) en el correo, ni en el asunto:
@@ -174,9 +192,11 @@ coma, dos puntos o punto. Son lo primero que delata un texto generado. `outreach
 revisa cada correo antes de enviarlo (`supabase/functions/_shared/reglas-correo.js`) y
 para el que no cumpla.
 
-**El asunto**: corto, llano y con el nombre del negocio — "Pedir cita en X", "Las citas
-en X", "El WhatsApp de X". Lo que suena a generado es el asunto ingenioso o recargado, no
-el personalizado. Tampoco el genérico "Os escribimos de Studio32", que no dice de qué va.
+**El asunto**: corto y llano, sin parecer campaña — "Sobre las citas de X", "Pedir cita en
+X", "Las citas en X", "El WhatsApp de X", "Consulta sobre X", "Una idea para vuestra
+clínica", "Una idea sobre vuestra agenda", "Una cosa que vi en vuestra web". Nunca
+"Propuesta", "Oferta", promesas ni emojis. Tampoco el genérico "Os escribimos de Studio32",
+que no dice de qué va.
 
 **Lo que el agente NO hace y por tanto no se ofrece nunca:** atender llamadas de
 teléfono. Es solo WhatsApp. **Tampoco se habla de "un ejemplo real" ni de "clínicas
@@ -215,20 +235,22 @@ empieces todos por "Vi…".
 
 Correo completo de referencia (lo que escribe la skill; la presentación y la firma no):
 
-> He visto vuestra web y me gusta cómo os presentáis: "no somos una franquicia, somos una
-> clínica familiar". Se nota en las reseñas, donde los pacientes nombran a vuestro equipo
-> uno por uno. Donde no se ve ese mismo trato es al pedir cita: solo hay teléfono y un
-> enlace de WhatsApp en el que hay que escribir y esperar a que alguien conteste.
+> Tres de las reseñas que tenéis en Google nombran a Lucía por cómo explica cada ejercicio,
+> y una paciente cuenta que salió de la primera sesión sabiendo exactamente qué tenía que
+> hacer en casa. Se ve que ese cuidado en explicar es una seña de la casa.
 >
-> Es justo lo que montamos: un asistente de WhatsApp que conoce vuestra agenda, da la
-> cita al momento a cualquier hora y manda un recordatorio antes para que no se olvide.
+> Sin embargo, el botón de pedir cita de la web termina en un formulario de contacto, no en
+> una agenda donde elegir hora.
 >
-> Aparte del asistente, también hacemos webs con reserva de cita online, por si en algún
-> momento os lo planteáis.
+> Es justo lo que montamos en Studio32: un asistente en vuestro WhatsApp que habla con el paciente,
+> mira la agenda real y le deja la cita cerrada ahí mismo, sin formulario de por medio.
 >
-> ¿Os enseño cómo funcionaría el asistente en vuestra clínica?
+> ¿Os enseño cómo quedaría en vuestro caso?
 >
 > Un saludo y gracias por vuestro tiempo,
+>
+> (Negocio ficticio. Una personalización, una fricción, una solución y una pregunta; sin
+> otros servicios.)
 
 Un lead sin esa frase **no sube en modo C**: aplica igual que la puerta del punto 2.
 
@@ -298,9 +320,10 @@ a medias.
       },
       "message": {
         "subject": "Asunto corto y llano con el nombre del negocio: Pedir cita en X",
-        "body": "80-110 palabras. Sin saludo ni presentacion (los pone el envio). Termina en \"Un saludo y gracias por vuestro tiempo,\" SIN nombre.",
+        "body": "100-140 palabras: personalizacion, friccion, solucion, pregunta. Sin saludo ni presentacion (los pone el envio). Termina en \"Un saludo y gracias por vuestro tiempo,\" SIN nombre.",
         "evidencia": [
-          { "afirmacion": "La frase del correo que afirma algo", "cita": "La cita que la sostiene", "fuente": "Autor · Google" }
+          { "rol": "personalizacion", "afirmacion": "La frase del correo que afirma algo del negocio", "cita": "La cita que la sostiene", "fuente": "Autor · Google", "confianza": 0.95 },
+          { "rol": "friccion", "afirmacion": "Lo que se ve al pedir cita", "cita": "Lo que dice la web o la página de contacto", "fuente": "Web · página de contacto", "confianza": 0.9, "angulo": "cita cerrada desde WhatsApp" }
         ]
       }
     }
@@ -319,6 +342,14 @@ enganchan a ella y pasa de `pedida` a `abierta`. Cuando el encargo venga de
 **`evidencia` es lo que hace revisable el correo.** Cada afirmación del cuerpo con su
 cita literal y su fuente. Es lo que se enseña en el Hub debajo del correo para que quien
 aprueba lo compruebe en dos segundos en vez de fiarse.
+
+**Y desde el 02/10 dice por qué se escribió ese correo.** Los dos elementos que lo sostienen
+llevan `rol`: `personalizacion` (la evidencia elegida) y `friccion` (lo que se vio al pedir
+cita, con `angulo`, la capacidad del asistente que le responde: "reserva directa desde
+WhatsApp"). Los dos llevan `confianza` de 0 a 1, lo seguro que estás de haberlo verificado.
+**Por debajo de 0,8 no es un hecho: reformúlalo como lo que sí se ve, o no lo uses.** Es el
+registro que permite auditar el correo, detectar una alucinación y regenerarlo. El Hub ya lo
+guarda (la columna es jsonb) pero todavía no lo enseña.
 
 **Las quejas nunca se citan en el correo.** Van en la huella porque explican el lead y
 sirven para una llamada, pero echárselas en cara al prospecto lo pierde.
@@ -357,7 +388,7 @@ Para cada lead del Top 3, genera mensajes en estos formatos:
 | Canal | Longitud objetivo |
 |---|---|
 | WhatsApp / DM Instagram — **corto** | 2-3 líneas, 40-60 palabras |
-| Email frío — **medio** | 90-140 palabras, asunto + cuerpo |
+| Email frío — **medio** | 100-140 palabras, asunto + cuerpo |
 | Visita presencial / llamada — **guion** | 4-6 frases, hablado |
 
 **Reglas de redacción** (ver `references/outreach-guidelines.md` para detalle completo):

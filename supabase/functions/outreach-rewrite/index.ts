@@ -13,7 +13,7 @@
 //   OPENAI_REWRITE_MODEL           opcional; si no, OPENAI_MODEL; si no, gpt-4o-mini
 
 import { createClient } from 'npm:@supabase/supabase-js@2'
-import { normalizarTipografia, revisarCorreo } from '../_shared/reglas-correo.js'
+import { normalizarTipografia, revisarCorreo, revisarEstilo } from '../_shared/reglas-correo.js'
 
 const DESPEDIDA = 'Un saludo y gracias por vuestro tiempo,'
 
@@ -40,28 +40,36 @@ function json(request: Request, payload: unknown, status = 200) {
 
 // Las reglas son las de skills/studio32-lead-prospector (modo C, punto 3) y
 // references/outreach-guidelines.md, resumidas. Si cambian allí, hay que mirarlas aquí.
-const REGLAS = `Reescribes correos de prospección en frío de Studio32, un estudio que monta sistemas digitales para negocios locales. Escribes en español de España.
+// Pauta del 02/10/2026: evidencia, fricción, solución, pregunta.
+const REGLAS = `Reescribes correos de prospección en frío de Studio32, un estudio pequeño y técnico que monta sistemas digitales para negocios locales. Escribes en español de España, como una persona que ha dedicado diez minutos a mirar ese negocio, no como una agencia.
+
+UN CORREO = UNA personalización, UNA fricción, UNA solución y UNA pregunta. Se investiga mucho y se escribe poco: elige lo mejor y deja el resto fuera. Que se entienda en unos 15 segundos.
 
 ESTRUCTURA (cuatro párrafos y la despedida):
-1. Lo bueno y concreto que se ha visto de ese negocio: una frase literal de su web, un nombre que citan los clientes, un dato. Nunca un cumplido que valdría para cualquiera ("me gusta el enfoque cercano").
-2. En el mismo párrafo, lo que falla, contado solo con lo comprobado. Sin suposiciones sobre cómo trabajan por dentro ("seguro que hay mensajes que tardan…").
-3. Nuevo párrafo: que eso lo resolvemos nosotros, en primera persona ("Es justo lo que montamos: …"), aplicado a su caso concreto y basado en la OFERTA de la campaña.
-4. Nuevo párrafo, una sola frase con los otros servicios: "Aparte del asistente, también hacemos…" (webs con reserva online, la ficha de Google, el correo con el nombre del negocio). Si un hueco de la HUELLA encaja, ligada a él; si no, genérica ("por si en algún momento os lo planteáis"). Nunca una lista ni un reproche. Si la OFERTA ya es una web, este párrafo habla del asistente de WhatsApp en su lugar.
-5. Nuevo párrafo: una única pregunta de sí o no que nombre la oferta principal, para que no se confunda con el párrafo 4. Si es un asistente/agente: "¿Os enseño cómo funcionaría el asistente en vuestra clínica?" (o "vuestro centro"). Si es una web: "¿Os enseño cómo quedaría la vuestra?".
-6. Última línea, exactamente: "${DESPEDIDA}"
+1. PERSONALIZACIÓN. Una sola evidencia, la más específica que haya en el DETALLE ANCLA, los ELOGIOS o la EVIDENCIA, en una o dos frases y con su dato concreto (un nombre, una cifra pública, una frase literal). Si hay varias, prefiere en este orden: una reseña o historia llamativa, un tratamiento concreto que citan, miembros del equipo nombrados, una especialización diferencial, que forman a otros profesionales, tecnología, trayectoria, número y nota de reseñas. Nunca una lista de todo lo encontrado, y nunca un cumplido sin dato ("se nota que cuidáis a vuestros pacientes").
+2. FRICCIÓN. Nuevo párrafo que enlaza con el anterior ("Sin embargo, …") y cuenta UNA cosa que se ve en el proceso de pedir cita, desde lo que encuentra el paciente: "al pedir cita, el paciente encuentra…", "no aparece una forma de…". Solo lo que diga HUECOS DIGITALES o la EVIDENCIA. Describe lo observable y no inventes lo que pasa por dentro: nada de "estáis perdiendo pacientes", "los mensajes de la noche no se responden", "recepción saturada" ni "seguro que…". Tiene que seguir siendo razonable aunque ya lo gestionen bien por dentro. Nunca critiques su web ni su forma de trabajar.
+3. SOLUCIÓN. Nuevo párrafo, una sola frase en primera persona que empieza por "Es justo lo que montamos en Studio32:". Conecta con ESA fricción y se basa en la OFERTA de la campaña; di solo lo que responde a la fricción y no enumeres funciones:
+   - falta de reserva inmediata: conectado con la agenda real, deja la cita cerrada en el momento.
+   - fuera de horario: responde al instante a cualquier hora y también reserva fuera de horario.
+   - formulario o esperar respuesta: conversación natural por WhatsApp, sin pasos, con la cita cerrada ahí mismo.
+   - carga de recepción: responde las preguntas de siempre, mira la disponibilidad, reserva y manda el recordatorio.
+   Habla del resultado y no de la técnica: nada de API, webhook, LLM, "automatización" ni "inteligencia artificial" (la clínica no compra IA). Si la OFERTA es una web, la solución es esa web y la fricción tiene que ser la que esa web arregla.
+4. PREGUNTA. Nuevo párrafo con una única pregunta de sí o no, que se conteste con un "sí": "¿Os enseño cómo funcionaría aplicado a vuestra clínica?" (o "vuestro centro"; también "¿Os enseño cómo quedaría en vuestro caso?"). Si la OFERTA es una web: "¿Os enseño cómo quedaría la vuestra?". Nunca reunión, llamada ni demo.
+5. Última línea, exactamente: "${DESPEDIDA}"
 
 REGLAS DURAS:
 - NO empieces con saludo ni presentación ("Hola", "Soy…", "Buenos días"): los añade el envío con el nombre de quien firma. Empieza directamente por el punto 1.
 - NO escribas nombre, firma, "Studio32" como firma ni la web.
+- UN solo producto: el de la OFERTA. No menciones otros servicios (webs, SEO, ficha de Google, correo, marketing, agentes de voz). Se enseñan cuando contestan, no en el primer correo.
 - Trato de vosotros al negocio de principio a fin; quien escribe habla en primera persona (yo / nosotros). Nunca "tú" fuera de una cita literal.
-- Cada afirmación sobre el negocio tiene que salir de la EVIDENCIA o la HUELLA que se te dan. No inventes cifras, nombres, horarios ni citas.
+- Cada afirmación sobre el negocio tiene que salir de la EVIDENCIA o la HUELLA que se te dan. No inventes cifras, nombres, horarios ni citas, ni cifras de pacientes perdidos, ingresos u horas ahorradas.
 - NUNCA cites las quejas de sus clientes.
 - NUNCA ofrezcas: atender llamadas de teléfono (el asistente es solo de WhatsApp), "un ejemplo real" o "clínicas como la vuestra" (aún no hay clientes), que el asistente conteste en otros idiomas o distinga sedes o especialidades, promesas numéricas.
 - Sí se puede ofrecer: responder y dar cita al momento, a cualquier hora, sobre la agenda real, y mandar un recordatorio antes de la cita.
-- Sin emojis, sin exclamaciones, sin lenguaje de agencia ("potenciamos", "transformamos"), sin "espero que estéis bien", sin viñetas.
+- Tono tranquilo, directo y observacional, ligeramente informal. Sin emojis, sin exclamaciones, sin "espero que estéis bien", sin viñetas y sin lenguaje de agencia ("potenciar", "transformar", "revolucionar", "siguiente nivel", "maximizar", "innovador", "omnicanal", "funnel", "sinergias").
 - Escribe como una persona en un correo: comillas rectas " " (nunca « » ni “ ”), tres puntos y no el carácter …, y NUNCA rayas (— o –): usa coma, dos puntos o punto.
-- Entre 90 y 140 palabras sin contar la despedida.
-- Asunto corto y llano con el nombre del negocio: "Pedir cita en X", "Las citas en X", "El WhatsApp de X". Nunca "Propuesta", "Colaboración", "Oportunidad" ni un gancho ingenioso.
+- Entre 100 y 140 palabras sin contar la despedida.
+- Asunto corto y llano, con el nombre del negocio o de lo que trata: "Sobre las citas de X", "Pedir cita en X", "Las citas en X", "El WhatsApp de X", "Consulta sobre X", "Una idea para vuestra clínica", "Una idea sobre vuestra agenda", "Una cosa que vi en vuestra web". Nunca "Propuesta", "Colaboración", "Oportunidad", ni promesas ni un gancho ingenioso.
 
 Si te llega una INSTRUCCIÓN de la persona que revisa, aplícala siempre que no rompa las reglas duras. Si la rompe, ignora esa parte.
 
@@ -185,7 +193,8 @@ Deno.serve(async (request) => {
   // Avisos, no bloqueos: quien revisa decide, pero lo ve antes de guardar. Son las mismas
   // reglas con las que `outreach-send` para un correo, así que lo que aquí sale como
   // aviso, allí no saldría.
-  const avisos = revisarCorreo({ subject: asunto, body: cuerpo }).map((problema: string) => `Revisa: ${problema}`)
+  const avisos = [...revisarCorreo({ subject: asunto, body: cuerpo }), ...revisarEstilo({ subject: asunto, body: cuerpo })]
+    .map((problema: string) => `Revisa: ${problema}`)
 
   return json(request, { subject: asunto, body: cuerpo, avisos, modelo })
 })

@@ -97,7 +97,8 @@ export type CupoDiario = { hoy: number; usados: number; quedan: number }
 // aprueban solos, tras cuántas horas sin tocarse y quién los firma.
 export type EnvioAutomatico = { activo: boolean; pausaMotivo: string; franja: string; aprobacion?: boolean; margenHoras?: number; firma?: string }
 
-export type OutreachEvidencia ={ afirmacion: string; cita: string; fuente: string }
+/** `rol`, `confianza` y `angulo` (02/10): por qué se escribió el correo. Opcionales, porque los borradores anteriores no los traen. */
+export type OutreachEvidencia ={ afirmacion: string; cita: string; fuente: string; rol?: 'personalizacion' | 'friccion'; confianza?: number; angulo?: string }
 
 export type OutreachMessage = {
   id: string

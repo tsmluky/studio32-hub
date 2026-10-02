@@ -664,6 +664,9 @@ justo lo que montamos" y a colar alguna suposición suave; los avisos no lo dete
 
 ## 2026-09-24 · El correo menciona los otros servicios, en una frase y después de la oferta
 
+> **Sustituida el 02/10:** la frase de otros servicios se quitó (ver la entrada del 02/10 al
+> final). Lo del asunto con el nombre del negocio sigue vigente.
+
 Pancho quería que el correo dijera que Studio32 hace más cosas que el asistente, sin
 perder naturalidad. Se descartaron dos formas:
 
@@ -805,3 +808,66 @@ llegara a tocarlos, y siguieron así todo el fin de semana sin que nadie los man
 hasta que Pancho los envió a mano hoy. Es el propio diseño (cola por `approved_at`,
 el más antiguo primero) funcionando bien: lo que no cabe un día espera al siguiente
 laborable. Aquí "el siguiente laborable" cayó después de un fin de semana entero.
+
+## 2026-10-02 · Pauta evidencia → fricción → solución → pregunta, y adiós a "otros servicios"
+
+Pancho trajo una especificación que Codex redactó para mejorar el texto, el tono y la
+captación de los correos. Se adopta como pauta del primer contacto. Lo esencial: **una
+personalización, una fricción, una solución y una pregunta**; se investiga mucho y se
+escribe poco; el primer correo no explica Studio32 ni vende un catálogo, solo busca que
+conteste con un "sí".
+
+**Qué cambia en el correo:** cuatro párrafos (la evidencia más específica, una fricción
+observada al pedir cita, "Es justo lo que montamos: …" ligada a esa fricción, y "¿Os enseño
+cómo funcionaría aplicado a vuestra clínica?"), de 100 a 140 palabras (antes 90-140). La
+fricción se cuenta desde lo que encuentra el paciente y solo con lo observable: nunca
+"estáis perdiendo pacientes" ni lo que pasa por dentro, para que el correo siga valiendo si
+ya lo gestionan bien. Sin técnica, sin "IA" como argumento, sin lenguaje de agencia. Un lead
+sin ninguna fricción vista **no sube**, en vez de inventar una.
+
+**Revierte dos cosas del 24/09, a propósito (Pancho lo confirmó el 02/10: "déjalo como dijo Codex"):**
+
+- **La frase "Aparte del asistente, también hacemos…" desaparece.** Pancho la había pedido
+  el 24/09. La especificación sostiene que mezclar webs, SEO y demás en el primer contacto
+  debilita la propuesta: la clínica deja de leer "fricción concreta con solución específica"
+  y lee "agencia que hace muchas cosas". Es una hipótesis, no una medida; el único
+  precedente a favor de la web es Centro COI. Si las respuestas dicen lo contrario, se
+  vuelve. Si la oferta de la campaña es ya una web, esa es el único producto.
+- **Asuntos.** Valen los de la especificación: "Sobre las citas de X", "Consulta sobre X",
+  "El WhatsApp de X", "Una idea para vuestra clínica", "Una idea sobre vuestra agenda", "Una
+  cosa que vi en vuestra web". El 24/09 se había exigido el nombre del negocio por sonar a
+  generado el asunto ingenioso; ahora se admite curiosidad moderada. Siguen vetados
+  "Propuesta", "Oferta", promesas y emojis.
+
+**Nuevo y sin migración:** cada `evidencia` puede llevar `rol` (`personalizacion` |
+`friccion`), `confianza` (0 a 1) y, en la fricción, `angulo`. Es el registro de por qué se
+escribió el correo (la columna es jsonb; los borradores viejos no lo traen). Bajo 0,8 no es
+un hecho. El Hub todavía no lo enseña.
+
+**Los avisos de estilo entran como aviso y no como puerta.** `revisarEstilo`, en
+`_shared/reglas-correo.js`, comprueba lo de la pauta que sí es comprobable (más de un
+producto, lenguaje de agencia, jerga técnica, "IA", afirmaciones que no se pueden verificar
+desde fuera, cumplidos de plantilla, reunión/demo, longitud, más de cuatro párrafos, cierre
+que no es una pregunta única). Lo enseñan el importador, "Reescribir con IA" y
+`npm run outreach:revisar` (que ahora cuenta cuántos incumple cada regla, para calibrar).
+**No para el envío**: una puerta nueva se aplica también a lo ya aprobado, y sin poder ver la
+cola real (este equipo no tiene `.env`) podía dejar `fallido` borradores buenos.
+
+**Hallazgo que conviene mirar:** la puerta de forma (`revisarCorreo`) deja pasar entero un
+correo que dice "estáis perdiendo pacientes", "inteligencia artificial", "API" y "agendar una
+reunión de 30 minutos"; solo comprueba la forma. Con la aprobación automática encendida,
+cualquier borrador que pase la forma sale a las 24 h aunque afirme lo que no sabe. Antes de
+subir reglas de `revisarEstilo` a puerta: `npm run outreach:revisar -- todos`, mirar cuáles
+no dan falsos positivos. Las candidatas obvias son las afirmaciones no verificables, el
+lenguaje de agencia y la jerga técnica.
+
+**Lo que no se tocó:** "Hola, soy X, de Studio32." sigue poniéndolo el envío (la
+especificación pone solo "Hola,"). La frase de solución es "Es justo lo que montamos en
+Studio32:", como en la especificación. El scoring interno opcional de la especificación (0-5 por criterio) no se
+implementó: lo cubren los avisos y la `confianza`.
+
+**Pendiente, y no hecho:** `outreach-rewrite` lleva el prompt nuevo en el repo pero **no se ha
+redesplegado**; mientras tanto "Reescribir con IA" sigue con el prompt de la estructura
+anterior. Los borradores en cola siguen en la estructura del 24/09 (con "otros servicios"):
+no se han reescrito. Antes de redesplegar, `git pull --rebase` y comparar `updated_at` de la
+función (lo que pasó el 24/09).

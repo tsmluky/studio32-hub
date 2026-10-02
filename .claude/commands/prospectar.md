@@ -128,23 +128,32 @@ Para los que pasaron la criba, y **como mucho 30**:
 - El cuerpo **no lleva saludo ni presentación** (empieza por lo que viste del negocio) y
   termina en "Un saludo y gracias por vuestro tiempo," **sin nombre**: el "Hola, soy…" y
   la firma los pone el envío con el nombre de quien apruebe.
-- La oferta va en primera persona ("Es justo lo que montamos: …"). **Nunca ofrezcas
-  llamadas de teléfono** (el agente es solo WhatsApp) ni "un ejemplo real".
-- Después de la oferta, **una sola frase con los otros servicios**, que empieza por
-  "Aparte del asistente, también hacemos…": webs con reserva online, la ficha de Google o
-  el correo con el nombre del negocio. Si la huella tiene un hueco que encaje (correo en
-  Gmail, reserva a través de Doctoralia, web solo en español…), la frase se liga a él y
-  ese hueco va a `evidencia`. Si no, se queda genérica. Nunca una lista ni un reproche.
-- El cierre va en su propio párrafo y nombra el asistente, para que no se confunda con
-  las webs: "¿Os enseño cómo funcionaría el asistente en vuestra clínica?" (o "vuestro
-  centro").
-- El asunto es corto y llano, con el nombre del negocio: "Pedir cita en X", "Las citas en
-  X", "El WhatsApp de X". Nada de ganchos ni asuntos ingeniosos: eso es lo que suena a
-  generado.
+- **La pauta del 02/10: evidencia → fricción → solución → pregunta.** Cuatro párrafos, de
+  100 a 140 palabras. **Una** personalización (la evidencia más específica, no una lista),
+  **una** fricción que hayas visto tú al pedir cita (lo observable, nunca "estáis perdiendo
+  pacientes" ni lo que pasa por dentro), **una** solución y **una** pregunta. Se investiga
+  mucho y se escribe poco: lo demás se queda en la huella. Léelo entero en
+  `references/outreach-guidelines.md` → "Email frío". **Sin fricción vista, el lead no
+  sube**: no se inventa una.
+- La solución va en primera persona ("Es justo lo que montamos: …"), ligada a ESA
+  fricción y sin técnica ni "IA" como argumento. **Nunca ofrezcas llamadas de teléfono**
+  (el agente es solo WhatsApp) ni "un ejemplo real".
+- **Un solo producto.** Ya no hay frase de "otros servicios" (webs, ficha de Google, correo,
+  SEO): se enseñan cuando contestan. Si la oferta de la campaña es una web, esa es el único
+  producto.
+- El cierre va en su propio párrafo, una sola pregunta de sí o no: "¿Os enseño cómo
+  funcionaría aplicado a vuestra clínica?" (o "vuestro centro"). Nunca reunión ni demo.
+- La `evidencia` lleva `rol` (`personalizacion` / `friccion`), `confianza` (0 a 1; por
+  debajo de 0,8 no es un hecho) y, en la fricción, el `angulo`. Es el registro de por qué
+  se escribió ese correo.
+- El asunto es corto y llano, sin parecer campaña: "Sobre las citas de X", "Pedir cita en
+  X", "El WhatsApp de X", "Una idea para vuestra clínica", "Una cosa que vi en vuestra web".
+  Nunca "Propuesta" ni "Oferta", ni promesas.
 - **Tipografía de persona, no de máquina.** Comillas rectas " " para citar (nunca « » ni
   “ ”), tres puntos y no el carácter …, y **ninguna raya (— o –)**: coma, dos puntos o
   punto. El envío para cualquier correo con una raya, así que un borrador con ella no
-  llegará a salir. Antes de subir, `npm run outreach:revisar` dice qué pararía el envío.
+  llegará a salir. Al subir, el importador lista lo que el envío pararía y, aparte, lo que
+  se aparta de la pauta de estilo (eso son avisos: arréglalo si puedes, no para nada).
 
 **Sube en cuanto tengas 2 o 3 listos**, no al final:
 

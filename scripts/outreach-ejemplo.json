@@ -44,10 +44,11 @@
         "confianza": { "nivel": "alto", "no_encontrado": ["Lo que no se pudo verificar"] }
       },
       "message": {
-        "subject": "Asunto corto y concreto",
-        "body": "Cuerpo del correo, sin saludo: el 'Hola, soy…' lo pone el envío. Lo bueno que se vio de ellos, lo que falla, 'Es justo lo que montamos: …' y '¿Os enseño cómo funciona?'. No cita nunca las quejas.\n\nUn saludo y gracias por vuestro tiempo,",
+        "subject": "Sobre las citas de Clínica Ejemplo",
+        "body": "Cuerpo del correo, sin saludo: el 'Hola, soy…' lo pone el envío. Una personalización (lo bueno y concreto que se vio de ellos), una fricción (lo que se ve al pedir cita), 'Es justo lo que montamos: …' y '¿Os enseño cómo funcionaría aplicado a vuestra clínica?'. 100-140 palabras. No cita nunca las quejas ni ofrece otros servicios.\n\nUn saludo y gracias por vuestro tiempo,",
         "evidencia": [
-          { "afirmacion": "La frase del correo que hace una afirmación", "cita": "La cita literal que la sostiene.", "fuente": "Autor · directorio" }
+          { "rol": "personalizacion", "afirmacion": "La frase del correo que hace una afirmación", "cita": "La cita literal que la sostiene.", "fuente": "Autor · directorio", "confianza": 0.95 },
+          { "rol": "friccion", "afirmacion": "Lo que se ve al pedir cita", "cita": "Lo que dice la web o la página de contacto.", "fuente": "Web · página de contacto", "confianza": 0.9, "angulo": "cita cerrada desde WhatsApp" }
         ]
       }
     }

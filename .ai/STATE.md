@@ -1,6 +1,6 @@
 # Estado — studio32-hub
 
-> Se **sobrescribe**, no se acumula. Tope ~100 líneas. Última actualización: 2026-09-27.
+> Se **sobrescribe**, no se acumula. Tope ~100 líneas. Última actualización: 2026-10-02.
 
 ## Qué es
 
@@ -66,15 +66,15 @@ servidor. `outreach-rewrite` y `outreach-send` redesplegados ya sincronizados co
 **Antes de tocar prospección: `git pull --rebase` primero, siempre** (la regla de más
 abajo, que esto acaba de incumplir). Detalle completo en `DECISIONS.md`.
 
-**24/09: el correo menciona también los otros servicios, y el asunto lleva el nombre del
-negocio.** Tras la oferta, una frase "Aparte del asistente, también hacemos…" (webs con
-reserva, ficha de Google, correo con el nombre del negocio), ligada a un hueco de la huella
-si lo hay (entonces ese hueco va a `evidencia`). El cierre pasa a su propio párrafo y nombra
-el asistente: "¿Os enseño cómo funcionaría el asistente en vuestra clínica?". Asunto llano:
-"Pedir cita en X", "Las citas en X", "El WhatsApp de X" (antes todos decían "Os escribimos
-de Studio32"). Los 40 borradores en cola se reescribieron así; los 22 aprobados, los
-enviados y el fallido no se tocaron. `outreach-rewrite` redesplegada con la misma pauta.
-Porqué en `DECISIONS.md`.
+**02/10: pauta nueva del correo, evidencia → fricción → solución → pregunta.** Una
+personalización, una fricción vista al pedir cita, "Es justo lo que montamos: …" ligada a
+ella y "¿Os enseño cómo funcionaría aplicado a vuestra clínica?"; 100-140 palabras. **Ya no
+hay frase de "otros servicios"** (revierte la del 24/09): un solo producto, el de la oferta.
+Asunto llano, con curiosidad moderada ("Sobre las citas de X", "Una idea sobre vuestra agenda").
+Sin fricción vista, el lead no sube. `evidencia` lleva `rol`, `confianza` y `angulo`. Las
+reglas de estilo nuevas (`revisarEstilo`) son **avisos**, no puerta: no paran el envío.
+**Hecho solo en el repo: falta redesplegar `outreach-rewrite` y los borradores en cola siguen
+en la estructura del 24/09.** Porqué, y qué reglas conviene subir a puerta, en `DECISIONS.md`.
 
 **15/09: estructura nueva del correo, acordada con Juanma.** "Hola, soy X, de Studio32."
 (lo pone el envío) → algo bueno y concreto de ellos → lo que falla, comprobado → "Es

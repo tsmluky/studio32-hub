@@ -8,7 +8,7 @@
 // script es lo que pasaría al enviar.
 
 import { createClient } from '@supabase/supabase-js'
-import { normalizarTipografia, revisarCorreo } from '../supabase/functions/_shared/reglas-correo.js'
+import { normalizarTipografia, revisarCorreo, revisarEstilo } from '../supabase/functions/_shared/reglas-correo.js'
 
 const url = process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL
 const key = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -27,11 +27,18 @@ const { data, error } = await supabase
 if (error) throw error
 
 const cuenta = {}
+const avisosPorRegla = {}
 let conProblemas = 0
 for (const m of data) {
-  const problemas = revisarCorreo({ subject: normalizarTipografia(m.subject), body: normalizarTipografia(m.body), to_email: m.to_email })
-  cuenta[m.status] ??= { pasan: 0, no_pasan: 0 }
+  const correo = { subject: normalizarTipografia(m.subject), body: normalizarTipografia(m.body), to_email: m.to_email }
+  const problemas = revisarCorreo(correo)
+  // Los avisos de estilo (pauta del 02/10) no paran el envío: se cuentan aparte, y por regla,
+  // para ver cuáles dan falsos positivos antes de subirlas a puerta.
+  const avisos = revisarEstilo(correo)
+  cuenta[m.status] ??= { pasan: 0, no_pasan: 0, fuera_de_pauta: 0 }
   cuenta[m.status][problemas.length ? 'no_pasan' : 'pasan'] += 1
+  if (avisos.length) cuenta[m.status].fuera_de_pauta += 1
+  for (const a of avisos) avisosPorRegla[a] = (avisosPorRegla[a] ?? 0) + 1
   if (!problemas.length) continue
   conProblemas += 1
   console.log(`\n✗ [${m.status}] ${m.outreach_leads?.business_name ?? m.id}`)
@@ -40,4 +47,9 @@ for (const m of data) {
 
 console.log('\nResumen:')
 console.table(cuenta)
+const reglas = Object.entries(avisosPorRegla).sort((a, b) => b[1] - a[1])
+if (reglas.length) {
+  console.log('\nFuera de la pauta de estilo (avisos, no paran el envío), por regla:')
+  for (const [aviso, n] of reglas) console.log(`  ${String(n).padStart(4)}  ${aviso}`)
+}
 process.exitCode = conProblemas ? 1 : 0

@@ -50,34 +50,107 @@ No:
 
 > ¡Hola! Vi tu negocio y me encantó. En Studio32 ayudamos a negocios como el tuyo a crecer en digital con webs premium y automatización. ¿Hablamos? 🚀
 
-### Email frío — medio (90-140 palabras sin contar presentación ni firma)
+### Email frío — medio (100-140 palabras sin contar presentación ni firma)
 
-Estructura acordada con el equipo el 15/09/2026 y ampliada el 24/09/2026:
-1. Asunto: corto y llano, con el nombre del negocio ("Pedir cita en X", "Las citas en X",
-   "El WhatsApp de X"). Nunca "Propuesta", "Colaboración", "Oportunidad", ni un gancho
-   ingenioso: es lo que suena a generado.
-2. Presentación corta: "Hola, soy [nombre], de Studio32." — **la pone el envío**, no se
+Pauta del 02/10/2026. Sustituye a la del 15/09 y a su ampliación del 24/09 (la frase de
+"otros servicios" desaparece).
+
+> **EVIDENCIA → FRICCIÓN → SOLUCIÓN → PREGUNTA.** Una personalización, una fricción, una
+> solución y una pregunta. Se investiga mucho y se escribe poco.
+
+El primer correo no explica Studio32 ni vende todo lo que hacemos. Solo tiene que conseguir
+que la clínica piense "han mirado de verdad nuestro negocio, han visto algo concreto y lo que
+proponen podría tener sentido", y que conteste con un sí. Interés, relevancia, curiosidad,
+respuesta; nunca presentación, catálogo, precio y reunión. Se entiende en unos 15 segundos.
+
+1. **Asunto**: corto y llano, con curiosidad moderada y sin parecer campaña ("Sobre las
+   citas de X", "Pedir cita en X", "El WhatsApp de X", "Consulta sobre X", "Una idea para
+   vuestra clínica", "Una idea sobre vuestra agenda", "Una cosa que vi en vuestra web").
+   Nunca "Propuesta", "Colaboración", "Oportunidad", "Oferta especial", ni promesas, cifras
+   ni emojis.
+2. **Presentación** ("Hola, soy [nombre], de Studio32.") — **la pone el envío**, no se
    escribe en el borrador, porque el nombre es el de quien apruebe.
-3. Lo bueno que has visto de ellos: el detalle concreto y comprobable (1-2 frases). Un
-   cumplido que valdría para cualquier clínica ("me gusta el enfoque cercano") no cuenta.
-4. Lo que falla, contado con lo que se ve, sin suponer cómo trabajan por dentro (1-2 frases)
-5. La oferta que resuelve ESE problema, en primera persona: "Es justo lo que montamos: …"
-   (1 frase) — no es el cierre, es la venta. Sin esta frase el correo diagnostica y
-   nunca dice con qué se arregla, que es el fallo más caro porque los pasos 4 y 5 se
-   parecen y es fácil escribir el primero y saltar al cierre sin pasar por el segundo.
-6. Los otros servicios, en una frase: "Aparte del asistente, también hacemos…" (webs con
-   reserva online, ficha de Google, correo con el nombre del negocio). Ligada a un hueco
-   de la huella si lo hay, y ese hueco va a `evidencia`; genérica si no. Nunca una lista.
-7. Cierre, en su propio párrafo: una pregunta de sí o no que nombra el asistente ("¿Os
-   enseño cómo funcionaría el asistente en vuestra clínica?"), nunca reunión
-8. "Un saludo y gracias por vuestro tiempo," y la firma, que **también la pone el envío**
+3. **Personalización** (1-2 frases): UNA evidencia específica, la más difícil de reutilizar
+   en otra clínica, con su dato: un nombre, una cifra pública, una frase literal. No es
+   adular: sirve para que lean, demostrar que se ha mirado y enlazar con el problema.
+4. **Fricción** (1-2 frases): UNA cosa que se ve en el proceso de pedir cita, desde lo que
+   encuentra el paciente ("Sin embargo, al pedir cita…", "no aparece una forma de…"). Solo lo
+   comprobado, sin suponer cómo trabajan por dentro.
+5. **Solución** (1 frase): "Es justo lo que montamos en Studio32: …", en primera persona y ligada a ESA
+   fricción. No es el cierre, es la venta: sin ella el correo diagnostica y nunca dice con
+   qué se arregla.
+6. **Pregunta**, en su propio párrafo: una de sí o no, que se conteste con un "sí" ("¿Os
+   enseño cómo funcionaría aplicado a vuestra clínica?"; también "¿Os enseño cómo quedaría
+   en vuestro caso?"). Nunca reunión, llamada ni demo.
+7. "Un saludo y gracias por vuestro tiempo," y la firma, que **también la pone el envío**.
+
+**Qué personalización elegir.** Si hay varias, aproximadamente en este orden: una reseña o
+historia llamativa; un tratamiento concreto que citan los pacientes; miembros del equipo
+nombrados con cariño; una especialización diferencial; que el doctor forma a otros
+profesionales; tecnología o equipamiento; trayectoria o antigüedad; número y nota de reseñas.
+Una sola, no una lista. Un cumplido genérico ("se nota que cuidáis a vuestros pacientes",
+"tenéis una clínica increíble") solo vale pegado a un dato; mejor el dato.
+
+**Observación, inferencia, afirmación.** Se puede escribir lo que se ve ("la web muestra un
+teléfono y un formulario, pero no una agenda donde cerrar la cita") y, con medida, la
+inferencia razonable ("eso añade un paso entre el interés y la cita"). Nunca lo que no se
+sabe ("estáis perdiendo pacientes", "los mensajes de la noche no se responden hasta el día
+siguiente", "vuestra recepción está saturada"): podrían tener una secretaria remota,
+contestar siempre o usar otro sistema. El correo tiene que seguir siendo razonable aunque ya
+lo lleven bien por dentro. Y nunca se critica su web, su sistema ni su forma de trabajar:
+"al pedir cita, el paciente encuentra…", no "vuestra web está mal".
+
+**Qué solución para qué fricción.** Se dice solo lo que responde a la fricción; nunca la lista
+de funciones.
+
+| Lo que se ve | Lo que se dice |
+|---|---|
+| No hay forma de dejar la cita cerrada al momento | Conectado con la agenda real, mira la disponibilidad y deja la cita cerrada |
+| Nada que se pueda hacer fuera de horario | Responde al instante a cualquier hora y también reserva fuera de horario |
+| Formulario o "te contestamos" | Conversación natural por WhatsApp, sin pasos, con la cita cerrada ahí mismo |
+| Mucho que preguntar antes de reservar | Responde lo de siempre, mira la disponibilidad, reserva y manda el recordatorio |
+
+**Lo que no va en el primer correo:** otros servicios (webs, SEO, ficha de Google, correo,
+marketing, voz): se enseñan cuando contestan. "IA" como argumento: la clínica compra
+respuestas rápidas y citas, y de IA se habla si preguntan. Técnica (API, webhook, Supabase,
+LLM): el resultado, no la arquitectura. Cifras que no sean públicas (pacientes perdidos,
+ingresos, horas ahorradas). Lenguaje de agencia. Si la oferta de la campaña es otra (una web,
+por ejemplo), esa es la única, con su fricción: la estructura es la misma.
+
+**Antes de dar un correo por bueno:** ¿el primer párrafo valdría para otra clínica? (si sí,
+rehacerlo) ¿cada afirmación se puede comprobar? ¿la fricción es una y la ven ellos? ¿la
+solución responde a esa fricción? ¿hay más de un producto? ¿se entiende en 15 segundos? ¿se
+contesta con un "sí"?
 
 Lo que no se ofrece nunca, porque no se puede entregar: **atender llamadas de teléfono**
 (el agente es solo WhatsApp) y **"un ejemplo real" o "clínicas como la vuestra"** (no hay
 clientes todavía; lo que se enseña es una clínica de prueba).
 
-**Ejemplo de asunto bueno:** "Pedir cita en [Nombre]"
-**Ejemplo de asunto malo:** "Propuesta de colaboración para [Nombre]"
+**Ejemplo** (negocio ficticio; lo que escribe la skill, sin presentación ni firma):
+
+> Tenéis 91 reseñas con un 5 en Google, y llama la atención que los pacientes no hablan solo
+> del doctor, sino de todo el equipo. Marta, por ejemplo, empieza nombrando a Raquel, en
+> recepción, sigue por Ana, la higienista, y termina con el Dr. Alberto.
+>
+> Sin embargo, cuando alguien entra en vuestra web para pedir cita, encuentra teléfono,
+> WhatsApp y correo, pero no una forma de dejar la cita cerrada en ese momento.
+>
+> Es justo lo que montamos en Studio32: un asistente en vuestro WhatsApp conectado con la agenda real de
+> la clínica, que responde al paciente y puede dejarle la cita cerrada al momento, también
+> fuera de horario.
+>
+> ¿Os enseño cómo funcionaría aplicado a vuestra clínica?
+>
+> Un saludo y gracias por vuestro tiempo,
+
+**Lo que se evita:** un correo con reseña 1, reseña 2, tratamiento, formación, consulta
+gratuita, radiografía, TAC, página de contacto, teléfono, horario y producto. Cada dato es
+cierto, pero son once observaciones antes de llegar al motivo, y el lector se pierde. Se
+elige lo que mejor construye personalización, problema y solución, y el resto se queda en la
+huella. Si una observación es excepcional ("un profesional de bandera", cuatro implantes de
+carga inmediata) se le puede dedicar algo más de espacio, pero no se le suman tres más detrás.
+
+**Asunto bueno:** "Sobre las citas de [Nombre]" · **malo:** "Propuesta de colaboración para [Nombre]"
 
 ### Visita presencial / guion de llamada — 4-6 frases, hablado
 

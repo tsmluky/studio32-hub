@@ -87,9 +87,9 @@ Studio32 Opportunity: XX/100
 > — Francisco / Studio32
 
 ✉️ **Email frío (medio):**
-> **Asunto:** [4-7 palabras]
+> **Asunto:** [4-7 palabras, con el nombre del negocio]
 >
-> [Cuerpo 80-120 palabras]
+> [Cuerpo 100-140 palabras: personalización, fricción, solución, pregunta]
 >
 > — Francisco
 > Studio32 · Digital Systems

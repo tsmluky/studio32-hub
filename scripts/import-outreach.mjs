@@ -18,7 +18,7 @@
 
 import { readFile } from 'node:fs/promises'
 import { createClient } from '@supabase/supabase-js'
-import { normalizarTipografia, revisarCorreo } from '../supabase/functions/_shared/reglas-correo.js'
+import { normalizarTipografia, revisarCorreo, revisarEstilo } from '../supabase/functions/_shared/reglas-correo.js'
 
 const url = process.env.SUPABASE_URL
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -134,7 +134,7 @@ function yaEscrito(email, leadId, duplicadoDe) {
   return ''
 }
 
-const report = { creados: 0, actualizados: 0, duplicados: 0, protegidos: 0, borradores: 0, omitidos: 0, sinAscii: [], noPasan: [], yaContactados: [] }
+const report = { creados: 0, actualizados: 0, duplicados: 0, protegidos: 0, borradores: 0, omitidos: 0, sinAscii: [], noPasan: [], fueraDePauta: [], yaContactados: [] }
 
 for (const lead of payload.leads) {
   if (!lead.business_name) {
@@ -272,6 +272,9 @@ for (const lead of payload.leads) {
   // como está, el envío lo pararía.
   const problemas = revisarCorreo({ subject: message.subject, body: message.body, to_email: message.to_email })
   if (problemas.length) report.noPasan.push(`${row.business_name}: ${problemas.join(' ')}`)
+  // Aparte, y sin parar nada: lo que se aparta de la pauta evidencia → fricción → solución → pregunta.
+  const avisos = revisarEstilo({ subject: message.subject, body: message.body })
+  if (avisos.length) report.fueraDePauta.push(`${row.business_name}: ${avisos.join(' ')}`)
 
   if (untouched) {
     const { error } = await admin.from('outreach_messages').update(message).eq('id', untouched.id)
@@ -319,4 +322,8 @@ if (report.yaContactados.length) {
 if (report.noPasan.length) {
   console.log(`  borradores que el envío pararía tal como están (arréglalos antes de aprobar):`)
   for (const item of report.noPasan) console.log(`    - ${item}`)
+}
+if (report.fueraDePauta.length) {
+  console.log(`  borradores fuera de la pauta de estilo (no paran el envío; reescríbelos si puedes):`)
+  for (const item of report.fueraDePauta) console.log(`    - ${item}`)
 }
