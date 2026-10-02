@@ -448,6 +448,23 @@ por tanto sin correo). Comprobaciones que sí dieron fallo demostrable para la o
 - **Antes de dar un dominio por muerto, probar también por http**: alguno solo redirige
   por http y falla por https.
 
+**Clínicas dentales · Valladolid capital — agotada y cerrada el 02/10/2026, 35 leads en
+total (15 en esta pasada).** Se recorrieron las 81 clínicas de topdentistas y las tres
+páginas de Doctoralia. Lo que queda: WhatsApp ya en la web (24 cayeron por eso), cadenas,
+webs caídas o reseñas solo cargadas por JavaScript. Muchos de los que entraron usan un
+Gmail o Hotmail con el nombre de la clínica (confianza `medio`).
+
+**Clínicas dentales · Zaragoza capital — agotada y cerrada el 02/10/2026, 44 leads.** Lo
+que queda tiene WhatsApp (17 cayeron por eso en esta pasada), web caída, es cadena o tiene
+menos de 9 reseñas. Doctoralia aquí no sirve: casi todas las fichas sin opiniones.
+
+**Centros de estética · Málaga capital (oferta de web) — pasada del 02/10/2026, 14 de 20,
+casi agotada.** Al final daba un lead por cada 8-10 candidatos. Treatwell en Málaga
+capital solo tiene unos 45 centros reales (el slug que funciona es `en-malaga-es`;
+`en-malaga-andalucia-es` da 404, y los listados por barrio no añaden casi nada). Unos doce
+centros con muchas reseñas tienen el dominio muerto, aparcado o secuestrado y no publican
+correo: son leads para llamada o visita, no para correo.
+
 ## Cuánto cuesta una tanda
 
 Verificar un lead de verdad son 2-3 páginas cargadas: su web, sus reseñas, y a veces una
@@ -510,14 +527,51 @@ También vale la ficha `topdentistas.com.es/es-es/i/<id>-<slug>/`. Se cita como
 "Autor · Google (vía topdentistas.com), <fecha>". `sonrisalista.com` y `docdental.es`
 **no** valen: esconden el autor o parafrasean.
 
+**Actualizado el 02/10/2026: `topdentistas.com/dentistas/<ciudad>` ha empeorado** (3
+reseñas por ficha, sin fecha exacta, muchas vacías). La versión buena ahora es
+**`topdentistas.com.es/es-es/z/dentistas/<id>-<ciudad>/`** (Zaragoza: `2417-zaragoza`):
+todas las clínicas en una página y hasta 100 reseñas de Google por ficha con autor y
+antigüedad. No enlaza la web: hay que buscarla aparte. En Valladolid el `.com` aún sirvió
+(paginado con `?pagina=N`, la web en el campo `sameAs`). **Corta si se descargan muchas
+páginas seguidas** ("Error de conexión", ~42 bytes): una a una y con pausa.
+
+**`bellecenter.es` es el `sportmedicine.es` de los centros de estética**, hallazgo del
+02/10/2026. Copia reseñas de Google con autor (nombre abreviado) pero sin fecha, y da
+recuento y nota. `bellecenter.es/ciudad/<ciudad>/page/N` sirve de censo y la web del
+centro va en un enlace `rel="nofollow"`. Salvó 6 de los 10 leads de Málaga. Se cita como
+"Autor · Google (vía bellecenter.es)", confianza `medio`. Las páginas de Fresha
+`fresha.com/lp/en/bt/<categoría>/in/es-<ciudad>` también listan centros con la web en
+`sameAs`; solo las fichas `/a/` traen reseñas (las `/lvp/` están vacías).
+
 **El widget de Trustindex que muchas webs incrustan también sirve.** Muestra reseñas de
-Google con autor, y se cita como "Autor · Google (vía la web del negocio)".
+Google con autor, y se cita como "Autor · Google (vía la web del negocio)". A menudo carga
+por JavaScript y el código llega vacío. Si el propio widget dice "basado en N reseñas" y N
+está muy por debajo de Google, eso ya es un fallo demostrable para la frase de servicios.
+
+**Antes de citar un fallo de la web, quitar los comentarios HTML.** En Málaga dos textos
+de plantilla que parecían visibles estaban comentados en el código; uno llegó a subirse y
+hubo que corregirlo.
+
+**Comprobar que el correo recibe de verdad**: `nslookup -type=mx <dominio>`. En Zaragoza
+salieron correos en dominios que ya son de otra empresa y erratas en el dominio del aviso
+de privacidad.
 
 **Para saber si una web ya tiene WhatsApp, leer el código y no un resumen.** Muchas lo
 meten con un plugin de chat (joinchat, ar-contactus) que solo aparece en el código, y los
 resúmenes automáticos lo pasan por alto. Fiarse de los enlaces `wa.me`, `api.whatsapp` o
 del plugin: la palabra "whatsapp" sola suele ser el botón de compartir y da falsos
 positivos.
+
+Matices del 02/10/2026, en las dos direcciones:
+- **Botones que la búsqueda de `wa.me` no ve:** el plugin "whatsapp-for-wordpress"
+  (clases `nta` / `njt-whatsapp`), la URL escapada en JSON (`api.whatsapp.com\/send`), el
+  campo `whatsAppNumber` de Zyro, o solo el texto "WhatsApp: 6xx…".
+- **Falso positivo:** algunos CMS meten `wa.me` y `api.whatsapp` dentro de un script de
+  seguimiento sin ningún botón real. Comprobar que hay un enlace de verdad antes de
+  descartar.
+
+**Desde PowerShell, `npm run outreach -- --conocidos …` pierde el `--`**: lanzarlo desde
+Bash.
 
 **Los agregadores no sirven**: top-rated.online, cylex, expirit y similares devuelven
 403, y los resúmenes que salen en los resultados de búsqueda vienen parafraseados y sin
