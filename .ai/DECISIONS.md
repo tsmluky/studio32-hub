@@ -871,3 +871,33 @@ redesplegado**; mientras tanto "Reescribir con IA" sigue con el prompt de la est
 anterior. Los borradores en cola siguen en la estructura del 24/09 (con "otros servicios"):
 no se han reescrito. Antes de redesplegar, `git pull --rebase` y comparar `updated_at` de la
 función (lo que pasó el 24/09).
+
+## 2026-10-17 · El diagnóstico pasa a ser el gancho del correo, y luego el producto
+
+Rumbo acordado con Pancho. Diseño completo en `docs/DIAGNOSTICO.md`. **Nada está
+construido todavía.**
+
+- **Se llama "diagnóstico"**, nunca "mini informe" ni "mini auditoría". Lo que se vende es
+  el **informe completo**: el diagnóstico más los pasos para arreglar cada cosa. Vender ese
+  informe por correo es más fácil que vender el agente directamente.
+- **Fase 1, correo frío:** 30 diagnósticos y 30 correos al día. Se planteó 50 y se bajó a
+  30: cada diagnóstico lo generamos nosotros y tiene que ser verdad, y además 30 es el
+  cupo que ya protege la reputación de `studio32.es`.
+- **El diagnóstico viaja como imagen dentro del correo, no como PDF ni como enlace.** Los
+  dos restan confianza y los filtros los castigan. Matiz que no se negocia: **el hallazgo
+  principal va también en el texto**, porque muchos clientes no enseñan las imágenes
+  hasta que se pulsa y un correo que es casi solo imagen puntúa como spam. Una imagen
+  incrustada también es un adjunto, solo que más ligero.
+- **Fase 2, landing de autodiagnóstico:** el negocio genera su diagnóstico gratis, ve el
+  informe completo borroso con precio y deja su correo. Ese consentimiento es lo que
+  permite el seguimiento a las 2 semanas. **En el correo frío sigue la regla del 25/09:**
+  un correo por negocio, para siempre, sin seguimiento.
+- **Antes de construir:** DMARC con `rua` y página de bajas por token.
+- **Lo que hacen Apollo, Hunter y compañía** queda anotado en `docs/DIAGNOSTICO.md` como
+  mejoras para el prospector, y quizá algún día como servicio. Las baratas: MX/DNS,
+  verificación SMTP sin enviar y desofuscación de Cloudflare. Descartado comprar o montar
+  una base agregada: es lo que más riesgo legal tiene (LSSI art. 21) y quemaría el dominio.
+
+**Roza la congelación de scope** (cero features hasta que gh-dent esté vivo). Se acepta
+por la misma razón que la prospección: es captación. La landing de fase 2 ya es producto,
+y esa decisión queda pendiente.

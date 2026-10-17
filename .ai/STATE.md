@@ -1,6 +1,6 @@
 # Estado — studio32-hub
 
-> Se **sobrescribe**, no se acumula. Tope ~100 líneas. Última actualización: 2026-10-02.
+> Se **sobrescribe**, no se acumula. Tope ~100 líneas. Última actualización: 2026-10-17.
 
 ## Qué es
 
@@ -47,6 +47,13 @@ aquí cuál gana. Borrarlas sería lo limpio, pero es una acción sobre el remot
 compartido y la decide una persona.
 
 ## Herramientas · Prospección — el ciclo
+
+**17/10: rumbo nuevo, el diagnóstico.** El correo frío llevará un *diagnóstico* del negocio
+como imagen incrustada, con el hallazgo también en el texto. Se mantienen 30 al día, y lo
+que se vende es el informe completo. Después vendrá una landing de autodiagnóstico.
+**Solo diseño, nada construido.** Plan, qué falta en `outreach-send` (hoy envía texto plano),
+DMARC `rua`, página de bajas y cómo funcionan las herramientas de leads: `docs/DIAGNOSTICO.md`.
+Porqué en `DECISIONS.md`.
 
 **24/09: aprobación automática encendida.** Un borrador que pasa la revisión automática
 (`_shared/reglas-correo.js`, que también aplica el envío a todo) y lleva 24 h sin tocarse
