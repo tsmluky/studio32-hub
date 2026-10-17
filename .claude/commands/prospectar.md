@@ -111,6 +111,9 @@ Este es el paso que ahorra el tiempo. **No te lances a fondo con cada negocio.**
 4. **Comprueba que hay correo público** antes de nada más. Sin correo el lead no puede
    entrar, así que investigarlo es tiempo tirado. El correo tiene que ser una dirección sin
    tildes ni eñes: el servidor no las envía y el importador las descarta.
+   Si la web no enseña el correo a la vista, o lo esconde Cloudflare ("[email protected]"),
+   sácalo con `npm run outreach -- --correos <web>`: mira portada, contacto, aviso legal y
+   privacidad, y desofusca lo de Cloudflare.
 
 Si tras la primera ronda quedan menos de 3 con correo, **para ahí**: ciérrala (B3)
 explicándolo y no sigas. Si en rondas posteriores la zona deja de dar candidatos nuevos,
@@ -154,6 +157,20 @@ Para los que pasaron la criba, y **como mucho 30**:
   punto. El envío para cualquier correo con una raya, así que un borrador con ella no
   llegará a salir. Al subir, el importador lista lo que el envío pararía y, aparte, lo que
   se aparta de la pauta de estilo (eso son avisos: arréglalo si puedes, no para nada).
+
+- **El diagnóstico** (desde el 17/10): añade `huella.diagnostico` con 1-3 hallazgos
+  (`SKILL.md` → Modo C, punto 1). Es lo mismo que sostiene el correo, en tres líneas.
+
+**Antes de subir, comprueba los correos** (desde el 17/10):
+
+```bash
+npm run outreach -- --verificar <ruta-del-json>
+```
+
+Un ✗ rebotaría (dominio sin correo o dirección que el servidor dice que no existe):
+quítalo de la tanda o busca otra dirección publicada. Un ? no se ha podido confirmar
+(servidor que acepta todo, o puerto 25 cortado en esta red) y puede subir. El importador
+ya para por su cuenta los dominios sin correo.
 
 **Sube en cuanto tengas 2 o 3 listos**, no al final:
 

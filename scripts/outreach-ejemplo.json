@@ -41,7 +41,13 @@
           "palabras_que_usan": ["cómo llama el cliente a lo que compra"]
         },
         "huecos_digitales": ["Sin WhatsApp", "Sin reserva online"],
-        "confianza": { "nivel": "alto", "no_encontrado": ["Lo que no se pudo verificar"] }
+        "confianza": { "nivel": "alto", "no_encontrado": ["Lo que no se pudo verificar"] },
+        "diagnostico": {
+          "hallazgos": [
+            { "area": "Reputación", "estado": "mejorable", "titulo": "4,1 de nota con 40 reseñas", "detalle": "Cita literal de una reseña.", "fuente": "Autor · directorio" },
+            { "area": "Pedir cita", "estado": "falla", "titulo": "Lo que se ve al pedir cita", "detalle": "Lo que dice la web o la página de contacto.", "fuente": "Web · página de contacto" }
+          ]
+        }
       },
       "message": {
         "subject": "Sobre las citas de Clínica Ejemplo",

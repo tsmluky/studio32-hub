@@ -2,3 +2,9 @@ project_id = "studio32-hub"
 
 [functions.google-calendar]
 verify_jwt = true
+
+# Pública a propósito: la llaman la página de baja y la baja de un clic de Gmail y
+# Outlook (RFC 8058), que no mandan cabecera de autorización. Solo añade direcciones
+# del propio lead a outreach_suppressions.
+[functions.outreach-unsubscribe]
+verify_jwt = false

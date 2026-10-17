@@ -51,9 +51,19 @@ compartido y la decide una persona.
 **17/10: rumbo nuevo, el diagnóstico.** El correo frío llevará un *diagnóstico* del negocio
 como imagen incrustada, con el hallazgo también en el texto. Se mantienen 30 al día, y lo
 que se vende es el informe completo. Después vendrá una landing de autodiagnóstico.
-**Solo diseño, nada construido.** Plan, qué falta en `outreach-send` (hoy envía texto plano),
-DMARC `rua`, página de bajas y cómo funcionan las herramientas de leads: `docs/DIAGNOSTICO.md`.
-Porqué en `DECISIONS.md`.
+Plan entero en `docs/DIAGNOSTICO.md`; porqué en `DECISIONS.md`.
+**Hecho el 17/10 en la rama `claude/adoring-carson-7clk01`, sin fusionar ni desplegar:**
+- Página de bajas `hub.studio32.es/baja/` + función `outreach-unsubscribe` + cabecera de
+  baja de un clic en `outreach-send`. Para activarlo: `npm run fn:deploy:baja`,
+  `npm run fn:deploy`, fusionar a `main`, y el secreto `OUTREACH_UNSUBSCRIBE_BASE` =
+  `https://hub.studio32.es/baja/`.
+- Diagnóstico como imagen: `npm run outreach -- --diagnostico tanda.json` (aún no viaja en
+  el correo).
+- Verificador de correos: `--verificar` (DNS + SMTP) y `--correos <web>` (Cloudflare). El
+  importador ya no crea borrador si el dominio no recibe correo. Sin probar contra
+  servidores reales.
+**Falta:** Storage de la imagen, `outreach-send` con imagen (hoy texto plano), vista
+previa en el Hub, DMARC `rua` (se deja para más adelante).
 
 **24/09: aprobación automática encendida.** Un borrador que pasa la revisión automática
 (`_shared/reglas-correo.js`, que también aplica el envío a todo) y lleva 24 h sin tocarse

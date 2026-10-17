@@ -332,6 +332,25 @@ function bajaTexto(token: string) {
   return `mailto:${mailto}?subject=Baja%20${token}`
 }
 
+// La cabecera List-Unsubscribe va a la función de baja, no a la página (17/10/2026).
+//
+// Gmail y Outlook enseñan un botón "Cancelar suscripción" junto al remitente y, con
+// List-Unsubscribe-Post (RFC 8058), lo resuelven ellos mismos con un POST sin que la
+// persona abra nada. Ese POST tiene que caer en algo que escriba la baja: la página
+// es estática y le respondería con un 405. Por eso la cabecera apunta a
+// outreach-unsubscribe y el pie del cuerpo, que sí lee una persona, a la página.
+//
+// Además arregla un fallo que estaba ahí: sin OUTREACH_UNSUBSCRIBE_BASE la cabecera
+// era un mailto a bajas@studio32.es, que no es un alias que exista en Hostinger.
+function cabecerasBaja(token: string, enlaceBaja: string): Record<string, string> {
+  const supabaseUrl = Deno.env.get('SUPABASE_URL')?.replace(/\/+$/, '')
+  if (!supabaseUrl) return { 'List-Unsubscribe': `<${enlaceBaja}>` }
+  return {
+    'List-Unsubscribe': `<${supabaseUrl}/functions/v1/outreach-unsubscribe?t=${token}>`,
+    'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+  }
+}
+
 // La firma se compone aquí, no la escribe la skill.
 //
 // Motivo: quien aprueba en el Hub se queda el cliente, y al aprobar cambia el
@@ -429,7 +448,7 @@ function componerRfc822(datos: {
   responderA: string
   asunto: string
   cuerpo: string
-  enlaceBaja: string
+  cabecerasBaja: Record<string, string>
 }) {
   // El cuerpo va en base64 a propósito: el texto lleva acentos, guiones largos y
   // líneas de longitud imprevisible, y base64 evita tener que pelearse con el corte
@@ -442,7 +461,7 @@ function componerRfc822(datos: {
     `Reply-To: ${cabeceraDireccion(datos.responderA)}`,
     `Subject: ${palabraCodificada(datos.asunto)}`,
     `Message-ID: <${crypto.randomUUID()}@studio32.es>`,
-    `List-Unsubscribe: <${datos.enlaceBaja}>`,
+    ...Object.entries(datos.cabecerasBaja).map(([nombre, valor]) => `${nombre}: ${valor}`),
     'MIME-Version: 1.0',
     'Content-Type: text/plain; charset=utf-8',
     'Content-Transfer-Encoding: base64',
@@ -682,7 +701,9 @@ Deno.serve(async (request) => {
       continue
     }
 
-    const enlaceBaja = bajaTexto(lead?.unsubscribe_token ?? id)
+    const tokenBaja = lead?.unsubscribe_token ?? id
+    const enlaceBaja = bajaTexto(tokenBaja)
+    const cabecerasDeBaja = cabecerasBaja(tokenBaja, enlaceBaja)
     const remitente = mensaje.from_email || remitentePorDefecto
     if (!remitente) {
       await admin.from('outreach_messages').update({ status: 'fallido', error: 'No hay remitente configurado.' }).eq('id', id)
@@ -710,7 +731,7 @@ Deno.serve(async (request) => {
           replyTo: mensaje.reply_to || remitente,
           subject: asuntoRevisado,
           content: cuerpoFinal,
-          headers: { 'List-Unsubscribe': `<${enlaceBaja}>` },
+          headers: cabecerasDeBaja,
         })
       } finally {
         // Cerrar siempre, tambien si el envio revienta: un socket abierto mantiene
@@ -752,7 +773,7 @@ Deno.serve(async (request) => {
           responderA: mensaje.reply_to || remitente,
           asunto: asuntoRevisado,
           cuerpo: cuerpoFinal,
-          enlaceBaja,
+          cabecerasBaja: cabecerasDeBaja,
         }))
       } catch (errorCopia) {
         copia = errorCopia instanceof Error ? errorCopia.message : 'no se pudo guardar la copia'

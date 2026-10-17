@@ -901,3 +901,38 @@ construido todavía.**
 **Roza la congelación de scope** (cero features hasta que gh-dent esté vivo). Se acepta
 por la misma razón que la prospección: es captación. La landing de fase 2 ya es producto,
 y esa decisión queda pendiente.
+
+## 2026-10-17 · Bajas, diagnóstico e imagen y verificador: cómo y por qué así
+
+Lo primero del plan del diagnóstico, con el visto bueno de Pancho. Está en la rama, sin
+desplegar. DMARC se deja para más adelante, a petición suya.
+
+- **La baja nunca se da al cargar la página, solo al pulsar.** Los filtros de seguridad
+  del correo de empresa (Outlook Safe Links y similares) abren los enlaces antes que la
+  persona. Con baja por GET, daríamos de baja a gente que no lo pidió.
+- **La cabecera `List-Unsubscribe` va a la función y el pie del cuerpo a la página.** La
+  baja de un clic de Gmail y Outlook (RFC 8058) es un POST del propio cliente de correo,
+  sin sesión. Una página estática le respondería 405. Por eso `outreach-unsubscribe` va
+  con `verify_jwt = false`. Es segura así porque solo da de baja las direcciones del lead
+  dueño del token, nunca una que llegue en la petición. Arregla de paso que la cabecera
+  apuntaba a `bajas@studio32.es`, que no existe.
+- **La página vive en el Hub (`public/baja/`) y no en studio32.es**, porque ese sitio está
+  en otro repo. Es HTML suelto, sin React: quien llega no tiene sesión.
+- **La plantilla del diagnóstico está en `supabase/functions/_shared/`**, como
+  `reglas-correo.js`. Así el script local y la futura vista previa del Hub pintan lo mismo.
+  Los hallazgos los escribe la skill (`huella.diagnostico`). Si no lo hace, se deducen de
+  la evidencia que ya tiene el lead, para que los 30 en cola también tengan diagnóstico.
+  Sin nada que mejorar no hay imagen, y nunca lleva precio.
+- **La imagen se pinta con el Chrome o el Edge de la máquina** (`playwright-core`, sin
+  navegadores descargados): Edge viene con Windows. JPG de 600 px al doble de resolución,
+  y baja la calidad hasta que quepa en 150 KB.
+- **El verificador no adivina direcciones**: solo comprueba las publicadas. Solo
+  descarta lo que de verdad rebotaría (dominio sin correo, o un 5xx en RCPT). Lista gris,
+  catch-all o puerto 25 cerrado son "sin confirmar", nunca "no existe".
+- **Si el DNS no responde, no se juzga nada.** Sin DNS, todas las consultas devuelven
+  ENOTFOUND, y eso pasaría por "dominio inexistente". Se vio en el entorno donde se
+  escribió. Antes de juzgar se consulta gmail.com: si ese tampoco resuelve, no se
+  descarta nada por DNS.
+- **En el importador solo entra el DNS, no el SMTP.** El SMTP necesita el puerto 25, que
+  muchas conexiones domésticas cortan, y haría lenta cada subida. Va aparte, con
+  `--verificar`.

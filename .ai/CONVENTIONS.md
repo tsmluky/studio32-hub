@@ -24,6 +24,10 @@ npm run outreach         # que campanas hay pedidas desde el Hub
 npm run outreach -- tanda.json   # sube una tanda. ESCRIBE al lanzarlo
 npm run outreach:probar -- --para x@y.z # siembra un lead de prueba
 npm run fn:deploy                   # despliega la Edge Function de envio
+npm run fn:deploy:baja              # despliega outreach-unsubscribe (pública, sin JWT)
+npm run outreach -- --verificar tanda.json   # ¿existen esos correos? DNS + SMTP, no escribe
+npm run outreach -- --correos https://web    # correos de una web, también los de Cloudflare
+npm run outreach -- --diagnostico tanda.json # JPG del diagnóstico de cada lead, junto a la tanda
 ```
 
 **`npm run outreach -- <archivo>` no tiene modo de revisión: escribe en cuanto se lanza.** Lo que

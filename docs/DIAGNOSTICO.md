@@ -1,7 +1,10 @@
 # Diagnóstico IA — de gancho del correo a producto
 
-> Rumbo acordado el 17/10/2026. Es diseño, no código: nada de esto está construido.
-> Porqué de cada decisión en `.ai/DECISIONS.md` (17/10).
+> Rumbo acordado el 17/10/2026. Porqué de cada decisión en `.ai/DECISIONS.md` (17/10).
+>
+> **Hecho el 17/10 (en la rama, sin desplegar):** plantilla del diagnóstico e imagen,
+> página y función de bajas, verificador de correos. **Falta:** Storage, imagen dentro
+> del correo, vista previa en el Hub, DMARC.
 
 ## La idea en una frase
 
@@ -39,7 +42,11 @@ cada cosa.
 
 ### Lo que hay que construir para la fase 1
 
-1. Plantilla del diagnóstico (HTML) + script de captura a JPG/PNG.
+1. ✅ Plantilla del diagnóstico (`supabase/functions/_shared/diagnostico.js`) y captura
+   a JPG (`npm run outreach -- --diagnostico <tanda.json>`, deja los JPG junto a la tanda,
+   fuera del repo). Usa el Chrome o el Edge de la máquina, sin descargar nada. Los
+   hallazgos salen de `huella.diagnostico` si la skill los escribió; si no, se deducen de
+   la evidencia, la nota y las reseñas. Sin hallazgo que mejorar, no hay diagnóstico.
 2. Guardar la imagen por lead. Va en Supabase Storage con RLS, **no** en
    `hub_states.payload` ni en una columna base64.
 3. `outreach-send` pasa de texto plano a `multipart/alternative` (texto + HTML) con la
@@ -55,11 +62,20 @@ cada cosa.
   `v=DMARC1; p=none; rua=mailto:dmarc@studio32.es; fo=1`
   (el buzón tiene que existir; vale un alias nuevo o `info@`). Los informes llegan a
   diario en XML; con dos semanas ya se ve si SPF y DKIM pasan.
-- **Página de bajas por token.** `outreach_leads.unsubscribe_token` ya existe y
-  `outreach-send` ya usa `OUTREACH_UNSUBSCRIBE_BASE` si es una URL. Falta la página
-  que recibe `?t=` y escribe la baja. Ojo: si ese secreto no está puesto, el pie cae a
-  `mailto:bajas@studio32.es`, y **`bajas@` no está en la lista de alias de Hostinger**.
-  Comprobarlo.
+- ✅ **Página de bajas por token** (17/10, falta desplegar). `hub.studio32.es/baja/?t=…`
+  (`public/baja/index.html`) pregunta y da de baja al pulsar, nunca al cargar (los filtros
+  de correo de empresa abren los enlaces solos). Escribe la función `outreach-unsubscribe`
+  (pública, `verify_jwt = false`), que da de baja todas las direcciones a las que se le
+  escribió a ese lead y ninguna otra. `outreach-send` pone ahora la cabecera
+  `List-Unsubscribe` apuntando a esa función, con `List-Unsubscribe-Post` para la baja de
+  un clic de Gmail y Outlook. Antes, sin `OUTREACH_UNSUBSCRIBE_BASE`, esa cabecera era un
+  mailto a `bajas@studio32.es`, **que no es un alias que exista**.
+  Para activarlo:
+  1. `npm run fn:deploy:baja` (la función nueva).
+  2. `npm run fn:deploy` (`outreach-send` con la cabecera nueva).
+  3. Fusionar a `main` para que Cloudflare publique la página.
+  4. Poner el secreto `OUTREACH_UNSUBSCRIBE_BASE` = `https://hub.studio32.es/baja/`.
+     Con eso, el pie del correo pasa de "responde BAJA" al enlace.
 
 ## Fase 2 · Landing de autodiagnóstico (después)
 
@@ -96,17 +112,19 @@ como servicio.
 |---|---|---|
 | **Censo de negocios** | Raspan Google Maps / Places y directorios del sector (Doctoralia, Treatwell, TheFork…) | ✅ se hace, a mano por pasada |
 | **Rastreo de la web** | Recorren home, contacto, aviso legal y política de privacidad buscando `@` y `mailto:` | ✅ se hace (el aviso legal ya está en `PROSPECCION.md`) |
-| **Desofuscación** | Decodifican el correo protegido de Cloudflare (`data-cfemail`, XOR con el primer byte) y los `[at]` / `(arroba)` | ❌ costó 2 leads en estética Valencia |
+| **Desofuscación** | Decodifican el correo protegido de Cloudflare (`data-cfemail`, XOR con el primer byte) y los `[at]` / `(arroba)` | ✅ 17/10: `npm run outreach -- --correos <web>` (costó 2 leads en estética Valencia) |
 | **Adivinar por patrón** | Prueban `nombre@`, `n.apellido@`, `info@`… con el nombre del dueño | ❌ no se hace, y no conviene: un correo que no publicaron es peor para la LSSI |
-| **Verificación SMTP** | Abren conexión con el MX, mandan `RCPT TO` sin enviar nada y miran si el servidor acepta la dirección; detectan dominios *catch-all* | ❌ **la mejora más barata**: evita rebotes, que son lo que más daña la reputación |
-| **MX / DNS** | Comprueban que el dominio resuelve y tiene MX antes de nada | ❌ habría evitado los dos dominios muertos de estética Valencia |
+| **Verificación SMTP** | Abren conexión con el MX, mandan `RCPT TO` sin enviar nada y miran si el servidor acepta la dirección; detectan dominios *catch-all* | ✅ 17/10: `npm run outreach -- --verificar <tanda.json>`. Necesita el puerto 25 abierto; si no lo está, dice "sin confirmar", nunca "no existe" |
+| **MX / DNS** | Comprueban que el dominio resuelve y tiene MX antes de nada | ✅ 17/10: el importador ya no crea borrador si el dominio del correo no recibe correo. Si el DNS no responde, no juzga |
 | **Enriquecimiento** | Cruzan con LinkedIn y registros mercantiles para sacar dueño, cargo y tamaño | ❌ opcional; da nombre propio al saludo |
 | **Señales de compra** | Ofertas de empleo ("buscamos recepcionista"), reseñas recientes que se quejan del teléfono, web nueva | parcial: las reseñas sí, el empleo no |
 | **Deduplicación** | Por dominio, teléfono y nombre normalizado | ✅ desde el 25/09 |
 | **Base agregada** | Guardan todo lo raspado y lo revenden | ❌ no queremos: es lo que más riesgo legal tiene |
 
-**Orden de prioridad para incorporar:** MX/DNS → verificación SMTP → desofuscación de
-Cloudflare → señales de empleo → enriquecimiento. Las tres primeras son código pequeño
-dentro del importador (`scripts/import-outreach.mjs`) o como paso previo de la skill.
-Ojo: muchas redes bloquean la salida por el puerto 25, y la verificación SMTP la necesita.
-Probarlo en la máquina donde corra.
+**Hecho el 17/10:** MX/DNS, verificación SMTP y desofuscación de Cloudflare, en
+`scripts/correo-verificacion.mjs` (sin dependencias). **Lo siguiente:** señales de empleo
+y enriquecimiento.
+**Sin probar contra servidores reales:** el entorno donde se escribió no tiene DNS ni
+puerto 25. La conversación SMTP se probó contra un servidor falso en local (existe, no
+existe, catch-all, lista gris, cuelgue, puerto cerrado). La primera vez en el portátil,
+`npm run outreach -- --verificar info@studio32.es` dice si el puerto 25 sale de esa red.

@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
+  <title>Baja · Studio32</title>
+  <link rel="icon" href="/studio32-mark.svg" type="image/svg+xml">
+  <!--
+    Página pública de baja (17/10/2026). Es lo que abre el enlace del pie de cada
+    correo de prospección: hub.studio32.es/baja/?t=<unsubscribe_token>.
+
+    Va suelta, sin la app del Hub: quien llega aquí no tiene sesión ni tiene por qué
+    cargar React. Habla con la función outreach-unsubscribe, que es la única que
+    escribe la baja.
+
+    No da de baja al cargar: pregunta y espera al botón. Los filtros de seguridad del
+    correo de empresa abren los enlaces antes que la persona; si cargar bastase, darían
+    de baja a gente que nunca lo pidió.
+  -->
+  <style>
+    :root {
+      --ink: #182622;
+      --muted: #697670;
+      --line: #dce3dc;
+      --surface: #fffefa;
+      --canvas: #f3f4ef;
+      --green: #2d746a;
+      --green-dark: #173e38;
+      --rose: #a55454;
+      --radius: 16px;
+      --shadow-soft: 0 5px 18px rgba(30, 50, 44, 0.055);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px 16px;
+      background: var(--canvas);
+      color: var(--ink);
+      font: 16px/1.55 'DM Sans', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
+    }
+    main {
+      width: 100%;
+      max-width: 440px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-soft);
+      padding: 28px 24px;
+    }
+    .marca { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; color: var(--green-dark); font-weight: 700; }
+    .marca img { width: 28px; height: 28px; }
+    h1 { font-size: 1.3rem; line-height: 1.3; margin: 0 0 10px; }
+    p { margin: 0 0 14px; color: var(--muted); }
+    p strong { color: var(--ink); font-weight: 600; }
+    button {
+      width: 100%;
+      margin-top: 6px;
+      padding: 13px 16px;
+      border: 0;
+      border-radius: 11px;
+      background: var(--green);
+      color: #fff;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button:hover { background: var(--green-dark); }
+    button:disabled { opacity: 0.6; cursor: default; }
+    .error { color: var(--rose); }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="marca"><img src="/studio32-mark.svg" alt="">Studio32</div>
+
+    <section id="cargando">
+      <h1>Un momento…</h1>
+      <p>Comprobando el enlace.</p>
+    </section>
+
+    <section id="pregunta" hidden>
+      <h1>¿Dejamos de escribirte?</h1>
+      <p>No volveremos a enviar ningún correo a <strong id="direcciones"></strong>.</p>
+      <button id="confirmar" type="button">Sí, no quiero más correos</button>
+    </section>
+
+    <section id="hecho" hidden>
+      <h1>Hecho, no te escribiremos más</h1>
+      <p>Hemos quitado <strong id="direcciones-hechas"></strong> de nuestros envíos. Perdona la molestia.</p>
+    </section>
+
+    <section id="fallo" hidden>
+      <h1>No hemos podido dar de baja este enlace</h1>
+      <p class="error" id="motivo"></p>
+      <p>Responde a nuestro correo con la palabra <strong>BAJA</strong> y lo haremos a mano.</p>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      const FUNCION = 'https://wwhinwxedcvpxprmcsta.supabase.co/functions/v1/outreach-unsubscribe'
+      const token = new URLSearchParams(location.search).get('t') || ''
+      const $ = (id) => document.getElementById(id)
+      const ver = (id) => {
+        for (const s of ['cargando', 'pregunta', 'hecho', 'fallo']) $(s).hidden = s !== id
+      }
+      const fallo = (motivo) => {
+        $('motivo').textContent = motivo
+        ver('fallo')
+      }
+      const hecho = (direcciones) => {
+        $('direcciones-hechas').textContent = direcciones.join(', ')
+        ver('hecho')
+      }
+
+      const llamar = async (metodo) => {
+        const respuesta = await fetch(`${FUNCION}?t=${encodeURIComponent(token)}`, {
+          method: metodo,
+          headers: metodo === 'POST' ? { 'Content-Type': 'application/json' } : {},
+          body: metodo === 'POST' ? JSON.stringify({ t: token }) : undefined,
+        })
+        const datos = await respuesta.json().catch(() => ({}))
+        if (!respuesta.ok) throw new Error(datos.error || 'El servicio no responde.')
+        return datos
+      }
+
+      if (!token) return fallo('El enlace llega sin su código de baja.')
+
+      llamar('GET')
+        .then((datos) => {
+          if (datos.estado === 'de_baja') return hecho(datos.direcciones)
+          $('direcciones').textContent = datos.direcciones.join(', ')
+          ver('pregunta')
+        })
+        .catch((error) => fallo(error.message))
+
+      $('confirmar').addEventListener('click', () => {
+        $('confirmar').disabled = true
+        llamar('POST')
+          .then((datos) => hecho(datos.direcciones))
+          .catch((error) => fallo(error.message))
+      })
+    })()
+  </script>
+</body>
+</html>

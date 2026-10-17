@@ -110,6 +110,14 @@ en este modo**: ese esquema es de otra ruta y el importador no lo lee.
   autor** de cada patrón. Sale de leer reseñas de verdad, no de suponer.
 - **`huecos_digitales`** — qué le falta: sin WhatsApp, sin reserva online, web sin móvil.
 - **`confianza`** — `alto` / `medio` / `bajo`, y qué no se pudo verificar.
+- **`diagnostico`** (desde el 17/10, recomendado) — lo que se pinta en la imagen del
+  diagnóstico: `hallazgos`, de 1 a 3, cada uno con `area` ("Reputación", "Pedir cita",
+  "Fuera de horario"…), `estado` (`bien` / `mejorable` / `falla`), `titulo` (una frase
+  con su dato), `detalle` (la cita literal, opcional) y `fuente`. Al menos uno que no sea
+  `bien`, ninguno sin fuente y **nunca precio**. Lo mismo que sostiene el correo, dicho
+  en tres líneas: no se añade nada que no esté en la evidencia. Si falta, el diagnóstico
+  se deduce de la evidencia, la nota y las reseñas (`npm run outreach -- --diagnostico
+  <tanda.json>`). Detalle en `docs/DIAGNOSTICO.md`.
 
 ### 2. La puerta se aplica antes de generar el archivo
 
@@ -316,7 +324,13 @@ a medias.
           "palabras_que_usan": ["cómo llaman ellos a lo que compran"]
         },
         "huecos_digitales": ["Sin WhatsApp", "Sin reserva online"],
-        "confianza": { "nivel": "alto", "no_encontrado": ["Lo que no se pudo verificar"] }
+        "confianza": { "nivel": "alto", "no_encontrado": ["Lo que no se pudo verificar"] },
+        "diagnostico": {
+          "hallazgos": [
+            { "area": "Reputación", "estado": "bien", "titulo": "4,7 de nota con 240 reseñas", "detalle": "Cita literal que lo sostiene", "fuente": "Autor · Google" },
+            { "area": "Pedir cita", "estado": "falla", "titulo": "Lo que se ve al pedir cita, con su dato", "detalle": "Lo que dice la web", "fuente": "Web · página de contacto" }
+          ]
+        }
       },
       "message": {
         "subject": "Asunto corto y llano con el nombre del negocio: Pedir cita en X",

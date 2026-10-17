@@ -16,6 +16,7 @@
     "outreach": "node --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/outreach.mjs",
     "fn:deploy": "supabase functions deploy outreach-send --project-ref wwhinwxedcvpxprmcsta --use-api",
     "fn:deploy:rewrite": "supabase functions deploy outreach-rewrite --project-ref wwhinwxedcvpxprmcsta --use-api",
+    "fn:deploy:baja": "supabase functions deploy outreach-unsubscribe --project-ref wwhinwxedcvpxprmcsta --use-api --no-verify-jwt",
     "outreach:probar": "node --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/probar-envio.mjs",
     "outreach:recuperar": "node --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/recuperar-fallidos.mjs",
     "outreach:revisar": "node --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/revisar-correos.mjs"
@@ -27,6 +28,7 @@
     "@vitejs/plugin-rsc": "^0.5.26",
     "ajv": "^8.20.0",
     "pg": "^8.22.0",
+    "playwright-core": "^1.56.1",
     "react-server-dom-webpack": "^19.2.7",
     "supabase": "^2.113.0",
     "typescript": "~6.0.2",

@@ -19,6 +19,7 @@
 import { readFile } from 'node:fs/promises'
 import { createClient } from '@supabase/supabase-js'
 import { normalizarTipografia, revisarCorreo, revisarEstilo } from '../supabase/functions/_shared/reglas-correo.js'
+import { comprobarDominio } from './correo-verificacion.mjs'
 
 const url = process.env.SUPABASE_URL
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -134,7 +135,7 @@ function yaEscrito(email, leadId, duplicadoDe) {
   return ''
 }
 
-const report = { creados: 0, actualizados: 0, duplicados: 0, protegidos: 0, borradores: 0, omitidos: 0, sinAscii: [], noPasan: [], fueraDePauta: [], yaContactados: [] }
+const report = { creados: 0, actualizados: 0, duplicados: 0, protegidos: 0, borradores: 0, omitidos: 0, sinAscii: [], sinCorreo: [], noPasan: [], fueraDePauta: [], yaContactados: [] }
 
 for (const lead of payload.leads) {
   if (!lead.business_name) {
@@ -232,6 +233,15 @@ for (const lead of payload.leads) {
     continue
   }
 
+  // Un dominio que no recibe correo es un rebote seguro, y los rebotes son lo que más
+  // daña la reputación de studio32.es (17/10/2026). Solo se para cuando el DNS dice que
+  // no existe; si el DNS no responde, no se juzga y el borrador sube igual.
+  const dominioCorreo = await comprobarDominio(row.email)
+  if (dominioCorreo.estado === 'no_existe') {
+    report.sinCorreo.push(`${row.business_name} <${row.email}>`)
+    continue
+  }
+
   // Un correo por negocio, para siempre: si esta dirección, su dominio propio o el
   // negocio del que es duplicado ya tienen un correo en marcha o enviado, no nace otro.
   const yaTiene = yaEscrito(row.email, leadId, row.duplicate_of)
@@ -314,6 +324,10 @@ if (report.omitidos) console.log(`  omitidos sin nombre: ${report.omitidos}`)
 if (report.sinAscii.length) {
   console.log(`  sin borrador por correo con tilde o eñe (Hostinger no lo envía):`)
   for (const item of report.sinAscii) console.log(`    - ${item}`)
+}
+if (report.sinCorreo.length) {
+  console.log(`  sin borrador porque el dominio del correo no recibe correo (rebotaría):`)
+  for (const item of report.sinCorreo) console.log(`    - ${item}`)
 }
 if (report.yaContactados.length) {
   console.log(`  sin borrador porque a ese negocio ya se le escribe (un correo por negocio):`)
