@@ -45,11 +45,19 @@ export async function reportState() {
 export async function reportCommand(route, data) {
   if (!cloud || !owner)
     throw new Error("La conexión de informes no está configurada.");
-  if (route === "/journey/search" || route === "/journey/generate") {
-    const kind = route.endsWith("search") ? "lookup" : "report";
+  if (
+    route === "/journey/search" ||
+    route === "/journey/search-web" ||
+    route === "/journey/generate"
+  ) {
+    const kind = route === "/journey/generate" ? "report" : "lookup";
     const payload =
       kind === "lookup"
-        ? { query: data.query, city: data.city }
+        ? {
+            query: data.query,
+            city: data.city,
+            ...(route === "/journey/search-web" ? { web: data.web } : {}),
+          }
         : { lookup_id: data.lookupId, candidate_id: data.candidateId };
     return {
       id: checked(

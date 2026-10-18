@@ -89,10 +89,24 @@ def candidate(row, source=''):
             'lon': float(row['lon']) if row.get('lon') is not None else None}
 
 
-def lookup(query, city):
+def lookup(query, city, web=''):
     query, city = query.strip(), city.strip()
     if not 2 <= len(query) <= 160 or len(city) > 120:
         raise ValueError('Indica un nombre de restaurante válido.')
+    known_file = CACHE.parent / 'known-webs.json'
+    try:
+        known = json.loads(known_file.read_text(encoding='utf-8')) if known_file.exists() else []
+    except (ValueError, OSError):
+        known = []
+    if web:
+        from report_discovery import verify_web
+        if len(web) > 2048: raise ValueError('La dirección web es demasiado larga.')
+        row = verify_web(query, city, web.strip(), public_url)
+        known = [r for r in known if r.get('web') != row['web']] + [row]
+        known_file.parent.mkdir(parents=True, exist_ok=True)
+        tmp = known_file.with_suffix('.tmp')
+        tmp.write_text(json.dumps(known, ensure_ascii=False), encoding='utf-8'); tmp.replace(known_file)
+        return {'candidates': [candidate(row)], 'source': 'Web indicada y comprobada', 'attribution': 'Fuente: la web del restaurante', 'sourceUrl': row['web']}
     q = re.sub(r'\b(restaurante|restaurant|el|la|los|las|de|del)\b', ' ', fold(query))
     words = q.split() or fold(query).split()
     rows = []
@@ -100,21 +114,28 @@ def lookup(query, city):
     universe = MOTOR / 'datos' / 'indice' / 'universo.json'
     if universe.exists():
         rows = json.loads(universe.read_text(encoding='utf-8')).get('webs', [])
+    rows = known + rows
     scored = []
     for row in rows:
         name = fold(row.get('nombre', ''))
+        compact_name = re.sub(r'[^a-z0-9]', '', name)
+        compact_query = re.sub(r'[^a-z0-9]', '', fold(query))
         score = sum(w in name for w in words) / max(1, len(words))
+        if compact_query and compact_query in compact_name: score = max(score, 1)
         if fold(query) == name:
             score += 2
         if score < 0.8:
             continue
-        location = fold(' '.join(str(row.get(k) or '') for k in ('municipio', 'provincia', 'direccion')))
+        location = fold(' '.join(str(row.get(k) or '') for k in ('municipio', 'provincia', 'direccion', 'zona_busqueda')))
         if city and not all(w in location for w in fold(city).split()):
             continue
         scored.append((score + SequenceMatcher(None, fold(query), name).ratio(), row))
     found = [candidate(row) for _, row in sorted(scored, key=lambda item: -item[0])[:8]]
     if found:
-        return {'candidates': list({c['id']: c for c in found}.values()), 'source': 'Registro local de fuentes públicas', 'attribution': '© Overture Maps Foundation y colaboradores de OpenStreetMap'}
+        primary = all(c['sourceLabel'] == 'Web indicada y comprobada' for c in found)
+        return {'candidates': list({c['id']: c for c in found}.values()), 'source': 'Fuentes guardadas',
+                'attribution': 'Fuente: la web del restaurante' if primary else 'Webs comprobadas y fuentes públicas · © Overture Maps Foundation y colaboradores de OpenStreetMap',
+                **({'sourceUrl': found[0]['web']} if primary and len(found) == 1 else {})}
     # Explicit restaurant search, not autocomplete/bulk geocoding. One worker,
     # persistent cache, >1 second between calls, configurable provider URL.
     CACHE.mkdir(parents=True, exist_ok=True)
@@ -133,7 +154,7 @@ def lookup(query, city):
     with urllib.request.urlopen(request, timeout=20) as response:
         results = json.loads(response.read(1_000_000))
     for r in results:
-        if r.get('type') != 'restaurant':
+        if r.get('type') not in ('restaurant', 'fast_food', 'food_court'):
             continue
         tags, addr = r.get('extratags') or {}, r.get('address') or {}
         web = tags.get('website') or tags.get('contact:website') or ''
@@ -225,12 +246,13 @@ def main():
     p.add_argument('mode', choices=['lookup', 'generate'])
     p.add_argument('--query', default='')
     p.add_argument('--city', default='')
+    p.add_argument('--web', default='')
     p.add_argument('--candidate')
     p.add_argument('--out')
     a = p.parse_args()
     safe_network()
     try:
-        result = lookup(a.query, a.city) if a.mode == 'lookup' else generate(json.loads(Path(a.candidate).read_text(encoding='utf-8')), Path(a.out))
+        result = lookup(a.query, a.city, a.web) if a.mode == 'lookup' else generate(json.loads(Path(a.candidate).read_text(encoding='utf-8')), Path(a.out))
         emit('result', result=result)
     except NeedsReview as e:
         emit('review', error=str(e)); return 12

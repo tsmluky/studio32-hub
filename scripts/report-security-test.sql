@@ -9,6 +9,7 @@ do $$begin
  if has_table_privilege('authenticated','public.ops_report_jobs','INSERT') then raise exception 'El navegador puede insertar trabajos sin RPC';end if;
  if has_function_privilege('authenticated','public.ops_desktop_enqueue(uuid,text,jsonb,uuid)','EXECUTE') then raise exception 'El navegador puede suplantar propietarios';end if;
  if has_function_privilege('authenticated','public.ops_finish_report_job(uuid,uuid,jsonb,jsonb,text,text)','EXECUTE') then raise exception 'El navegador puede publicar informes';end if;
+ if has_function_privilege('anon','public.ops_enqueue_lookup_web(text,text,text,uuid)','EXECUTE') then raise exception 'Puede encolar webs sin sesión';end if;
  if (select public from storage.buckets where id='studio32-reports') then raise exception 'El bucket es público';end if;
 end $$;
 insert into public.ops_report_jobs(id,workspace_id,owner_id,request_key,kind,payload)
@@ -32,6 +33,10 @@ do $$declare a uuid;b uuid;k uuid:=gen_random_uuid();begin
  a:=public.ops_enqueue_lookup('Prueba idempotencia','Valencia',k);
  b:=public.ops_enqueue_lookup('Prueba idempotencia','Valencia',k);
  if a<>b then raise exception 'Se duplicó una solicitud reintentada';end if;
+ a:=public.ops_enqueue_lookup_web('Prueba web','Valencia','https://example.org/',k:=gen_random_uuid());
+ b:=public.ops_enqueue_lookup_web('Prueba web','Valencia','https://example.org/',k);
+ if a<>b then raise exception 'Se duplicó una web reintentada';end if;
+ if not exists(select 1 from public.ops_report_jobs where id=a and payload->>'web'='https://example.org/') then raise exception 'No conservó la web para verificarla';end if;
  begin
   perform public.ops_enqueue_lookup(null,'Valencia',gen_random_uuid());
   raise exception 'Aceptó nombre nulo';

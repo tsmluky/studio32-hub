@@ -26,16 +26,14 @@ const heartbeat = async () => {
   const activity = stopping ? "offline" : active?.id || "idle";
   if (activity === lastActivity && Date.now() - lastHeartbeat < 15000) return;
   checked(
-    await cloud
-      .from("ops_report_workers")
-      .upsert({
-        id: worker,
-        workspace_id: "studio32",
-        last_seen: new Date().toISOString(),
-        status: stopping ? "offline" : active ? "working" : "idle",
-        current_job: active?.id || null,
-        version,
-      }),
+    await cloud.from("ops_report_workers").upsert({
+      id: worker,
+      workspace_id: "studio32",
+      last_seen: new Date().toISOString(),
+      status: stopping ? "offline" : active ? "working" : "idle",
+      current_job: active?.id || null,
+      version,
+    }),
   );
   lastHeartbeat = Date.now();
   lastActivity = activity;
@@ -76,6 +74,7 @@ export async function runMotor(job, out) {
       job.payload.query,
       "--city",
       job.payload.city || "",
+      ...(job.payload.web ? ["--web", job.payload.web] : []),
     );
   else {
     const input = path.join(out, "candidate.json");
@@ -226,12 +225,10 @@ async function execute(job) {
   // Unique immutable path per lease: a late worker can never overwrite a published PDF.
   const storagePath = `${job.workspace_id}/${job.id}/${job.lease_token}.pdf`;
   checked(
-    await cloud.storage
-      .from("studio32-reports")
-      .upload(storagePath, bytes, {
-        contentType: "application/pdf",
-        upsert: false,
-      }),
+    await cloud.storage.from("studio32-reports").upload(storagePath, bytes, {
+      contentType: "application/pdf",
+      upsert: false,
+    }),
   );
   const doc = {
     id: job.id,
