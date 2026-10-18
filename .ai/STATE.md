@@ -1,6 +1,6 @@
 # Estado — studio32-hub
 
-> Se **sobrescribe**, no se acumula. Última actualización: 2026-10-18 (restaurante nuevo → PDF privado; cliente pendiente de publicar).
+> Se **sobrescribe**, no se acumula. Última actualización: 2026-10-18 (recorrido publicado; aceptación desde teléfono físico pendiente).
 
 ## Qué es
 
@@ -26,7 +26,9 @@ El código actual conserva los tres miembros originales; no se ha cambiado su ac
 - Probado con Unsushi sin ficha preparada: auditoría actual → PDF A4 → subida privada → descarga idéntica por SHA-256.
   Caché siete días, fuentes guardadas y fallback OSM moderado. Sin APIs de pago, puertos públicos ni cambios a miembros/outreach.
 - Cliente publicado usa sesión Supabase real; preview usa pasarela loopback sin claves en navegador. Voz/notas/visitas locales.
-  Falta publicar y aceptar desde teléfono físico/4G/impresión. Sin push ni despliegue del frontend.
+  Publicado en `hub.studio32.es` con autorización de Pancho: push `a7d6b17`, Cloudflare Pages correcto,
+  HTML/JS/CSS públicos verificados con RPC nuevas, proyecto Supabase correcto y sin credencial privada del worker.
+  Falta aceptación desde teléfono físico/4G/impresión; no se atribuye una prueba de teléfono real a la vista responsive.
   Worker activo; tras reiniciar PC hay que arrancarlo. Operación/pruebas: `docs/INFORMES-DESDE-MOVIL.md`.
 
 **Se publica solo: push a `main` y Cloudflare Pages lo despliega.** Nada que ejecutar.

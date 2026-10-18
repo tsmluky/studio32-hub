@@ -1,6 +1,6 @@
 # Mi estudio · primer recorrido integrado
 
-18 de octubre de 2026. Código y prueba local; no publicado en `hub.studio32.es`.
+18 de octubre de 2026. Primera fase local, ampliada con informes remotos y publicada en `hub.studio32.es`.
 
 ## Abrir y detener
 
@@ -57,7 +57,8 @@ validación de Host/Origin/Fetch Metadata, sin CORS ni claves de cliente. Polít
 El servicio de gestión no importa el store del agente ni mezcla visitas propias con reservas de clientes.
 
 **Ampliación del 18/10:** búsqueda nueva, cola Supabase, worker, Diagnóstico y descarga privada implementados y probados.
-Migración aditiva aplicada. Cliente pendiente de publicar/aceptar desde teléfono físico. Detalle: `INFORMES-DESDE-MOVIL.md`.
+Migración aditiva aplicada y cliente publicado con autorización de Pancho. Pendiente aceptación desde teléfono físico.
+Detalle: `INFORMES-DESDE-MOVIL.md`.
 Voz/notas/agenda locales; prospección previa sigue en el Hub. No abre puertos ni configura asistentes de clientes.
 
 ## Verificación
@@ -78,5 +79,5 @@ npx tsc --noEmit
 npm run build:static
 ```
 
-Siguiente tramo: publicar y aceptar descarga/impresión desde teléfono real. Después, análisis completo e índice nuevo,
+Siguiente tramo: aceptar descarga/impresión desde teléfono real. Después, análisis completo e índice nuevo,
 coordinado con el frente de Claude.

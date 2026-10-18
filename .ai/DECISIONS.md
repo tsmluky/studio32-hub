@@ -943,3 +943,11 @@ al índice nuevo, datos del motor, reservas del agente ni campañas. Asistente/v
 Migración aditiva aplicada y RLS probada con rollback. Recorrido real Unsushi sin ficha previa: PDF generado,
 revisado y descargado desde Storage con SHA-256 idéntico. Cliente pendiente de publicación y aceptación
 desde teléfono físico. Operación y límites: `docs/INFORMES-DESDE-MOVIL.md`.
+
+### Publicación autorizada · 18/10
+
+Pancho autoriza expresamente el push y pide probar desde el teléfono real. Publicados los cinco commits
+hasta `a7d6b17` en `origin/main`; Cloudflare Pages informa despliegue correcto. El dominio público sirve
+el recorrido nuevo y la configuración del Supabase del Hub, sin la credencial privada del worker.
+Sobremesa conectado y diagnóstico privado disponible. Login con los perfiles existentes conservado.
+La prueba física de descarga/impresión corresponde al siguiente paso con Pancho.

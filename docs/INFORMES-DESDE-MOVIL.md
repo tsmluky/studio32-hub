@@ -1,6 +1,7 @@
 # Restaurante nuevo → diagnóstico en el teléfono
 
-Implementado el 18/10/2026. Cliente pendiente de publicar en hub.studio32.es y aceptar desde teléfono físico/4G.
+Implementado y publicado el 18/10/2026 en hub.studio32.es con autorización de Pancho.
+Cloudflare Pages correcto y assets públicos comprobados. Pendiente aceptación desde teléfono físico/4G.
 
 ## Uso
 
@@ -54,7 +55,7 @@ No toca NBA. Logs en .local/report-worker/worker.log; entrada/auditoría/HTML/PD
 
 Probado Unsushi sin ficha preparada: selección a 375 px, encargo Supabase, auditoría real PC, PDF A4 de una página,
 subida privada y descarga idéntica por SHA-256/tamaño. PDF renderizado/revisado. Ensayos propios anteriores retirados
-con copia local; resultado final conservado. Sin mensajes ni visitas. Pendiente publicación y aceptación física.
+con copia local; resultado final conservado. Sin mensajes ni visitas. Publicado; pendiente aceptación física.
 
 ```powershell
 node scripts/probar-informes-remotos.mjs
