@@ -62,12 +62,14 @@ export default function OperationsView({
   displayName = "Francisco",
   onSignOut,
   outreachContent,
+  onOutreachActiveChange,
 }: {
   onOpenLegacy?: () => void;
   localPreview?: boolean;
   displayName?: string;
   onSignOut?: () => void | Promise<void>;
   outreachContent?: ReactNode;
+  onOutreachActiveChange?: (active: boolean) => void;
 }) {
   configureTransport(localPreview);
   const [tab, setTab] = useState<Tab>("home"),
@@ -459,7 +461,9 @@ export default function OperationsView({
                 ? "En tu sobremesa"
                 : desktopOnline
                   ? "Sobremesa conectado"
-                  : "PC sin conexión"}
+                  : loading
+                    ? "Comprobando conexión…"
+                    : "PC sin conexión"}
             </span>
             <button
               className="ops-icon-button"
@@ -476,6 +480,7 @@ export default function OperationsView({
           {tab === "tools" && (
             <OperationsTools
               outreach={outreachContent}
+              onActiveChange={onOutreachActiveChange}
               onReports={() => setTab("businesses")}
               onArchive={onOpenLegacy}
             />

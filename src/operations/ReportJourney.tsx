@@ -52,6 +52,7 @@ export default function ReportJourney() {
       if (live.current) setConnectionError((e as Error).message);
     }
   }, []);
+  const working = !!state?.jobs.some(pending);
   useEffect(() => {
     live.current = true;
     let timer: ReturnType<typeof setTimeout>;
@@ -74,7 +75,7 @@ export default function ReportJourney() {
       clearTimeout(timer);
       document.removeEventListener("visibilitychange", resume);
     };
-  }, [refresh]);
+  }, [refresh, working]);
   const lookup = state?.jobs.find((j) => j.id === lookupId),
     report = state?.jobs.find((j) => j.id === reportId);
   const online = state?.workers.some(

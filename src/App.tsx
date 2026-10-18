@@ -696,6 +696,7 @@ function App() {
     })
   }, [])
   const [view, setView] = useState<MainView>('operations')
+  const [embeddedOutreach, setEmbeddedOutreach] = useState(false)
   const [projectTab, setProjectTab] = useState<ProjectTab>('overview')
   const [captureOpen, setCaptureOpen] = useState(false)
   const [projectEditor, setProjectEditor] = useState<{ mode: 'create' } | { mode: 'edit'; projectId: ProjectId } | null>(null)
@@ -706,7 +707,7 @@ function App() {
 
   // Solo consulta cuando la vista está abierta: es un tablero de trabajo, no
   // algo que deba cargarse en cada arranque del Hub.
-  const outreach = useOutreach(view === 'prospecting')
+  const outreach = useOutreach(view === 'prospecting' || view === 'operations' && embeddedOutreach)
   const outreachPulse = useOutreachPulse(view === 'today')
 
   const activeMember = activeMemberId ? getMember(activeMemberId) : null
@@ -1060,6 +1061,7 @@ function App() {
   const searchTerm = search.trim().toLocaleLowerCase('es')
 
   if (view === 'operations') return <OperationsView displayName={activeMember.id === 'pancho' ? 'Francisco' : activeMember.name} onSignOut={signOut} onOpenLegacy={() => selectView('today')}
+    onOutreachActiveChange={setEmbeddedOutreach}
     outreachContent={<OutreachView campaigns={outreach.campaigns} leads={outreach.leads} messages={outreach.messages}
       status={outreach.status} error={outreach.error} onReload={outreach.reload} activeMemberId={activeMember.id}
       onApprove={(messageId, leadId) => void outreach.approveMessage(messageId, leadId, activeMember.id)}

@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -11,12 +11,18 @@ export default function OperationsTools({
   outreach,
   onReports,
   onArchive,
+  onActiveChange,
 }: {
   outreach?: ReactNode;
   onReports: () => void;
   onArchive?: () => void;
+  onActiveChange?: (active: boolean) => void;
 }) {
   const [selected, setSelected] = useState(false);
+  useEffect(() => {
+    onActiveChange?.(selected);
+    return () => onActiveChange?.(false);
+  }, [selected, onActiveChange]);
   return (
     <>
       {selected ? (
