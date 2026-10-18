@@ -42,6 +42,7 @@ export default function ReportJourney({
     [selected, setSelected] = useState<Candidate | null>(null),
     [reportId, setReportId] = useState("");
   const live = useRef(true),
+    resultTarget = useRef<HTMLDivElement>(null),
     command = useRef(false),
     hasPending = useRef(false),
     requestKey = useRef<{ kind: string; value: string; id: string } | null>(
@@ -90,6 +91,13 @@ export default function ReportJourney({
       w.status !== "offline" && Date.now() - Date.parse(w.last_seen) < 75000,
   );
   const doc = state?.documents.find((d) => d.id === report?.result?.documentId);
+  useEffect(() => {
+    if (focusJob && report?.id === focusJob)
+      resultTarget.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+  }, [focusJob, report?.id, report?.status]);
   useEffect(() => {
     if (focusJob) {
       setReportId(focusJob);
@@ -482,7 +490,9 @@ export default function ReportJourney({
           )}
         </div>
       )}
-      {report && progress(report)}
+      <div ref={resultTarget} style={{ scrollMarginTop: 80 }}>
+        {report && progress(report)}
+      </div>
       {doc && (
         <div className="ops-journey-ready">
           <span className="ops-document-icon">

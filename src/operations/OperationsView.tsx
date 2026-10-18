@@ -151,8 +151,8 @@ export default function OperationsView({
     }
   }, [snapshot?.messages.length, tab]);
   useEffect(() => {
-    window.scrollTo({ top: 0 });
-  }, [tab]);
+    if (!focusJob) window.scrollTo({ top: 0 });
+  }, [tab, focusJob]);
   useEffect(() => {
     if (
       tab === "businesses" &&
