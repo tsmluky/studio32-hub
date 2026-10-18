@@ -265,7 +265,7 @@
   padding: 14px 0;
   border-bottom: 1px solid var(--ops-line);
 }
-.ops-journey-library > div > span {
+.ops-journey-library > div:not(.ops-list-caption) > span {
   flex: 1;
   min-width: 0;
 }

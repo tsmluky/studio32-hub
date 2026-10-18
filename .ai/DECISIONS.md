@@ -871,3 +871,75 @@ redesplegado**; mientras tanto "Reescribir con IA" sigue con el prompt de la est
 anterior. Los borradores en cola siguen en la estructura del 24/09 (con "otros servicios"):
 no se han reescrito. Antes de redesplegar, `git pull --rebase` y comparar `updated_at` de la
 función (lo que pasó el 24/09).
+
+---
+
+## 2026-10-18 · Hub personal y asistente con audio de entrada y respuesta escrita
+
+Pancho quiere llevar Studio32 desde el móvil: fichas de negocios y clientes, informes reutilizables,
+peticiones al sobremesa y seguimiento de los trabajos. El usuario principal es él; un comercial puede
+incorporarse después. La definición está en `docs/HUB-PERSONAL.md`; todavía no se cambian vistas ni permisos.
+
+Confirma asistente interno por texto o notas de voz, con respuesta escrita; sin voz de salida.
+Se propone reutilizar el núcleo canónico de `studio32-agent` mediante perfil y herramientas de gestión,
+sin mantener una copia independiente. Las visitas comerciales pertenecen a Studio32 y no se mezclan
+con reservas de los clientes. El patrón pedido en Supabase → ejecución local → resultado se aprovecha
+antes de crear otro sistema de trabajos.
+
+Modelo local aún sin elegir: Qwen3.5 4B y Qwen3 4B son candidatos, con transcripción separada.
+El ensayo de selección de herramientas usa datos ficticios y no ejecuta escrituras. El intento se
+aplazó por falta de margen de compromiso de memoria de Windows; no hay medición de calidad o latencia.
+El lanzador comprueba recursos y solo gestiona su servidor aislado en 11435. No se usan APIs de pago
+ni se sustituyen automáticamente los modelos por un proveedor externo. Detalle: `docs/ASISTENTE-LOCAL.md`.
+
+### Resultado posterior del 18/10 · modelo util con validacion externa
+
+Tras liberar recursos, Qwen3.5 4B corrio por CUDA 12 en la GTX 1080: 11/13 casos iniciales,
+mediana 1,67 s y primera carga 19,8 s. Un prompt mas explicito no evito inventar una hora.
+La politica preparada en `scripts/asistente-policy.cjs` exige negocio y tiempo verificados fuera
+del modelo; no ejecuta nada y falta conectarla al Hub. Ocho pruebas correctas. No se atribuye
+al modelo la responsabilidad exclusiva de validar escrituras.
+
+Proveedor opt-in agregado al agente canonico (124 pruebas correctas). Roundtrip de informe y
+nota+visita con resultados ficticios correctos; el ultimo tardo 11,5 s incluyendo carga. Un fallo
+de primera seleccion no implica fallo del plan entero: se prueba tambien la continuacion.
+Conservados resultados base, estrictos y reevaluados por separado. Sin audio real, escrituras,
+envios ni despliegue; candidato para el primer flujo controlado, no autonomia validada.
+
+## 2026-10-18 · Primer recorrido integrado, local y revisable
+
+Pancho autoriza desarrollar la interfaz y avanzar con la integración. Se construye `Mi estudio` como nueva entrada
+del Hub, conservando acceso a las herramientas existentes. Mismo componente para la preview del sobremesa y el Hub
+autenticado; entrada de desarrollo excluida del build público. CSS aislado en `operations/` para no alterar prospección.
+
+Primero se conecta lectura real de fichas/PDF a un servicio loopback, Qwen local y SQLite. No se pretende que una página
+Cloudflare pueda acceder al ordenador por localhost: el puente autenticado Supabase/worker sigue pendiente.
+No se aplican migraciones ni se publica esta fase. Se reutiliza el proveedor canónico de `studio32-agent` y el contrato
+de herramientas, sin importar su store de reservas. Visitas del estudio y citas de clientes conservan dominios distintos.
+
+El modelo propone; el formulario confirma negocio/contenido/hora fuera del modelo. La hora siempre empieza vacía.
+Cambios múltiples atómicos y confirmaciones idempotentes. Las herramientas pueden encadenarse antes de cerrar el resultado;
+se corrigió un corte después de la búsqueda y una colisión del discriminador `type` al presentar tarjetas de PDF.
+Conversaciones, trabajos y propuestas crecen en tablas SQLite, nunca en el payload compartido.
+
+Whisper small con faster-whisper CPU int8: la transcripción deja un borrador revisable, sin envío automático ni TTS.
+Dependencias aisladas y fijadas tras detectar incompatibilidad de PyAV 19. Audio sintético probado; voz real de Pancho
+pendiente. Datos, límites, pruebas y arranque en `docs/MI-ESTUDIO.md`.
+
+## 2026-10-18 · Restaurante nuevo, sobremesa y entrega privada
+
+Pancho pide el hito de buscar desde el móvil un restaurante sin informe preparado, generarlo en el PC,
+subirlo a Supabase y descargarlo para imprimir/visitar. Se implementa primero el Diagnóstico A4 de una
+página: valor inmediato sin llamadas a modelos ni web nueva automática, respetando NEGOCIO.md del 18/10.
+
+Se reutilizan autenticación/membresías y motor canónico. Cola propia con propietario, lease y RPC; documentos
+privados compartidos por workspace. El worker solo conecta hacia fuera. Rechazar un candidato no devuelto
+por una búsqueda propia evita que el navegador lance comandos o envíe URLs arbitrarias al PC.
+
+Primero fuentes públicas locales; fallback OSM moderado/configurable, caché y atribución. PDF reciente se
+reutiliza siete días. Se valida y sube antes de publicar; reserva caducada no puede finalizar. Sin cambios
+al índice nuevo, datos del motor, reservas del agente ni campañas. Asistente/voz/notas siguen locales.
+
+Migración aditiva aplicada y RLS probada con rollback. Recorrido real Unsushi sin ficha previa: PDF generado,
+revisado y descargado desde Storage con SHA-256 idéntico. Cliente pendiente de publicación y aceptación
+desde teléfono físico. Operación y límites: `docs/INFORMES-DESDE-MOVIL.md`.

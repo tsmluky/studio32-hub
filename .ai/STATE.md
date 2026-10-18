@@ -1,10 +1,33 @@
 # Estado — studio32-hub
 
-> Se **sobrescribe**, no se acumula. Tope ~100 líneas. Última actualización: 2026-10-02.
+> Se **sobrescribe**, no se acumula. Última actualización: 2026-10-18 (restaurante nuevo → PDF privado; cliente pendiente de publicar).
 
 ## Qué es
 
-Workspace interno del equipo (Juanma, Pancho, Gonzalo). Vive en `hub.studio32.es`.
+Centro de gestión de Studio32, principalmente para Pancho; posible comercial después. Vive en `hub.studio32.es`.
+El código actual conserva los tres miembros originales; no se ha cambiado su acceso.
+
+## Frente activo: Hub personal y asistente
+
+- **Mi estudio**, en `src/operations/` y como entrada de la aplicación autenticada: Mi mesa, Negocios, Asistente
+  y Actividad; móvil probado a 375 px y herramientas anteriores accesibles. Sin cambiar miembros ni sus permisos.
+- `Abrir mi estudio.cmd` arranca interfaz, servicio y Ollama; `Detener mi estudio.cmd` cierra solo sus procesos.
+  URL `http://127.0.0.1:4310/mesa.html`. Preview local sin credenciales, excluida del build público.
+- Lectura real de 8 fichas y 8 PDF del motor, con fuentes/fechas y prioridad de seguridad. No modifica el motor.
+  Qwen3.5 4B usa el proveedor canónico del agente para buscar, devolver PDF y proponer notas/visitas.
+- Notas, visitas, conversaciones, propuestas y cola en SQLite local, fuera de payload/Git. Validación externa de
+  negocio/hora, confirmación editable, transacciones e idempotencia. Contexto del modelo acotado.
+- Voz instalada: faster-whisper 1.2.1 + PyAV 16.1.0 + Whisper small CPU int8. Grabación/adjunto → texto editable;
+  sin voz de salida. Audio sintético transcrito en ~4,15 s; voz/micrófono de Pancho pendientes de prueba.
+- TypeScript/build correctos, 21 pruebas núcleo/política y 8 comprobaciones HTTP. Navegador real: búsqueda→informe,
+  propuesta doble, descarte y nota guardada/recuperada (nota de prueba retirada con copia; visitas reales: ninguna).
+- Nombre/ciudad → confirmar local → encargo → progreso → PDF. Cola autenticada `ops_report_*`, RLS por propietario/workspace,
+  bucket privado y worker saliente con leases. Migración aditiva aplicada solo al Supabase del Hub.
+- Probado con Unsushi sin ficha preparada: auditoría actual → PDF A4 → subida privada → descarga idéntica por SHA-256.
+  Caché siete días, fuentes guardadas y fallback OSM moderado. Sin APIs de pago, puertos públicos ni cambios a miembros/outreach.
+- Cliente publicado usa sesión Supabase real; preview usa pasarela loopback sin claves en navegador. Voz/notas/visitas locales.
+  Falta publicar y aceptar desde teléfono físico/4G/impresión. Sin push ni despliegue del frontend.
+  Worker activo; tras reiniciar PC hay que arrancarlo. Operación/pruebas: `docs/INFORMES-DESDE-MOVIL.md`.
 
 **Se publica solo: push a `main` y Cloudflare Pages lo despliega.** Nada que ejecutar.
 El repo gemelo `studio32-hub-live` **está muerto** — era el despliegue por GitHub Pages,
@@ -13,9 +36,9 @@ nada. Comprobado el 15/08.
 
 ## Dónde está ahora
 
-- Vistas: Hoy, Tareas, Calendario, Proyectos, Inbox, Biblioteca y **Herramientas**.
-- Interfaz móvil: cinco destinos en la barra inferior (Hoy, Tareas, Proyectos,
-  Herramientas, Más). Calendario, Inbox, Biblioteca y Alta viven en la hoja Más.
+- Vistas: **Mi estudio** abre el espacio personal; siguen Hoy, Tareas, Calendario, Proyectos, Inbox, Biblioteca y Herramientas.
+- Móvil personal: Mi mesa, Negocios, Asistente, Actividad y Más. En las herramientas previas: Mi estudio,
+  Tareas, Proyectos, Herramientas y Más; Hoy pasa a la hoja secundaria.
 - Entre 721 y 920px se usa **escritorio compacto**: sidebar de 190px y topbar de
   escritorio. La barra móvil queda reservada para 720px o menos.
 - Sistema visual renovado el 13/08: fondo cálido, verde Studio32, superficies con

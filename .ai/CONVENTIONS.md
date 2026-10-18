@@ -6,7 +6,9 @@ Específico de este repo. No replicar a ciegas en otros.
 
 - React 19 + TypeScript, servido con **vinext** sobre Vite 8.
 - Supabase para auth y persistencia (`@supabase/supabase-js`).
-- Iconos: `lucide-react`. Estilos: un único `src/style.css`, sin framework CSS.
+- Iconos: `lucide-react`. Estilos compartidos en `src/style.css`, sin framework CSS.
+  El espacio personal nuevo encapsula sus estilos en `src/operations/operations.css` (`ops-*`),
+  para mantener aisladas las herramientas existentes durante la integración.
 - Sin librería de estado: todo pasa por `HubState` en `src/App.tsx`.
 
 ## Comandos
@@ -25,6 +27,12 @@ npm run outreach -- tanda.json   # sube una tanda. ESCRIBE al lanzarlo
 npm run outreach:probar -- --para x@y.z # siembra un lead de prueba
 npm run fn:deploy                   # despliega la Edge Function de envio
 ```
+
+El recorrido personal local se abre con `Abrir mi estudio.cmd` y se detiene con `Detener mi estudio.cmd`.
+Interfaz en 4310, servicio en 4311 y Ollama en 11435; solo loopback. Voz y datos propios fuera de Git.
+Informes nuevos: cola Supabase `ops_report_*`, RLS y worker saliente. Voz/notas siguen locales.
+Operación, caché, fuentes y permisos: `docs/INFORMES-DESDE-MOVIL.md`.
+Operación, pruebas y límites: `docs/MI-ESTUDIO.md`.
 
 **`npm run outreach -- <archivo>` no tiene modo de revisión: escribe en cuanto se lanza.** Lo que
 sube entra como borrador y nada sale sin que alguien lo apruebe en el Hub, pero el JSON
