@@ -79,7 +79,15 @@ export async function runMotor(job, out) {
   else {
     const input = path.join(out, "candidate.json");
     await writeFile(input, JSON.stringify(job.payload.candidate));
-    args.push("generate", "--candidate", input, "--out", out);
+    args.push(
+      "generate",
+      "--candidate",
+      input,
+      "--out",
+      out,
+      "--report-type",
+      job.payload.report_type || "diagnostico",
+    );
   }
   return new Promise((resolve, reject) => {
     // Credentials are not inherited by the web-reading subprocess.
@@ -188,7 +196,13 @@ async function execute(job) {
         .select("id")
         .eq("business_key", job.payload.candidate.id)
         .eq("workspace_id", job.workspace_id)
-        .like("motor_version", "diagnostico-hub-2/%")
+        .eq("report_type", job.payload.report_type || "diagnostico")
+        .like(
+          "motor_version",
+          job.payload.report_type === "completo"
+            ? "completo-hub-1/%"
+            : "diagnostico-hub-2/%",
+        )
         .gt("expires_at", new Date().toISOString())
         .order("generated_at", { ascending: false })
         .limit(1),
@@ -233,7 +247,7 @@ async function execute(job) {
   const doc = {
     id: job.id,
     business_key: job.payload.candidate.id,
-    title: `Diagnóstico · ${job.payload.candidate.name}`,
+    title: `${job.payload.report_type === "completo" ? "Análisis completo" : "Diagnóstico"} · ${job.payload.candidate.name}`,
     storage_path: storagePath,
     sha256: hash,
     bytes: bytes.length,
@@ -247,6 +261,7 @@ async function execute(job) {
         cached: false,
         auditDate: result.auditDate,
         findings: result.findings,
+        pages: result.pages,
       },
       doc,
     );

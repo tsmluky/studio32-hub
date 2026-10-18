@@ -295,3 +295,69 @@ test("successive model write suggestions become one proposal, with no saved acti
   assert.match(s.messages.at(-1).content, /propuesta/);
   assert.doesNotMatch(s.messages.at(-1).content, /guardado todo/);
 });
+
+test("cloud report requests use trusted catalogue and return a pending job without invented PDF", async (t) => {
+  const root = await mkdtemp(path.join(tmpdir(), "s32-cloud-"));
+  let calls = 0;
+  const opts = {
+    dataDir: root,
+    catalogueLoader: async () => ({
+      businesses: [
+        {
+          id: "known",
+          name: "Real",
+          area: "Valencia",
+          reports: [],
+          findings: [],
+        },
+      ],
+      files: new Map(),
+      warnings: [],
+    }),
+    health: async () => true,
+    provider: {
+      chat: async ({ messages }) =>
+        messages.at(-1)?.role === "tool"
+          ? { role: "assistant", content: "Listo" }
+          : {
+              role: "assistant",
+              tool_calls: [
+                call("request_report", {
+                  business_id: "known",
+                  report_type: "completo",
+                }),
+              ],
+            },
+    },
+    requestReport: async (b, type, key) => {
+      assert.equal(b.id, "known");
+      assert.equal(type, "completo");
+      assert.ok(key);
+      calls++;
+      return { id: "queued-report" };
+    },
+  };
+  const ops = await createOperations(opts);
+  t.after(async () => {
+    await ops.idle();
+    ops.close();
+    await rm(root, { recursive: true, force: true });
+  });
+  const key = randomUUID();
+  ops.send({ text: "Pide el completo", businessId: "known", requestId: key });
+  ops.send({ text: "Pide el completo", businessId: "known", requestId: key });
+  await ops.idle();
+  const s = await ops.snapshot("known");
+  assert.equal(calls, 1);
+  assert.deepEqual(s.messages.at(-1).cards, [
+    {
+      type: "job",
+      id: "queued-report",
+      business: "Real",
+      reportType: "completo",
+    },
+  ]);
+  assert.equal(s.notes.length, 0);
+  assert.equal(s.visits.length, 0);
+  assert.match(s.messages.at(-1).content, /Encargo guardado/);
+});

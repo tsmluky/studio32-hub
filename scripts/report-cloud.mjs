@@ -45,6 +45,18 @@ export async function reportState() {
 export async function reportCommand(route, data) {
   if (!cloud || !owner)
     throw new Error("La conexión de informes no está configurada.");
+  if (route === "/journey/generate")
+    return {
+      id: checked(
+        await cloud.rpc("ops_request_report", {
+          p_owner: owner,
+          p_business: data.candidateId,
+          p_type: data.reportType || "diagnostico",
+          p_key: data.requestKey,
+          p_lookup: data.lookupId || null,
+        }),
+      ),
+    };
   if (
     route === "/journey/search" ||
     route === "/journey/search-web" ||
@@ -74,7 +86,7 @@ export async function reportCommand(route, data) {
     const doc = checked(
       await cloud
         .from("ops_report_documents")
-        .select("storage_path")
+        .select("storage_path,report_type")
         .eq("id", data.id)
         .eq("workspace_id", "studio32")
         .single(),
@@ -83,7 +95,7 @@ export async function reportCommand(route, data) {
       await cloud.storage
         .from("studio32-reports")
         .createSignedUrl(doc.storage_path, 120, {
-          download: data.download ? "diagnostico-studio32.pdf" : false,
+          download: data.download ? `${doc.report_type}-studio32.pdf` : false,
         }),
     );
     return { url: signed.signedUrl };

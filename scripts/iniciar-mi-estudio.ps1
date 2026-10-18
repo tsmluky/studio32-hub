@@ -54,6 +54,7 @@ try {
     $processes += Start-Owned $node 'scripts/operations-server.mjs' 'servicio'
     if (Test-Path -LiteralPath (Join-Path $repo '.local\report-worker\worker.env')) {
         $processes += Start-Owned $node 'scripts/report-worker.mjs' 'informes'
+        $processes += Start-Owned $node 'scripts/assistant-worker.mjs' 'asistente-remoto'
     }
     $processes += Start-Owned $node 'node_modules/vite/bin/vite.js --config vite.operations.config.ts' 'interfaz'
     @{ processes = $processes } | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $stateFile -Encoding UTF8

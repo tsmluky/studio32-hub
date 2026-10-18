@@ -172,7 +172,8 @@ class NeedsReview(Exception):
     pass
 
 
-def generate(business, out):
+def generate(business, out, report_type='diagnostico'):
+    out = out.resolve()
     public_url(business['web'])
     out.mkdir(parents=True, exist_ok=True)
     sys.path.insert(0, str(MOTOR))
@@ -181,7 +182,17 @@ def generate(business, out):
         os.environ[key] = ''
     from visibilidad import auditor, config, gancho, ranking, hoja, cliente
     emit('progress', stage='Leyendo su web', progress=25)
-    audit = auditor.auditar(business['web'], business['name'], ciudad=business.get('city') or 'Valencia', max_paginas=8)
+    # Reuse only this business's recently saved audit, never a ranking row measured on another day.
+    audit = None
+    reuse = business.get('_audit_file')
+    if reuse:
+        saved = Path(reuse).resolve()
+        jobs_root = (ROOT / '.local/report-worker/jobs').resolve()
+        if not saved.is_relative_to(jobs_root): raise ValueError('Auditoría fuera de la carpeta de encargos.')
+        data = json.loads(saved.read_text(encoding='utf-8'))
+        if data.get('url') == business['web'] and data.get('nombre') == business['name'] and time.time()-saved.stat().st_mtime < 3600:
+            audit = data
+    audit = audit or auditor.auditar(business['web'], business['name'], ciudad=business.get('city') or 'Valencia', max_paginas=8)
     checks = {c['id']: c for c in audit['checks']}
     live = checks.get('web_viva', {})
     if live.get('estado') != 'ok' or 'OJO:' in str(live.get('evidencia', '')):
@@ -189,7 +200,7 @@ def generate(business, out):
     if any('otro negocio' in str(c.get('evidencia', '')).lower() for c in audit['checks']):
         raise NeedsReview('El motor detecta una posible web de otro negocio. Necesita revisión.')
     (out / 'auditoria.json').write_text(json.dumps(audit, ensure_ascii=False, indent=2), encoding='utf-8')
-    emit('progress', stage='Preparando el diagnóstico', progress=60)
+    emit('progress', stage='Preparando el análisis completo' if report_type=='completo' else 'Preparando el diagnóstico', progress=60)
     score = ranking.nota_web(audit['puntos'])
     reference = ranking.cargar()['webs']
     row = {'nombre': business['name'], 'web': business['web'], 'tipo': 'restaurante', 'municipio': business.get('city') or '',
@@ -215,8 +226,13 @@ def generate(business, out):
     cliente.por_web = lambda _: None
     ranking.buscar = lambda _: None
     ranking.medir = lambda *_args, **_kwargs: row
+    expected_pages = 1
     with contextlib.redirect_stdout(sys.stderr):
-        html = gancho.generar(business['web'], nombre=business['name'], ciudad=business.get('city') or 'Valencia', hacer_pdf=False)
+        if report_type == 'completo':
+            from report_complete import render
+            html, expected_pages = render(business, audit, row, out)
+        else:
+            html = gancho.generar(business['web'], nombre=business['name'], ciudad=business.get('city') or 'Valencia', hacer_pdf=False)
     content = html.read_text(encoding='utf-8')
     # Only the canonical renderer's fixed A4 fitting script may execute.
     trusted_scripts = re.findall(r'<script\b[^>]*>.*?</script>', hoja.documento('Control', ['']), re.I | re.S)
@@ -231,13 +247,14 @@ def generate(business, out):
     import fitz
     with fitz.open(pdf) as doc:
         text = '\n'.join(p.get_text() for p in doc)
-        if len(doc) != 1 or fold(business['name']) not in fold(text) or 'diagnostico' not in fold(text):
+        if len(doc) != expected_pages or fold(business['name']) not in fold(text).replace('\n',' ') or ('analisis completo' if report_type=='completo' else 'diagnostico') not in fold(text):
             raise NeedsReview('La comprobación del PDF no ha pasado. Se conserva para revisar en el sobremesa.')
     data = pdf.read_bytes()
     if not data.startswith(b'%PDF-') or not 5000 < len(data) <= 20 * 1024 * 1024:
         raise RuntimeError('El PDF no tiene un tamaño o formato válido.')
     return {'pdf': str(pdf.resolve()), 'html': str(html.resolve()), 'bytes': len(data), 'sha256': hashlib.sha256(data).hexdigest(),
-        'motorVersion': VERSION + '/' + ranking.VERSION, 'generatedAt': datetime.now(timezone.utc).isoformat(),
+        'motorVersion': ('completo-hub-1' if report_type=='completo' else VERSION) + '/' + ranking.VERSION, 'generatedAt': datetime.now(timezone.utc).isoformat(),
+        'reportType': report_type, 'pages': expected_pages,
         'auditDate': audit['fecha_utc'], 'findings': [{'title': c['titulo'], 'evidence': c['evidencia']} for c in audit['checks'] if c['estado'] == 'mal'][:5]}
 
 
@@ -247,12 +264,13 @@ def main():
     p.add_argument('--query', default='')
     p.add_argument('--city', default='')
     p.add_argument('--web', default='')
+    p.add_argument('--report-type', choices=['diagnostico','completo'], default='diagnostico')
     p.add_argument('--candidate')
     p.add_argument('--out')
     a = p.parse_args()
     safe_network()
     try:
-        result = lookup(a.query, a.city, a.web) if a.mode == 'lookup' else generate(json.loads(Path(a.candidate).read_text(encoding='utf-8')), Path(a.out))
+        result = lookup(a.query, a.city, a.web) if a.mode == 'lookup' else generate(json.loads(Path(a.candidate).read_text(encoding='utf-8')), Path(a.out), a.report_type)
         emit('result', result=result)
     except NeedsReview as e:
         emit('review', error=str(e)); return 12

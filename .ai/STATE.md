@@ -39,7 +39,11 @@ El código actual conserva los tres miembros originales; no se ha cambiado su ac
   No se completó un ensayo de caída durante una auditoría activa (terminó antes de la interrupción). No atribuirlo a lo probado.
 - Más/Herramientas conserva la navegación nueva y monta Prospección dentro. Activación de consultas/subscripción solo al abrirla;
   campañas reales e historial de 274 correos comprobados, sin aprobar, enviar ni modificar automatización.
-  Inicio remoto prioriza diagnósticos; acciones de notas/visitas/asistente locales se muestran desactivadas en fichas remotas.
+  Inicio remoto prioriza informes.
+- Corrección tras nueva prueba de Pancho: asistente y completo no estaban conectados. Ahora se añaden cola `ops_assistant_*`,
+  snapshots privados por usuario, Qwen/Whisper locales y worker independiente. Informe completo de web actual, todos los checks
+  y plan de arreglos, sin simular antes/después ni recomendaciones. SQL/RLS y 22 pruebas de núcleo/política correctas.
+  Comprobación pública autenticada del nuevo recorrido pendiente antes de declarar el hito terminado.
 
 **Se publica solo: push a `main` y Cloudflare Pages lo despliega.** Nada que ejecutar.
 El repo gemelo `studio32-hub-live` **está muerto** — era el despliegue por GitHub Pages,

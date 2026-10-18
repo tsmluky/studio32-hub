@@ -1,4 +1,8 @@
-import { remoteJourney, remoteSnapshot } from "./report-cloud-client";
+import {
+  remoteJourney,
+  remoteSnapshot,
+  remoteAssistant,
+} from "./report-cloud-client";
 let localTransport = false;
 export function configureTransport(local: boolean) {
   localTransport = local;
@@ -49,6 +53,7 @@ export type Message = {
     | { type: "proposal"; id: string }
     | { type: "business"; id: string; name: string; area: string }
     | { type: "report"; title: string; url: string; business: string }
+    | { type: "job"; id: string; business: string; reportType: string }
   )[];
 };
 export type Snapshot = {
@@ -97,8 +102,11 @@ export async function request<T>(
     if (route.startsWith("/journey/"))
       return (await remoteJourney(route, data as Record<string, unknown>)) as T;
     if (route.startsWith("/state") || route === "/reload")
-      return (await remoteSnapshot()) as T;
-    throw new Error("Esta acción está disponible en la sesión del sobremesa.");
+      return (await remoteSnapshot(
+        new URL(route, "https://hub.studio32.es").searchParams.get("thread") ||
+          "general",
+      )) as T;
+    return (await remoteAssistant(route, data, signal)) as T;
   }
   if (!session) {
     const r = await fetch("/api/operations/session", {

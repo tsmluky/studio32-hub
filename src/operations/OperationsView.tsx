@@ -73,6 +73,7 @@ export default function OperationsView({
 }) {
   configureTransport(localPreview);
   const [tab, setTab] = useState<Tab>("home"),
+    [focusJob, setFocusJob] = useState(""),
     [selected, setSelected] = useState(""),
     [query, setQuery] = useState("");
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null),
@@ -133,14 +134,16 @@ export default function OperationsView({
     generation.current++;
     setSnapshot((s) => (s ? { ...s, messages: [], proposals: [] } : s));
     void refresh();
+  }, [refresh]);
+  useEffect(() => {
     const interval = setInterval(
       () => {
         if (!document.hidden) void refresh();
       },
-      localPreview ? 3500 : 15000,
+      tab === "assistant" || snapshot?.service.busy ? 4000 : 20000,
     );
     return () => clearInterval(interval);
-  }, [refresh, localPreview]);
+  }, [refresh, tab, snapshot?.service.busy]);
   useEffect(() => {
     if (tab === "assistant" && snapshot?.messages.length) {
       const messages = end.current?.parentElement;
@@ -219,7 +222,10 @@ export default function OperationsView({
   async function act(route: string, payload: unknown) {
     setError("");
     try {
-      await request(route, payload);
+      await request(route, {
+        ...(payload as Record<string, unknown>),
+        thread: selected || "general",
+      });
       await refresh();
     } catch (e) {
       setError((e as Error).message);
@@ -832,7 +838,7 @@ export default function OperationsView({
                   {snapshot?.businesses.length || 0} fichas guardadas
                 </span>
               </div>
-              <ReportJourney />
+              <ReportJourney focusJob={focusJob} />
               <div className="ops-business-layout">
                 <section className="ops-business-list">
                   <label className="ops-search">
@@ -934,10 +940,10 @@ export default function OperationsView({
                       <div className="ops-detail-actions">
                         <button
                           className="ops-primary"
-                          disabled={!localPreview}
+                          disabled={!snapshot?.service.modelReady}
                           title={
-                            !localPreview
-                              ? "Asistente disponible en la sesión del sobremesa"
+                            !snapshot?.service.modelReady
+                              ? "Esperando al asistente del sobremesa"
                               : undefined
                           }
                           onClick={() => {
@@ -952,10 +958,10 @@ export default function OperationsView({
                         </button>
                         <button
                           className="ops-secondary"
-                          disabled={!connected || !localPreview}
+                          disabled={!desktopOnline}
                           title={
                             !localPreview
-                              ? "Las visitas siguen disponibles en la sesión del sobremesa"
+                              ? "Prepara una visita para revisar y guardar"
                               : undefined
                           }
                           onClick={() => void propose("schedule_visit")}
@@ -965,10 +971,10 @@ export default function OperationsView({
                         </button>
                         <button
                           className="ops-secondary"
-                          disabled={!connected || !localPreview}
+                          disabled={!desktopOnline}
                           title={
                             !localPreview
-                              ? "Las notas siguen disponibles en la sesión del sobremesa"
+                              ? "Prepara una nota para revisar y guardar"
                               : undefined
                           }
                           onClick={() => void propose("add_note")}
@@ -1089,7 +1095,7 @@ export default function OperationsView({
                   <p>
                     {localPreview
                       ? "Escribe o manda una nota de voz. Te respondo por aquí."
-                      : "El asistente está disponible en la sesión del sobremesa. El recorrido de diagnósticos ya funciona por encargos."}
+                      : "Habla o escribe: consulta informes, encarga un análisis y prepara tus notas o visitas. El PC procesa las peticiones."}
                   </p>
                 </div>
               </div>
@@ -1106,7 +1112,7 @@ export default function OperationsView({
                           ? "Disponible en tu sobremesa"
                           : localPreview
                             ? "Modelo local desconectado"
-                            : "Disponible en la sesión del sobremesa"}
+                            : "Esperando al servicio del sobremesa"}
                       </small>
                     </div>
                     <button
@@ -1191,6 +1197,27 @@ export default function OperationsView({
                               <span>
                                 <strong>{card.name}</strong>
                                 <small>{card.area}</small>
+                              </span>
+                              <ChevronRight size={16} />
+                            </button>
+                          ) : card.type === "job" ? (
+                            <button
+                              key={i}
+                              className="ops-chat-result"
+                              onClick={() => {
+                                setFocusJob(card.id);
+                                setTab("businesses");
+                              }}
+                            >
+                              <FileText size={20} />
+                              <span>
+                                <strong>
+                                  {card.reportType === "completo"
+                                    ? "Análisis completo"
+                                    : "Diagnóstico"}{" "}
+                                  · {card.business}
+                                </strong>
+                                <small>Ver progreso y descargar el PDF</small>
                               </span>
                               <ChevronRight size={16} />
                             </button>
@@ -1363,7 +1390,7 @@ export default function OperationsView({
                   <p className="ops-chat-footnote">
                     {recording || transcribing
                       ? "La copia del audio se borra tras transcribir. Revisa el texto antes de enviarlo."
-                      : "Las propuestas se revisan antes de guardar. Notas y visitas quedan en este sobremesa."}
+                      : "Las propuestas se revisan antes de guardar. Notas y visitas se guardan en tu cuenta y en el sobremesa."}
                   </p>
                 </section>
                 <aside className="ops-context-panel">
@@ -1610,7 +1637,7 @@ export default function OperationsView({
             <p>
               {localPreview
                 ? "Esta sesión conecta tus fichas y PDF reales con el asistente local. Notas, visitas y conversaciones se guardan en este sobremesa."
-                : "Busca un restaurante y pide su diagnóstico al sobremesa. Cuando el PDF esté listo podrás verlo o descargarlo desde aquí."}
+                : "Busca un restaurante y encarga su diagnóstico o análisis completo. Puedes pedirlo también al asistente. El PDF quedará disponible aquí."}
             </p>
             <p>
               Los encargos y documentos quedan guardados en Supabase. Si el mapa
@@ -1619,8 +1646,9 @@ export default function OperationsView({
             </p>
             <p>
               Prospección está en Herramientas, dentro de este espacio. El
-              asistente de voz, las notas y la agenda todavía requieren la
-              sesión local del sobremesa.
+              asistente recibe texto o audio desde el Hub. El PC tiene que estar
+              encendido para responder o transcribir. Las notas y visitas se
+              revisan antes de guardar.
             </p>
             <a
               className="ops-secondary"

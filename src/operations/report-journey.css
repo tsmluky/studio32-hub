@@ -543,3 +543,24 @@
     font-size: 11px;
   }
 }
+
+.ops-report-choice {
+  display: grid;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 650;
+  width: 100%;
+}
+.ops-report-choice select {
+  font: inherit;
+  max-width: 100%;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--ops-line);
+  border-radius: 10px;
+  background: var(--ops-surface);
+  color: inherit;
+}
+.ops-journey-library > div {
+  flex-wrap: wrap;
+}

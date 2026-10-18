@@ -22,7 +22,14 @@ import type {
 import "./report-journey.css";
 
 const pending = (j: ReportJob) => ["queued", "running"].includes(j.status);
-export default function ReportJourney() {
+export default function ReportJourney({
+  focusJob = "",
+}: {
+  focusJob?: string;
+}) {
+  const [reportType, setReportType] = useState<"diagnostico" | "completo">(
+    "diagnostico",
+  );
   const [query, setQuery] = useState(""),
     [city, setCity] = useState("Valencia"),
     [web, setWeb] = useState("");
@@ -83,6 +90,12 @@ export default function ReportJourney() {
       w.status !== "offline" && Date.now() - Date.parse(w.last_seen) < 75000,
   );
   const doc = state?.documents.find((d) => d.id === report?.result?.documentId);
+  useEffect(() => {
+    if (focusJob) {
+      setReportId(focusJob);
+      void refresh();
+    }
+  }, [focusJob, refresh]);
   function resume(j: ReportJob) {
     if (j.kind === "lookup") {
       setLookupId(j.id);
@@ -137,16 +150,21 @@ export default function ReportJourney() {
       command.current = false;
     }
   }
-  async function generate() {
-    if (!selected || command.current) return;
+  async function generate(saved?: Document) {
+    const target = saved?.business || selected;
+    if (!target || command.current) return;
     command.current = true;
     setBusy(true);
     setError("");
     try {
       const r = await request<{ id: string }>("/journey/generate", {
-        lookupId,
-        candidateId: selected.id,
-        requestKey: key("report", `${lookupId}|${selected.id}`),
+        lookupId: saved ? null : lookupId,
+        candidateId: saved?.business_key || target.id,
+        reportType: saved ? "completo" : reportType,
+        requestKey: key(
+          "report",
+          `${saved ? "" : lookupId}|${target.id}|${saved ? "completo" : reportType}`,
+        ),
       });
       setReportId(r.id);
       requestKey.current = null;
@@ -237,7 +255,7 @@ export default function ReportJourney() {
         <div>
           <span className="ops-eyebrow">DE LA CALLE A LA VISITA</span>
           <h2 id="journey-title">Un restaurante. Tu próxima oportunidad.</h2>
-          <p>Búscalo, confirma el local y llévate su diagnóstico en PDF.</p>
+          <p>Búscalo, confirma el local y elige qué informe necesitas.</p>
         </div>
         <span className={`ops-badge ${online ? "" : "muted"}`}>
           <Monitor size={14} />
@@ -408,9 +426,15 @@ export default function ReportJourney() {
       {selected && !reportId && (
         <div className="ops-journey-confirm">
           <div>
-            <strong>Diagnóstico para la visita</strong>
+            <strong>
+              {reportType === "completo"
+                ? "Análisis completo de la web"
+                : "Diagnóstico para la visita"}
+            </strong>
             <p>
-              1 página A4 · web actual y oportunidades de mejora · PDF privado
+              {reportType === "completo"
+                ? "Todos los puntos, evidencias y soluciones · PDF privado"
+                : "1 página A4 · web actual y oportunidades de mejora · PDF privado"}
             </p>
             <a
               href={selected.web || selected.sourceUrl}
@@ -420,13 +444,36 @@ export default function ReportJourney() {
               Comprobar la web del local <ExternalLink size={13} />
             </a>
           </div>
+          <label className="ops-report-choice">
+            Tipo de informe
+            <select
+              value={reportType}
+              onChange={(e) =>
+                setReportType(e.target.value as "diagnostico" | "completo")
+              }
+            >
+              <option value="diagnostico">
+                Diagnóstico · resumen de una página
+              </option>
+              <option value="completo">
+                Análisis completo · evidencias y plan de arreglos
+              </option>
+            </select>
+          </label>
           <button
             className="ops-primary"
             disabled={busy || !selected.web}
             onClick={() => void generate()}
           >
-            Preparar diagnóstico <ArrowRight size={16} />
+            Preparar{" "}
+            {reportType === "completo" ? "análisis completo" : "diagnóstico"}{" "}
+            <ArrowRight size={16} />
           </button>
+
+          <p>
+            El completo analiza la web actual. No incluye una web nueva ni
+            mediciones de antes/después o recomendaciones de IA.
+          </p>
           {!selected.web && (
             <p>
               Necesitamos confirmar su web para analizarla. Selecciona otro
@@ -445,8 +492,10 @@ export default function ReportJourney() {
             <span className="ops-eyebrow">LISTO PARA TU VISITA</span>
             <h3>{doc.business.name}</h3>
             <p>
-              Diagnóstico · {date(doc.generated_at)} ·{" "}
-              {Math.round(doc.bytes / 1024)} KB
+              {doc.report_type === "completo"
+                ? "Análisis completo"
+                : "Diagnóstico"}{" "}
+              · {date(doc.generated_at)} · {Math.round(doc.bytes / 1024)} KB
               {report?.result?.cached ? " · recuperado de tus informes" : ""}
             </p>
           </div>
@@ -512,7 +561,7 @@ export default function ReportJourney() {
       {!!state?.documents.length && (
         <div className="ops-journey-library">
           <div className="ops-list-caption">
-            TUS DIAGNÓSTICOS <span>Disponibles aunque el PC esté apagado</span>
+            TUS INFORMES <span>Disponibles aunque el PC esté apagado</span>
           </div>
           {state.documents.slice(0, 12).map((d) => (
             <div key={d.id}>
@@ -520,12 +569,15 @@ export default function ReportJourney() {
               <span>
                 <strong>{d.business.name}</strong>
                 <small>
-                  {d.business.city} · {date(d.generated_at)}
+                  {d.report_type === "completo"
+                    ? "Análisis completo"
+                    : "Diagnóstico"}{" "}
+                  · {d.business.city} · {date(d.generated_at)}
                 </small>
               </span>
               <button
                 className="ops-icon-button"
-                aria-label={`Descargar diagnóstico de ${d.business.name}`}
+                aria-label={`Descargar ${d.report_type === "completo" ? "análisis completo" : "diagnóstico"} de ${d.business.name}`}
                 disabled={!!opening}
                 onClick={() => void open(d, true)}
               >
@@ -535,6 +587,20 @@ export default function ReportJourney() {
                   <Download size={18} />
                 )}
               </button>
+              {d.report_type !== "completo" &&
+                !state.documents.some(
+                  (other) =>
+                    other.business_key === d.business_key &&
+                    other.report_type === "completo",
+                ) && (
+                  <button
+                    className="ops-secondary"
+                    disabled={busy}
+                    onClick={() => void generate(d)}
+                  >
+                    Pedir completo
+                  </button>
+                )}
             </div>
           ))}
         </div>

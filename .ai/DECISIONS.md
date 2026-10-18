@@ -967,3 +967,10 @@ Más/Herramientas monta la Prospección existente dentro del shell nuevo; archiv
 Activar `useOutreach` al abrir la herramienta es parte de la integración, no basta con montar su componente vacío.
 Se comprueban campañas reales e historial (274), sin tocar envíos. El inicio remoto destaca diagnósticos y desactiva
 en ficha las acciones que todavía solo existen en local. La voz no se presenta como operativa remotamente.
+
+
+## 2026-10-18 · Conectar el asistente remoto por una cola propia
+
+El Hub publicado solo conectaba diagnósticos; el asistente seguía en loopback. Se añade cola `ops_assistant_*`, snapshots privados por usuario y worker saliente independiente del de informes. Qwen y Whisper siguen en el PC. Cada miembro tiene SQLite separado; claves de servicio solo en el worker. No se amplían miembros ni permisos sobre outreach o reservas. Las notas/visitas continúan con revisión explícita.
+
+El análisis completo remoto revisa la web actual, incluye cada comprobación, evidencias y plan, con diseño A4 del motor. No genera web nueva ni simula el antes/después o mediciones en seis idiomas que todavía no se hayan realizado. Tipos y cachés separados de diagnóstico. PDF privado; no confundir encargo en cola con documento disponible.
