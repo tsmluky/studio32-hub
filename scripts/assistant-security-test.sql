@@ -7,10 +7,12 @@ do $$begin
  if exists(select 1 from storage.buckets where id in ('studio32-reports','studio32-audio') and public) then raise exception 'Bucket público';end if;
 end $$;
 insert into public.ops_assistant_threads(owner_id,thread,payload) select user_id,'test-private','{"messages":[{"content":"privado"}]}' from assistant_test_users where n=1;
+insert into storage.objects(bucket_id,name) select 'studio32-audio',user_id::text || '/22222222-2222-4222-8222-222222222222' from assistant_test_users where n=1;
 select set_config('request.jwt.claim.sub',(select user_id::text from assistant_test_users where n=2),true);
 set local role authenticated;
 do $$begin
  if exists(select 1 from public.ops_assistant_threads where thread='test-private')then raise exception 'Conversación ajena visible';end if;
+ if exists(select 1 from storage.objects where bucket_id='studio32-audio' and name like '%22222222-2222-4222-8222-222222222222') then raise exception 'Audio ajeno visible';end if;
 end $$;
 reset role;
 select set_config('request.jwt.claim.sub',(select user_id::text from assistant_test_users where n=1),true);

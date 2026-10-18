@@ -14,7 +14,9 @@ const baseURL = "http://127.0.0.1:11435",
   model = "qwen3.5:4b";
 const instances = new Map();
 let stopping = false,
-  active = null;
+  active = null,
+  lastHeartbeat = 0,
+  lastActivity = "";
 await mkdir(work, { recursive: true });
 for (const s of ["SIGINT", "SIGTERM"])
   process.on(s, () => {
@@ -36,17 +38,19 @@ const voiceReady = () =>
     () => false,
   );
 async function heartbeat() {
+  const activity = stopping ? "offline" : active?.id || "idle";
+  if (activity === lastActivity && Date.now() - lastHeartbeat < 15000) return;
   checked(
-    await cloud
-      .from("ops_assistant_workers")
-      .upsert({
-        id: "sobremesa-asistente",
-        last_seen: new Date().toISOString(),
-        status: stopping ? "offline" : active ? "working" : "idle",
-        model_ready: !stopping && (await health()),
-        voice_ready: !stopping && (await voiceReady()),
-      }),
+    await cloud.from("ops_assistant_workers").upsert({
+      id: "sobremesa-asistente",
+      last_seen: new Date().toISOString(),
+      status: stopping ? "offline" : active ? "working" : "idle",
+      model_ready: !stopping && (await health()),
+      voice_ready: !stopping && (await voiceReady()),
+    }),
   );
+  lastHeartbeat = Date.now();
+  lastActivity = activity;
 }
 async function catalogue() {
   const docs = checked(
@@ -271,7 +275,7 @@ while (!stopping) {
     await log("Conexión pendiente: " + e.message);
   }
   if (process.argv.includes("--once")) break;
-  await new Promise((r) => setTimeout(r, 2000));
+  await new Promise((r) => setTimeout(r, 4000));
 }
 stopping = true;
 await heartbeat().catch(() => {});

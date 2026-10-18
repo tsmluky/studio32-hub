@@ -182,17 +182,7 @@ def generate(business, out, report_type='diagnostico'):
         os.environ[key] = ''
     from visibilidad import auditor, config, gancho, ranking, hoja, cliente
     emit('progress', stage='Leyendo su web', progress=25)
-    # Reuse only this business's recently saved audit, never a ranking row measured on another day.
-    audit = None
-    reuse = business.get('_audit_file')
-    if reuse:
-        saved = Path(reuse).resolve()
-        jobs_root = (ROOT / '.local/report-worker/jobs').resolve()
-        if not saved.is_relative_to(jobs_root): raise ValueError('Auditoría fuera de la carpeta de encargos.')
-        data = json.loads(saved.read_text(encoding='utf-8'))
-        if data.get('url') == business['web'] and data.get('nombre') == business['name'] and time.time()-saved.stat().st_mtime < 3600:
-            audit = data
-    audit = audit or auditor.auditar(business['web'], business['name'], ciudad=business.get('city') or 'Valencia', max_paginas=8)
+    audit = auditor.auditar(business['web'], business['name'], ciudad=business.get('city') or 'Valencia', max_paginas=8)
     checks = {c['id']: c for c in audit['checks']}
     live = checks.get('web_viva', {})
     if live.get('estado') != 'ok' or 'OJO:' in str(live.get('evidencia', '')):

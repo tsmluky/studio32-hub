@@ -157,10 +157,11 @@ export default function OperationsView({
     if (
       tab === "businesses" &&
       selected &&
+      !focusJob &&
       window.matchMedia("(max-width:720px)").matches
     )
       detail.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, [tab, selected]);
+  }, [tab, selected, focusJob]);
   useEffect(
     () => () => {
       if (recordingTimer.current) clearInterval(recordingTimer.current);
@@ -260,6 +261,7 @@ export default function OperationsView({
     }
   }
   function openBusiness(b: Business) {
+    setFocusJob("");
     setSelected(b.id);
     setTab("businesses");
     setError("");
@@ -392,6 +394,7 @@ export default function OperationsView({
               key={n.id}
               className={tab === n.id ? "active" : ""}
               onClick={() => {
+                setFocusJob("");
                 setTab(n.id);
                 setError("");
               }}
@@ -1593,6 +1596,7 @@ export default function OperationsView({
             className={tab === n.id ? "active" : ""}
             aria-current={tab === n.id ? "page" : undefined}
             onClick={() => {
+              setFocusJob("");
               setTab(n.id);
               setError("");
             }}

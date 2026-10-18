@@ -1,6 +1,6 @@
 # Estado — studio32-hub
 
-> Se **sobrescribe**, no se acumula. Última actualización: 2026-10-18 (prueba autenticada real, Asiers y navegación corregida).
+> Se **sobrescribe**, no se acumula. Última actualización: 2026-10-18 (asistente remoto y análisis completo probados con sesión pública).
 
 ## Qué es
 
@@ -14,19 +14,19 @@ El código actual conserva los tres miembros originales; no se ha cambiado su ac
 - `Abrir mi estudio.cmd` arranca interfaz, servicio y Ollama; `Detener mi estudio.cmd` cierra solo sus procesos.
   URL `http://127.0.0.1:4310/mesa.html`. Preview local sin credenciales, excluida del build público.
 - Lectura real de 8 fichas y 8 PDF del motor, con fuentes/fechas y prioridad de seguridad. No modifica el motor.
-  Qwen3.5 4B usa el proveedor canónico del agente para buscar, devolver PDF y proponer notas/visitas.
-- Notas, visitas, conversaciones, propuestas y cola en SQLite local, fuera de payload/Git. Validación externa de
+  En la preview, Qwen3.5 4B consulta esas fichas. En producción, el catálogo sale de los documentos del workspace.
+- Notas, visitas, conversaciones y propuestas en SQLite local por usuario; snapshots/cola remotos privados en Supabase, fuera de payload/Git. Validación externa de
   negocio/hora, confirmación editable, transacciones e idempotencia. Contexto del modelo acotado.
 - Voz instalada: faster-whisper 1.2.1 + PyAV 16.1.0 + Whisper small CPU int8. Grabación/adjunto → texto editable;
-  sin voz de salida. Audio sintético transcrito en ~4,15 s; voz/micrófono de Pancho pendientes de prueba.
-- TypeScript/build correctos, 21 pruebas núcleo/política y 8 comprobaciones HTTP. Navegador real: búsqueda→informe,
+  sin voz de salida. Audio sintético adjuntado desde el Hub publicado → Whisper PC → borrador editable, corregido y enviado; copia borrada. Voz/micrófono del teléfono pendientes de prueba.
+- TypeScript/build correctos, 22 pruebas núcleo/política y 8 comprobaciones HTTP. Navegador real: búsqueda→informe,
   propuesta doble, descarte y nota guardada/recuperada (nota de prueba retirada con copia; visitas reales: ninguna).
 - Nombre/ciudad → confirmar local → encargo → progreso → PDF. Cola autenticada `ops_report_*`, RLS por propietario/workspace,
   bucket privado y worker saliente con leases. Migración aditiva aplicada solo al Supabase del Hub.
 - Probado con Unsushi sin ficha preparada: auditoría actual → PDF A4 → subida privada → descarga idéntica por SHA-256.
   Caché siete días, fuentes guardadas y fallback OSM moderado. Sin APIs de pago, puertos públicos ni cambios a miembros/outreach.
-- Cliente publicado usa sesión Supabase real; preview usa pasarela loopback sin claves en navegador. Voz/notas/visitas locales.
-  Publicado en `hub.studio32.es` con autorización de Pancho: push `a7d6b17`, Cloudflare Pages correcto,
+- Cliente publicado usa sesión Supabase real; preview usa pasarela loopback sin claves en navegador. Asistente, voz y propuestas conectados por cola propia con aislamiento por usuario.
+  Publicado en `hub.studio32.es` con autorización de Pancho: push `9969dc7`, Cloudflare Pages correcto,
   HTML/JS/CSS públicos verificados con RPC nuevas, proyecto Supabase correcto y sin credencial privada del worker.
   Falta aceptación desde teléfono físico/4G/impresión; no se atribuye una prueba de teléfono real a la vista responsive.
   Worker activo; tras reiniciar PC hay que arrancarlo. Operación/pruebas: `docs/INFORMES-DESDE-MOVIL.md`.
@@ -43,7 +43,11 @@ El código actual conserva los tres miembros originales; no se ha cambiado su ac
 - Corrección tras nueva prueba de Pancho: asistente y completo no estaban conectados. Ahora se añaden cola `ops_assistant_*`,
   snapshots privados por usuario, Qwen/Whisper locales y worker independiente. Informe completo de web actual, todos los checks
   y plan de arreglos, sin simular antes/después ni recomendaciones. SQL/RLS y 22 pruebas de núcleo/política correctas.
-  Comprobación pública autenticada del nuevo recorrido pendiente antes de declarar el hito terminado.
+  Prueba pública autenticada real a 375 px: pedir completo al agente → tarjeta de encargo → PC → Storage → descarga por botón
+  y por enlace del agente. Asiers: 11 páginas A4, 27 checks incluidos, 626.486 bytes, hashes idénticos. PDF renderizado/revisado.
+  Pedido directo «Pedir completo» de Unsushi también completado desde la biblioteca pública, recuperado al cambiar de pantalla.
+  Propuesta de nota remota revisada y descartada sin guardarla. Audio sintético confundió el nombre: corrección editable comprobada.
+  Evidencias `.local/report-worker/assistant-complete-e2e.json`. No sustituye probar micrófono/Safari/Chrome/4G del teléfono real.
 
 **Se publica solo: push a `main` y Cloudflare Pages lo despliega.** Nada que ejecutar.
 El repo gemelo `studio32-hub-live` **está muerto** — era el despliegue por GitHub Pages,

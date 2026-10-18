@@ -30,7 +30,7 @@ npm run fn:deploy                   # despliega la Edge Function de envio
 
 El recorrido personal local se abre con `Abrir mi estudio.cmd` y se detiene con `Detener mi estudio.cmd`.
 Interfaz en 4310, servicio en 4311 y Ollama en 11435; solo loopback. Voz y datos propios fuera de Git.
-Informes nuevos: cola Supabase `ops_report_*`, RLS y worker saliente. Voz/notas siguen locales.
+Informes nuevos: cola Supabase `ops_report_*`, RLS y worker saliente. Asistente/voz/notas remotos: cola `ops_assistant_*`, worker separado y snapshots privados por usuario. Qwen y Whisper siguen locales.
 Operación, caché, fuentes y permisos: `docs/INFORMES-DESDE-MOVIL.md`.
 Operación, pruebas y límites: `docs/MI-ESTUDIO.md`.
 
