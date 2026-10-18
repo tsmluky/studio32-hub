@@ -23,7 +23,11 @@ para restaurantes en España: búsqueda explícita, caché persistente siete dí
 separación superior a un segundo. La [política pública](https://operations.osmfoundation.org/policies/nominatim/)
 exige caché, identificación, atribución y máximo global de una petición/segundo; prohíbe autocomplete y extracción
 sistemática. Endpoint STUDIO32_NOMINATIM_URL configurable; revisar proveedor al crecer el equipo/volumen.
-Puede faltar el local o su web; no inventa datos. PDF de la misma versión reutilizado siete días. Caducar no borra
+Puede faltar el local o su web; no inventa datos. En ese caso permite indicar una web pública: el PC comprueba
+el nombre contra su título o datos estructurados antes de devolver un candidato seleccionable. Dirección/ciudad
+no confirmadas quedan vacías; no se inventan coordenadas. La web verificada se guarda en `.local/report-worker/known-webs.json`
+para futuras búsquedas. No integra un buscador general de Internet ni garantiza encontrar cualquier negocio solo por nombre.
+PDF de la misma versión reutilizado siete días. Caducar no borra
 documentos; no hay todavía archivo/borrado automático ni control de cuotas Storage. Usa capacidad Supabase existente.
 
 ## Arquitectura y permisos
@@ -61,6 +65,31 @@ con copia local; resultado final conservado. Sin mensajes ni visitas. Publicado;
 node scripts/probar-informes-remotos.mjs
 node node_modules/supabase/dist/supabase.js db query --linked --file scripts/report-security-test.sql -o json
 ..\..\Visibilidad-IA\.venv\Scripts\python scripts/report-motor-test.py
+..\..\Visibilidad-IA\.venv\Scripts\python scripts/report-discovery-test.py
 npx tsc --noEmit
 npm run build:static
 ```
+
+## Corrección y prueba con sesión real del Hub público
+
+La primera publicación no había probado de extremo a extremo la UI autenticada: la pasarela local usaba otro
+RPC con privilegios de servicio. No equivalía a validar la sesión pública. Pancho cuestionó esta confianza.
+
+En su sesión pública se reprodujo la búsqueda «Asiers burger» sin resultados. La web existe, pero no estaba
+en las fuentes consultadas. Se añadió la continuación por web, sin depender de scraping de buscadores que
+pueden bloquear o restringir su uso. RPC autenticada nueva `ops_enqueue_lookup_web`; migración aditiva aplicada.
+El subproceso conserva los bloqueos de IP privada/protocolos y no recibe claves del worker.
+
+Prueba real a 375 px: búsqueda vacía → web indicada → nombre comprobado → selección → encargo desde el cliente
+público → PC genera PDF nuevo (sin caché) → Storage → enlace y botón de descarga del navegador. Resultado Asiers,
+384.741 bytes, SHA-256 idéntico. PDF A4 de una página revisado visualmente. Evidencia local en
+`.local/report-worker/authenticated-e2e.json` y `produccion-asiers-descargado.pdf`.
+
+Worker detenido antes de enviar otra búsqueda: encargo en cola conservado al salir de la pantalla, completado
+al reiniciar el worker. PDF ya existente descargado mientras estaba detenido. Evidencia `recovery-test.json`.
+La caída en mitad de una auditoría activa no quedó ensayada: terminó antes de poder interrumpirla.
+Las leases tienen validación SQL, pero no se presenta ese caso como probado en un proceso real.
+
+Más y Herramientas ahora abren herramientas dentro del mismo entorno. Prospección carga sus datos al abrirse;
+campañas e historial de 274 correos comprobados. No se envió, aprobó, descartó ni cambió el envío automático.
+Aceptación desde Safari/Chrome del teléfono físico e impresión en papel siguen pendientes.

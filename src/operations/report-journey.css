@@ -114,6 +114,11 @@
 .ops-embedded-tool .surface {
   border-color: var(--ops-line);
 }
+@media (max-width: 920px) {
+  .ops-embedded-tool .outreach-campaign-picker {
+    flex: 0 0 auto;
+  }
+}
 @media (max-width: 850px) {
   .ops-tool-cards {
     grid-template-columns: 1fr;

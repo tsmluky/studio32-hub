@@ -951,3 +951,19 @@ hasta `a7d6b17` en `origin/main`; Cloudflare Pages informa despliegue correcto. 
 el recorrido nuevo y la configuración del Supabase del Hub, sin la credencial privada del worker.
 Sobremesa conectado y diagnóstico privado disponible. Login con los perfiles existentes conservado.
 La prueba física de descarga/impresión corresponde al siguiente paso con Pancho.
+
+## 2026-10-18 · Probar la sesión pública y cerrar el salto al Hub anterior
+
+Pancho cuestiona la validación y detecta que Más devuelve al diseño antiguo. Se diferencia la prueba previa
+de la pasarela local de una prueba con JWT real en la UI publicada. Pancho inicia sesión personalmente;
+se ensaya en una pestaña aparte, sin leer su PIN ni extraer tokens.
+
+El caso real Asiers no aparece en mapa/registro. No se finge que esas fuentes son un buscador universal.
+Salida por web indicada, verificación de identidad en título/JSON-LD y caché propia de fuentes comprobadas.
+Sin proveedores de búsqueda de pago, automatización de ChatGPT ni evasión de CAPTCHA. El mapa admite fast_food
+para no descartar hamburgueserías clasificadas así. Asiers genera un PDF nuevo descargado por el navegador real.
+
+Más/Herramientas monta la Prospección existente dentro del shell nuevo; archivo anterior solo por enlace explícito.
+Activar `useOutreach` al abrir la herramienta es parte de la integración, no basta con montar su componente vacío.
+Se comprueban campañas reales e historial (274), sin tocar envíos. El inicio remoto destaca diagnósticos y desactiva
+en ficha las acciones que todavía solo existen en local. La voz no se presenta como operativa remotamente.

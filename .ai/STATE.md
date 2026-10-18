@@ -1,6 +1,6 @@
 # Estado — studio32-hub
 
-> Se **sobrescribe**, no se acumula. Última actualización: 2026-10-18 (recorrido publicado; aceptación desde teléfono físico pendiente).
+> Se **sobrescribe**, no se acumula. Última actualización: 2026-10-18 (prueba autenticada real, Asiers y navegación corregida).
 
 ## Qué es
 
@@ -30,6 +30,16 @@ El código actual conserva los tres miembros originales; no se ha cambiado su ac
   HTML/JS/CSS públicos verificados con RPC nuevas, proyecto Supabase correcto y sin credencial privada del worker.
   Falta aceptación desde teléfono físico/4G/impresión; no se atribuye una prueba de teléfono real a la vista responsive.
   Worker activo; tras reiniciar PC hay que arrancarlo. Operación/pruebas: `docs/INFORMES-DESDE-MOVIL.md`.
+- Verificación posterior a la crítica de Pancho: antes faltaba probar la UI pública autenticada. Con su sesión iniciada,
+  reproducido «Asiers burger» sin resultados. El buscador no es un buscador general de Internet: mapa/registro tienen lagunas.
+  Añadida salida para indicar web, comprobar nombre en título/JSON-LD y guardarla en caché propia para búsquedas posteriores.
+- E2E real Asiers: búsqueda vacía → web indicada/verificada → selección → encargo público → auditoría/PDF nuevo en PC
+  → descarga desde enlace y botón del navegador autenticado. 384.741 bytes, SHA-256 igual a Storage, A4 renderizado/revisado.
+  Worker detenido con otro encargo en cola: persistió al salir de pantalla, terminó tras reinicio; PDF previo descargable.
+  No se completó un ensayo de caída durante una auditoría activa (terminó antes de la interrupción). No atribuirlo a lo probado.
+- Más/Herramientas conserva la navegación nueva y monta Prospección dentro. Activación de consultas/subscripción solo al abrirla;
+  campañas reales e historial de 274 correos comprobados, sin aprobar, enviar ni modificar automatización.
+  Inicio remoto prioriza diagnósticos; acciones de notas/visitas/asistente locales se muestran desactivadas en fichas remotas.
 
 **Se publica solo: push a `main` y Cloudflare Pages lo despliega.** Nada que ejecutar.
 El repo gemelo `studio32-hub-live` **está muerto** — era el despliegue por GitHub Pages,

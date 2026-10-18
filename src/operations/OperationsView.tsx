@@ -810,7 +810,9 @@ export default function OperationsView({
               <div className="ops-footer-note">
                 <span className="ops-dot" />
                 {connected
-                  ? "Datos del motor local. Las fichas conservan su fecha y su fuente."
+                  ? localPreview
+                    ? "Datos del motor local. Las fichas conservan su fecha y su fuente."
+                    : "Informes privados de tu estudio. Cada documento conserva su fecha y su fuente."
                   : "Tu espacio está preparado para conectar el sobremesa."}
                 <span>HECHO PARA TU FORMA DE TRABAJAR ↗</span>
               </div>
@@ -932,6 +934,12 @@ export default function OperationsView({
                       <div className="ops-detail-actions">
                         <button
                           className="ops-primary"
+                          disabled={!localPreview}
+                          title={
+                            !localPreview
+                              ? "Asistente disponible en la sesión del sobremesa"
+                              : undefined
+                          }
                           onClick={() => {
                             setTab("assistant");
                             setDraft(
@@ -944,7 +952,12 @@ export default function OperationsView({
                         </button>
                         <button
                           className="ops-secondary"
-                          disabled={!connected}
+                          disabled={!connected || !localPreview}
+                          title={
+                            !localPreview
+                              ? "Las visitas siguen disponibles en la sesión del sobremesa"
+                              : undefined
+                          }
                           onClick={() => void propose("schedule_visit")}
                         >
                           <CalendarDays size={17} />
@@ -952,7 +965,12 @@ export default function OperationsView({
                         </button>
                         <button
                           className="ops-secondary"
-                          disabled={!connected}
+                          disabled={!connected || !localPreview}
+                          title={
+                            !localPreview
+                              ? "Las notas siguen disponibles en la sesión del sobremesa"
+                              : undefined
+                          }
                           onClick={() => void propose("add_note")}
                         >
                           <NotebookPen size={17} />
