@@ -1,3 +1,137 @@
+.ops-web-fallback {
+  margin-top: 18px;
+  background: #f6f7ef;
+  border: 1px solid var(--ops-line);
+  padding: 17px;
+  border-radius: 10px;
+}
+.ops-web-fallback summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+}
+.ops-web-fallback p {
+  font-size: 12px;
+  color: #6c7867;
+  margin: 12px 0;
+}
+.ops-web-fallback > a {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 12px;
+  text-decoration: underline;
+  margin-bottom: 15px;
+}
+.ops-web-fallback form {
+  display: flex;
+  gap: 12px;
+  align-items: end;
+}
+.ops-web-fallback label {
+  flex: 1;
+  font-size: 11px;
+  font-weight: 600;
+}
+.ops-web-fallback input {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  border: 1px solid #dce2d7;
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 6px;
+  background: #fffefa;
+  font: inherit;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+.ops-web-fallback button {
+  min-height: 44px;
+  white-space: nowrap;
+}
+.ops-web-fallback input:focus-visible {
+  outline: 2px solid #96ad7a;
+  outline-offset: 2px;
+}
+.ops-tool-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-top: 30px;
+}
+.ops-tool-cards > button {
+  display: flex;
+  align-items: center;
+  gap: 17px;
+  border: 1px solid var(--ops-line);
+  background: var(--ops-paper);
+  border-radius: 14px;
+  padding: 25px;
+  text-align: left;
+  min-width: 0;
+  color: var(--ops-ink);
+}
+.ops-tool-cards > button > span:nth-child(2) {
+  flex: 1;
+  min-width: 0;
+}
+.ops-tool-cards strong {
+  display: block;
+  font-size: 17px;
+  letter-spacing: -0.025em;
+}
+.ops-tool-cards small {
+  display: block;
+  font-size: 12px;
+  line-height: 1.65;
+  color: #6f7a68;
+  margin-top: 7px;
+}
+.ops-tool-cards > button:hover {
+  border-color: #a2b88b;
+  box-shadow: 0 7px 24px #243b3408;
+}
+.ops-tools-note {
+  display: flex;
+  gap: 9px;
+  color: #78816f;
+  font-size: 12px;
+  margin: 24px 0;
+}
+.ops-archive-link {
+  font-size: 11px;
+  margin-top: 32px;
+  color: #7c8575;
+}
+.ops-embedded-tool {
+  margin-top: 18px;
+}
+.ops-embedded-tool .page {
+  padding: 0;
+  max-width: none;
+}
+.ops-embedded-tool .surface {
+  border-color: var(--ops-line);
+}
+@media (max-width: 850px) {
+  .ops-tool-cards {
+    grid-template-columns: 1fr;
+  }
+  .ops-web-fallback form {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .ops-web-fallback input {
+    font-size: 16px;
+  }
+  .ops-tool-cards > button {
+    padding: 21px 17px;
+  }
+  .ops-tool-cards strong {
+    font-size: 16px;
+  }
+}
 .ops-journey {
   background: var(--ops-paper);
   border: 1px solid var(--ops-line);

@@ -33,7 +33,8 @@ do $$declare a uuid;b uuid;k uuid:=gen_random_uuid();begin
  a:=public.ops_enqueue_lookup('Prueba idempotencia','Valencia',k);
  b:=public.ops_enqueue_lookup('Prueba idempotencia','Valencia',k);
  if a<>b then raise exception 'Se duplicó una solicitud reintentada';end if;
- a:=public.ops_enqueue_lookup_web('Prueba web','Valencia','https://example.org/',k:=gen_random_uuid());
+ k:=gen_random_uuid();
+ a:=public.ops_enqueue_lookup_web('Prueba web','Valencia','https://example.org/',k);
  b:=public.ops_enqueue_lookup_web('Prueba web','Valencia','https://example.org/',k);
  if a<>b then raise exception 'Se duplicó una web reintentada';end if;
  if not exists(select 1 from public.ops_report_jobs where id=a and payload->>'web'='https://example.org/') then raise exception 'No conservó la web para verificarla';end if;

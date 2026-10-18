@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { ReactNode } from "react";
+import OperationsTools from "./OperationsTools";
 import {
   ArrowDownToLine,
   ArrowRight,
@@ -35,7 +37,7 @@ import type { Business, Proposal, Snapshot } from "./api";
 import SecurityNotice from "./SecurityNotice";
 import "./operations.css";
 
-type Tab = "home" | "businesses" | "assistant" | "activity";
+type Tab = "home" | "businesses" | "assistant" | "activity" | "tools";
 const navigation = [
   { id: "home", label: "Mi mesa", icon: Home },
   { id: "businesses", label: "Negocios", icon: Store },
@@ -59,11 +61,13 @@ export default function OperationsView({
   localPreview = false,
   displayName = "Francisco",
   onSignOut,
+  outreachContent,
 }: {
   onOpenLegacy?: () => void;
   localPreview?: boolean;
   displayName?: string;
   onSignOut?: () => void | Promise<void>;
+  outreachContent?: ReactNode;
 }) {
   configureTransport(localPreview);
   const [tab, setTab] = useState<Tab>("home"),
@@ -395,10 +399,7 @@ export default function OperationsView({
         </nav>
         <div className="ops-nav-divider" />
         <span className="ops-nav-label">TUS RECURSOS</span>
-        <button
-          className="ops-side-link"
-          onClick={() => (onOpenLegacy ? onOpenLegacy() : setHelp(true))}
-        >
+        <button className="ops-side-link" onClick={() => setTab("tools")}>
           <Wrench size={19} />
           Herramientas
           <ExternalLink size={13} />
@@ -445,7 +446,11 @@ export default function OperationsView({
         <header className="ops-topbar">
           <div className="ops-breadcrumb">
             Studio32 <span>/</span>{" "}
-            <strong>{navigation.find((n) => n.id === tab)?.label}</strong>
+            <strong>
+              {tab === "tools"
+                ? "Herramientas"
+                : navigation.find((n) => n.id === tab)?.label}
+            </strong>
           </div>
           <div className="ops-top-right">
             <span className="ops-local">
@@ -468,6 +473,13 @@ export default function OperationsView({
           </div>
         </header>
         <main className={`ops-main ops-${tab}`}>
+          {tab === "tools" && (
+            <OperationsTools
+              outreach={outreachContent}
+              onReports={() => setTab("businesses")}
+              onArchive={onOpenLegacy}
+            />
+          )}
           {connectionError && (
             <div className="ops-connection" role="status">
               <Monitor size={22} />
@@ -549,52 +561,65 @@ export default function OperationsView({
                   }).format(new Date())}
                 </span>
               </div>
-              <button
-                className="ops-journey-entry"
-                onClick={() => {
-                  setTab("businesses");
-                  setSelected("");
-                }}
-              >
-                <span className="ops-document-icon">
-                  <Search size={23} />
-                </span>
-                <span>
-                  <strong>Prepara tu próxima visita</strong>
-                  <small>
-                    Busca un restaurante nuevo y llévate su diagnóstico en PDF.
-                  </small>
-                </span>
-                <ArrowRight size={20} />
-              </button>
+              {localPreview && (
+                <button
+                  className="ops-journey-entry"
+                  onClick={() => {
+                    setTab("businesses");
+                    setSelected("");
+                  }}
+                >
+                  <span className="ops-document-icon">
+                    <Search size={23} />
+                  </span>
+                  <span>
+                    <strong>Prepara tu próxima visita</strong>
+                    <small>
+                      Busca un restaurante nuevo y llévate su diagnóstico en
+                      PDF.
+                    </small>
+                  </span>
+                  <ArrowRight size={20} />
+                </button>
+              )}
               <div className="ops-home-top">
                 <section className="ops-hero">
                   <div className="ops-hero-top">
                     <span className="ops-hero-label">
-                      <AudioLines size={16} /> TU ASISTENTE
+                      {localPreview ? (
+                        <AudioLines size={16} />
+                      ) : (
+                        <FileText size={16} />
+                      )}{" "}
+                      {localPreview ? "TU ASISTENTE" : "TU PRÓXIMA VISITA"}
                     </span>
                     <span className="ops-hero-star">✳</span>
                   </div>
                   <h2>
-                    ¿Qué movemos
+                    {localPreview ? "¿Qué movemos" : "Del nombre"}
                     <br />
-                    hoy, {displayName}?
+                    {localPreview ? `hoy, ${displayName}?` : "al diagnóstico."}
                   </h2>
                   <p>
-                    Recupera un informe, apunta lo que te han contado
-                    <br className="ops-desktop-break" /> o prepara tu próxima
-                    visita.
+                    {localPreview
+                      ? "Recupera un informe, apunta lo que te han contado o prepara tu próxima visita."
+                      : "Busca un restaurante, prepara su diagnóstico y llévalo contigo para abrir la conversación."}
                   </p>
                   <button
                     className="ops-hero-input"
                     onClick={() => {
-                      setTab("assistant");
-                      setTimeout(() => input.current?.focus(), 50);
+                      setTab(localPreview ? "assistant" : "businesses");
+                      if (localPreview)
+                        setTimeout(() => input.current?.focus(), 50);
                     }}
                   >
-                    <span>Escríbeme o cuéntamelo…</span>
                     <span>
-                      <Mic size={19} />
+                      {localPreview
+                        ? "Escríbeme o cuéntamelo…"
+                        : "Prepara tu próxima visita"}
+                    </span>
+                    <span>
+                      {localPreview ? <Mic size={19} /> : <Search size={19} />}
                       <ArrowRight size={19} />
                     </span>
                   </button>
@@ -609,11 +634,16 @@ export default function OperationsView({
                     </button>
                     <button
                       onClick={() => {
-                        setTab("assistant");
-                        setDraft("¿Qué puedes hacer por mí?");
+                        if (localPreview) {
+                          setTab("assistant");
+                          setDraft("¿Qué puedes hacer por mí?");
+                        } else setTab("tools");
                       }}
                     >
-                      Qué puedes hacer <ArrowRight size={13} />
+                      {localPreview
+                        ? "Qué puedes hacer"
+                        : "Herramientas del estudio"}{" "}
+                      <ArrowRight size={13} />
                     </button>
                   </div>
                 </section>
@@ -1521,7 +1551,11 @@ export default function OperationsView({
             <span>{n.label}</span>
           </button>
         ))}
-        <button onClick={() => (onOpenLegacy ? onOpenLegacy() : setHelp(true))}>
+        <button
+          className={tab === "tools" ? "active" : ""}
+          aria-current={tab === "tools" ? "page" : undefined}
+          onClick={() => setTab("tools")}
+        >
           <Wrench size={21} />
           <span>Más</span>
         </button>
@@ -1551,19 +1585,19 @@ export default function OperationsView({
             <span className="ops-eyebrow">PRIMER RECORRIDO · STUDIO32</span>
             <h2 id="ops-help-title">Tu estudio vive aquí.</h2>
             <p>
-              Esta versión conecta tus fichas y PDF reales con el asistente
-              local. Las notas, visitas y conversaciones se guardan en este
-              sobremesa.
+              {localPreview
+                ? "Esta sesión conecta tus fichas y PDF reales con el asistente local. Notas, visitas y conversaciones se guardan en este sobremesa."
+                : "Busca un restaurante y pide su diagnóstico al sobremesa. Cuando el PDF esté listo podrás verlo o descargarlo desde aquí."}
             </p>
             <p>
-              Busca un negocio, consulta un informe y apunta el próximo paso.
-              Para las visitas, elige la fecha y la hora en la ficha de
-              revisión.
+              Los encargos y documentos quedan guardados en Supabase. Si el mapa
+              no encuentra un local, puedes indicar su web para comprobarla.
+              Revisa el diagnóstico antes de entregarlo.
             </p>
             <p>
-              El acceso desde fuera de casa y la sincronización con Supabase son
-              el siguiente tramo. La prospección sigue disponible en el Hub
-              habitual.
+              Prospección está en Herramientas, dentro de este espacio. El
+              asistente de voz, las notas y la agenda todavía requieren la
+              sesión local del sobremesa.
             </p>
             <a
               className="ops-secondary"

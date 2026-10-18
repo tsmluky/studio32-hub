@@ -1059,7 +1059,12 @@ function App() {
 
   const searchTerm = search.trim().toLocaleLowerCase('es')
 
-  if (view === 'operations') return <OperationsView displayName={activeMember.id === 'pancho' ? 'Francisco' : activeMember.name} onSignOut={signOut} onOpenLegacy={() => selectView('tools')} />
+  if (view === 'operations') return <OperationsView displayName={activeMember.id === 'pancho' ? 'Francisco' : activeMember.name} onSignOut={signOut} onOpenLegacy={() => selectView('today')}
+    outreachContent={<OutreachView campaigns={outreach.campaigns} leads={outreach.leads} messages={outreach.messages}
+      status={outreach.status} error={outreach.error} onReload={outreach.reload} activeMemberId={activeMember.id}
+      onApprove={(messageId, leadId) => void outreach.approveMessage(messageId, leadId, activeMember.id)}
+      onDiscard={(leadId) => void outreach.discardLead(leadId)} onEdit={outreach.updateMessageDraft}
+      onSend={outreach.sendApproved} onEstadoEnvio={outreach.consultarEnvio} onCambiarAutomatico={outreach.cambiarEnvioAutomatico}/>} />
 
   return (
     <div className="hub-shell">

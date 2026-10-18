@@ -24,7 +24,8 @@ import "./report-journey.css";
 const pending = (j: ReportJob) => ["queued", "running"].includes(j.status);
 export default function ReportJourney() {
   const [query, setQuery] = useState(""),
-    [city, setCity] = useState("Valencia");
+    [city, setCity] = useState("Valencia"),
+    [web, setWeb] = useState("");
   const [state, setState] = useState<JourneyState | null>(null),
     [error, setError] = useState(""),
     [connectionError, setConnectionError] = useState(""),
@@ -105,17 +106,24 @@ export default function ReportJourney() {
       requestKey.current = { kind, value, id: crypto.randomUUID() };
     return requestKey.current.id;
   }
-  async function search() {
+  async function search(website = "") {
     if (command.current || !query.trim()) return;
     command.current = true;
     setBusy(true);
     setError("");
     try {
-      const r = await request<{ id: string }>("/journey/search", {
-        query: query.trim(),
-        city: city.trim(),
-        requestKey: key("lookup", `${query.trim()}|${city.trim()}`),
-      });
+      const r = await request<{ id: string }>(
+        website ? "/journey/search-web" : "/journey/search",
+        {
+          query: query.trim(),
+          city: city.trim(),
+          ...(website ? { web: website } : {}),
+          requestKey: key(
+            "lookup",
+            `${query.trim()}|${city.trim()}|${website}`,
+          ),
+        },
+      );
       setLookupId(r.id);
       setSelected(null);
       setReportId("");
@@ -302,8 +310,8 @@ export default function ReportJourney() {
           </div>
           {!lookup.result?.candidates?.length && (
             <p>
-              No encontramos un local con ese nombre. Prueba el nombre comercial
-              y otra ciudad o barrio. No se ha generado ningún diagnóstico.
+              No aparece en las fuentes consultadas. Si tiene web propia,
+              podemos comprobarla y preparar su diagnóstico.
             </p>
           )}
           {lookup.result?.candidates?.map((c) => (
@@ -338,14 +346,63 @@ export default function ReportJourney() {
           <p className="ops-attribution">
             {lookup.result?.attribution} ·{" "}
             <a
-              href="https://www.openstreetmap.org/copyright"
+              href={
+                lookup.result?.sourceUrl ||
+                "https://www.openstreetmap.org/copyright"
+              }
               target="_blank"
               rel="noreferrer"
             >
-              Fuentes y licencia
+              Ver fuente
             </a>
           </p>
         </div>
+      )}
+      {lookup?.status === "succeeded" && !reportId && (
+        <details
+          className="ops-web-fallback"
+          open={
+            !lookup.result?.candidates?.length || (!!selected && !selected.web)
+          }
+        >
+          <summary>
+            {lookup.result?.candidates?.length
+              ? "¿No es este local o falta su web?"
+              : "Continuar con la web del restaurante"}
+          </summary>
+          <p>
+            Las fuentes del mapa no incluyen todos los negocios. Indica su web y
+            comprobaremos que corresponde al nombre.
+          </p>
+          <a
+            href={`https://www.google.com/search?q=${encodeURIComponent(`${query} ${city} web oficial`)}`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Buscar su web <ExternalLink size={13} />
+          </a>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              void search(web.trim());
+            }}
+          >
+            <label>
+              Web del restaurante
+              <input
+                type="url"
+                value={web}
+                onChange={(e) => setWeb(e.target.value)}
+                placeholder="https://restaurante.es"
+                required
+                maxLength={2048}
+              />
+            </label>
+            <button className="ops-secondary" disabled={busy || !web.trim()}>
+              Comprobar esta web <ArrowRight size={15} />
+            </button>
+          </form>
+        </details>
       )}
       {selected && !reportId && (
         <div className="ops-journey-confirm">

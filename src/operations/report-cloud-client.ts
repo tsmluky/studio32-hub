@@ -23,6 +23,7 @@ export type ReportJob = {
     documentId?: string;
     attribution?: string;
     cached?: boolean;
+    sourceUrl?: string;
   };
 };
 export type Document = {
@@ -80,6 +81,17 @@ export async function remoteJourney(
         await db.rpc("ops_enqueue_lookup", {
           p_query: data?.query,
           p_city: data?.city,
+          p_request_key: data?.requestKey,
+        }),
+      ),
+    };
+  if (route === "/journey/search-web")
+    return {
+      id: check(
+        await db.rpc("ops_enqueue_lookup_web", {
+          p_query: data?.query,
+          p_city: data?.city,
+          p_web: data?.web,
           p_request_key: data?.requestKey,
         }),
       ),
