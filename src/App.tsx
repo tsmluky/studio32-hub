@@ -40,12 +40,13 @@ import { isSupabaseConfigured, pinToPassword, supabase } from './supabase'
 import { EmptyState, PageHeading, SectionHeader, StatusBadge } from './ui'
 import ToolsView, { type ToolId, tools } from './ToolsView'
 import OutreachView from './OutreachView'
+import OperationsView from './operations/OperationsView'
 import { useOutreach, useOutreachPulse } from './outreach'
 import type { HubSyncStatus, MemberId } from './types'
 
 
 type ProjectId = string
-type MainView = 'today' | 'tasks' | 'calendar' | 'projects' | 'inbox' | 'library' | 'tools' | ToolId | 'project'
+type MainView = 'operations' | 'today' | 'tasks' | 'calendar' | 'projects' | 'inbox' | 'library' | 'tools' | ToolId | 'project'
 type ProjectTab = 'overview' | 'tasks' | 'conversation' | 'board' | 'files'
 type TaskStatus = 'todo' | 'doing' | 'done'
 type CaptureType = 'task' | 'note' | 'decision' | 'link'
@@ -217,6 +218,7 @@ const initialState: HubState = {
 }
 
 const navigation: Array<{ id: Exclude<MainView, 'project'>; label: string; icon: typeof Home }> = [
+  { id: 'operations', label: 'Mi estudio', icon: Home },
   { id: 'today', label: 'Hoy', icon: Home },
   { id: 'tasks', label: 'Tareas', icon: ListTodo },
   { id: 'calendar', label: 'Calendario', icon: CalendarClock },
@@ -693,7 +695,7 @@ function App() {
       // The Hub still works when service workers are unavailable.
     })
   }, [])
-  const [view, setView] = useState<MainView>('today')
+  const [view, setView] = useState<MainView>('operations')
   const [projectTab, setProjectTab] = useState<ProjectTab>('overview')
   const [captureOpen, setCaptureOpen] = useState(false)
   const [projectEditor, setProjectEditor] = useState<{ mode: 'create' } | { mode: 'edit'; projectId: ProjectId } | null>(null)
@@ -1056,6 +1058,8 @@ function App() {
   }
 
   const searchTerm = search.trim().toLocaleLowerCase('es')
+
+  if (view === 'operations') return <OperationsView displayName={activeMember.id === 'pancho' ? 'Francisco' : activeMember.name} onSignOut={signOut} onOpenLegacy={() => selectView('tools')} />
 
   return (
     <div className="hub-shell">
@@ -1498,8 +1502,8 @@ function Sidebar({
   onSignOut: () => void | Promise<void>
 }) {
   const [mobileMoreOpen, setMobileMoreOpen] = useState(false)
-  const mobilePrimaryIds: Array<Exclude<MainView, 'project'>> = ['today', 'tasks', 'projects', 'tools']
-  const mobileSecondaryIds: Array<Exclude<MainView, 'project'>> = ['calendar', 'inbox', 'library']
+  const mobilePrimaryIds: Array<Exclude<MainView, 'project'>> = ['operations', 'tasks', 'projects', 'tools']
+  const mobileSecondaryIds: Array<Exclude<MainView, 'project'>> = ['today', 'calendar', 'inbox', 'library']
   const mobileMoreActive = mobileSecondaryIds.includes(activeView as Exclude<MainView, 'project'>)
 
   const navigateFromMobile = (target: Exclude<MainView, 'project'>) => {
