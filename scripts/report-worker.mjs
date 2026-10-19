@@ -200,8 +200,8 @@ async function execute(job) {
         .like(
           "motor_version",
           job.payload.report_type === "completo"
-            ? "completo-hub-1/%"
-            : "diagnostico-hub-2/%",
+            ? "completo-hub-2/%"
+            : "diagnostico-hub-3/%",
         )
         .gt("expires_at", new Date().toISOString())
         .order("generated_at", { ascending: false })

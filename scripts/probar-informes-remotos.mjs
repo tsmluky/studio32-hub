@@ -6,7 +6,7 @@ import { cloud, checked, reportState, reportCommand } from "./report-cloud.mjs";
 process.loadEnvFile(".env.local");
 const state = await reportState();
 const doc = state.documents.find((d) =>
-  d.motor_version.startsWith("diagnostico-hub-2/"),
+  d.motor_version.startsWith("diagnostico-hub-3/"),
 );
 assert.ok(
   doc,
@@ -31,11 +31,14 @@ for (const table of [
   "ops_report_jobs",
   "ops_report_documents",
   "ops_report_workers",
+  "ops_assistant_jobs",
+  "ops_assistant_threads",
+  "ops_assistant_workers",
 ]) {
   const { error } = await anon.from(table).select("*");
   assert.ok(error, `Lectura anónima permitida: ${table}`);
 }
-console.log("OK · Las tres tablas rechazan lecturas sin sesión.");
+console.log("OK · Las seis tablas rechazan lecturas sin sesión.");
 const raw = await fetch(
   `${process.env.SUPABASE_URL}/storage/v1/object/studio32-reports/${doc.storage_path}`,
   { headers: { apikey: process.env.VITE_SUPABASE_ANON_KEY } },
@@ -53,6 +56,43 @@ assert.equal(forged, null);
 console.log(
   "OK · Sin sesión no se puede suplantar un encargo del propietario.",
 );
+const cacheChecks = [];
+for (const type of ["diagnostico", "completo"]) {
+  const prefix = type === "completo" ? "completo-hub-2/" : "diagnostico-hub-3/";
+  const existing = state.documents.find(
+    (d) => d.report_type === type && d.motor_version.startsWith(prefix),
+  );
+  assert.ok(existing, `Falta un ${type} de la versión actual`);
+  const queued = await reportCommand("/journey/generate", {
+    candidateId: existing.business_key,
+    reportType: type,
+    requestKey: crypto.randomUUID(),
+  });
+  const deadline = Date.now() + 90000;
+  let job;
+  while (Date.now() < deadline) {
+    job = checked(
+      await cloud
+        .from("ops_report_jobs")
+        .select("status,result,error")
+        .eq("id", queued.id)
+        .single(),
+    );
+    if (!["queued", "running"].includes(job.status)) break;
+    await new Promise((r) => setTimeout(r, 1000));
+  }
+  assert.equal(
+    job.status,
+    "succeeded",
+    job.error || `No terminó la caché de ${type}`,
+  );
+  assert.equal(job.result.cached, true);
+  assert.equal(job.result.documentId, existing.id);
+  cacheChecks.push({ type, jobId: queued.id, documentId: existing.id });
+}
+console.log(
+  "OK · Ambos tipos reutilizan su PDF actual sin regenerarlo ni mezclarlos.",
+);
 await writeFile(
   ".local/report-worker/verification.json",
   JSON.stringify(
@@ -61,7 +101,8 @@ await writeFile(
       documentId: doc.id,
       bytes: doc.bytes,
       sha256: doc.sha256,
-      checks: 4,
+      checks: 5,
+      cacheChecks,
     },
     null,
     2,

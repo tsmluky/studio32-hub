@@ -22,7 +22,7 @@ import urllib.request
 ROOT = Path(__file__).resolve().parent.parent
 MOTOR = Path(os.environ.get('STUDIO32_MOTOR_ROOT', ROOT.parent.parent / 'Visibilidad-IA')).resolve()
 CACHE = ROOT / '.local' / 'report-worker' / 'search-cache'
-VERSION = 'diagnostico-hub-2'
+VERSION = 'diagnostico-hub-3'
 
 
 def emit(kind, **data):
@@ -180,7 +180,7 @@ def generate(business, out, report_type='diagnostico'):
     # Prevent any model fallback, even if motor .env contains credentials.
     for key in ('OPENAI_PERMITIDO', 'DEEPSEEK_PERMITIDO', 'OPENAI_API_KEY', 'DEEPSEEK_API_KEY', 'GEMINI_API_KEY', 'GROQ_API_KEY', 'SERPER_API_KEY'):
         os.environ[key] = ''
-    from visibilidad import auditor, config, gancho, ranking, hoja, cliente
+    from visibilidad import auditor, ranking, hoja
     emit('progress', stage='Leyendo su web', progress=25)
     audit = auditor.auditar(business['web'], business['name'], ciudad=business.get('city') or 'Valencia', max_paginas=8)
     checks = {c['id']: c for c in audit['checks']}
@@ -191,38 +191,8 @@ def generate(business, out, report_type='diagnostico'):
         raise NeedsReview('El motor detecta una posible web de otro negocio. Necesita revisión.')
     (out / 'auditoria.json').write_text(json.dumps(audit, ensure_ascii=False, indent=2), encoding='utf-8')
     emit('progress', stage='Preparando el análisis completo' if report_type=='completo' else 'Preparando el diagnóstico', progress=60)
-    score = ranking.nota_web(audit['puntos'])
-    reference = ranking.cargar()['webs']
-    row = {'nombre': business['name'], 'web': business['web'], 'tipo': 'restaurante', 'municipio': business.get('city') or '',
-        'direccion': business.get('address') or '', 'lat': business.get('lat'), 'lon': business.get('lon'),
-        'nota': score, 'nivel': ranking.nivel(score), 'bloques': {b: audit['puntos'][b] for b in ranking.BLOQUES_WEB},
-        'idiomas': audit.get('idiomas', []), 'carta': (audit.get('carta') or {}).get('estado'),
-        'checks': {k: v['estado'] for k, v in checks.items()}, 'evidencias': {k: v['evidencia'] for k, v in checks.items()},
-        'fallos': ranking.fallos_de({k: v['estado'] for k, v in checks.items()}),
-        'fecha': audit['fecha_utc'][:10], 'puesto': 1 + sum(f['nota'] > score for f in reference), 'fuera_del_ranking': True}
-    # Reuse the renderer and facts of the canonical motor, while writing only this job's directory.
-    # Work is isolated in this subprocess; no module files or motor data are changed.
-    gancho.CARPETA = out
-    # The canonical template's old CTA still promises a newly built web before sale.
-    # Adapt only this process to the latest NEGOCIO.md decision (18/10); never edit motor files.
-    def next_step(p):
-        return ('<section class="banda siguiente"><div><h2>Siguiente paso: el análisis completo</h2>'
-                '<p>1. Cada problema de tu web, con su evidencia y su solución.</p>'
-                '<p>2. Los arreglos propuestos, en orden de prioridad.</p>'
-                '<p>3. Una revisión contigo para decidir qué mejorar.</p>'
-                '<p><b>Te lo enseño en una visita de 20 minutos.</b> La aplicación de los cambios se acuerda después.</p>'
-                '</div>' + hoja.firma(p['nombre']) + '</section>')
-    gancho._siguiente = next_step
-    cliente.por_web = lambda _: None
-    ranking.buscar = lambda _: None
-    ranking.medir = lambda *_args, **_kwargs: row
-    expected_pages = 1
-    with contextlib.redirect_stdout(sys.stderr):
-        if report_type == 'completo':
-            from report_complete import render
-            html, expected_pages = render(business, audit, row, out)
-        else:
-            html = gancho.generar(business['web'], nombre=business['name'], ciudad=business.get('city') or 'Valencia', hacer_pdf=False)
+    from report_complete import render
+    html, expected_pages = render(business, audit, None, out, report_type)
     content = html.read_text(encoding='utf-8')
     # Only the canonical renderer's fixed A4 fitting script may execute.
     trusted_scripts = re.findall(r'<script\b[^>]*>.*?</script>', hoja.documento('Control', ['']), re.I | re.S)
@@ -243,7 +213,7 @@ def generate(business, out, report_type='diagnostico'):
     if not data.startswith(b'%PDF-') or not 5000 < len(data) <= 20 * 1024 * 1024:
         raise RuntimeError('El PDF no tiene un tamaño o formato válido.')
     return {'pdf': str(pdf.resolve()), 'html': str(html.resolve()), 'bytes': len(data), 'sha256': hashlib.sha256(data).hexdigest(),
-        'motorVersion': ('completo-hub-1' if report_type=='completo' else VERSION) + '/' + ranking.VERSION, 'generatedAt': datetime.now(timezone.utc).isoformat(),
+        'motorVersion': ('completo-hub-2' if report_type=='completo' else 'diagnostico-hub-3') + '/' + ranking.VERSION, 'generatedAt': datetime.now(timezone.utc).isoformat(),
         'reportType': report_type, 'pages': expected_pages,
         'auditDate': audit['fecha_utc'], 'findings': [{'title': c['titulo'], 'evidence': c['evidencia']} for c in audit['checks'] if c['estado'] == 'mal'][:5]}
 

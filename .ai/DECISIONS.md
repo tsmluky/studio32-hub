@@ -974,3 +974,10 @@ en ficha las acciones que todavía solo existen en local. La voz no se presenta 
 El Hub publicado solo conectaba diagnósticos; el asistente seguía en loopback. Se añade cola `ops_assistant_*`, snapshots privados por usuario y worker saliente independiente del de informes. Qwen y Whisper siguen en el PC. Cada miembro tiene SQLite separado; claves de servicio solo en el worker. No se amplían miembros ni permisos sobre outreach o reservas. Las notas/visitas continúan con revisión explícita.
 
 El análisis completo remoto revisa la web actual, incluye cada comprobación, evidencias y plan, con diseño A4 del motor. No genera web nueva ni simula el antes/después o mediciones en seis idiomas que todavía no se hayan realizado. Tipos y cachés separados de diagnóstico. PDF privado; no confundir encargo en cola con documento disponible.
+
+
+## 2026-10-19 · Auditoría del Hub sin inferir comprensión ni recomendaciones
+
+La prueba física de Pancho confirmó transporte y documentos de Xaruga; la revisión del PDF encontró frases heredadas como «no sabe que eres un restaurante» a partir de schema ausente. Faltan pruebas para esa conclusión y el índice histórico no está validado para presentar resultados públicos. El Hub conserva diseño A4 y auditoría guardada, pero separa observación, interpretación y arreglo: sin proyectar puestos ni afirmar qué recomendará una IA. Se retiran comparativas/porcentajes históricos de las nuevas plantillas; no se cambian fórmulas ni archivos del motor compartido. El completo automático de auditoría no sustituye al expediente comercial validado ni genera un antes/después. Versiones nuevas invalidan solo la reutilización de caché; los archivos anteriores se conservan.
+
+El lanzador pasa a recuperar procesos propios ausentes sin reiniciar los sanos. Identidad por PID y fecha, puertos ajenos protegidos; no se añade arranque automático de Windows ni se instala nada. Prueba operativa: solo interfaz detenida y recuperada, cuatro servicios intactos, segunda apertura sin duplicados.

@@ -1,7 +1,7 @@
 # Restaurante nuevo → informes y asistente en el teléfono
 
 Implementado y publicado el 18/10/2026 en hub.studio32.es con autorización de Pancho.
-Cloudflare Pages correcto y assets públicos comprobados. Pendiente aceptación desde teléfono físico/4G.
+Cloudflare Pages correcto y assets públicos comprobados. Pancho confirmó el recorrido desde su teléfono el 19/10. Red 4G e impresión no especificadas.
 
 ## Uso
 
@@ -21,7 +21,7 @@ soluciones y fuentes. Usa el diseño A4 del motor, comprobando el número de pá
 antes/después ni pruebas en seis idiomas. Esas mediciones no se simulan: el PDF explica su alcance.
 La caché distingue tipo de informe y versión del renderizador.
 
-Nota y zona usan la referencia activa del motor: 891 webs en la prueba. El índice nuevo de Claude es otro frente.
+Desde la revisión del 19/10, las plantillas nuevas del Hub no muestran nota, puesto ni cifras del índice histórico: su validez es otro frente. Presentan las comprobaciones automáticas y sus límites, sin inferir resultados de modelos a partir de etiquetas técnicas.
 Busca primero en datos/indice/universo.json, más amplio que las fichas preparadas. Fallback Nominatim/OpenStreetMap
 para restaurantes en España: búsqueda explícita, caché persistente siete días, identificación/atribución y
 separación superior a un segundo. La [política pública](https://operations.osmfoundation.org/policies/nominatim/)
@@ -139,3 +139,41 @@ Propuesta de nota creada por la UI, editable y descartada: no se guardó una not
 Falta la voz real de Pancho, permisos del micrófono del móvil y prueba física de descarga/impresión.
 
 Pedido directo «Pedir completo» de Unsushi desde la biblioteca pública, sin asistente: encargo `15ad0060-8350-4791-9268-925dabd1a49a`, auditoría/PDF nuevos, progreso observado y documento disponible al volver tras cambiar de pantalla.
+
+
+## Revisión del 19/10: teléfono, Xaruga y fallos encontrados
+
+Pancho confirmó diagnóstico y completo descargables desde su teléfono, incluyendo un restaurante nuevo: Xaruga.
+Se contrastaron sus encargos y originales: 23 s diagnóstico/13 s completo desde encolado hasta publicación, ambos
+al primer intento y sin caché. PDFs 1/11 A4, 27 checks y estados coincidentes; tamaño/SHA-256 verificados.
+
+Se detectaron dos problemas reales. Los procesos estaban parados con registro obsoleto: restaurados; el lanzador
+ahora recupera ausentes y conserva los sanos. `probar-recuperacion-arranque.ps1` detiene únicamente la interfaz
+registrada, prueba recuperación y verifica que cuatro procesos y una segunda apertura no cambien sus PID.
+No se ha instalado una tarea de Windows: después de reiniciar el PC hay que abrir Mi estudio.
+
+Los textos heredados del motor afirmaban comprensión/recomendación a partir de señales técnicas y proyectaban
+puestos del índice histórico. Nuevas plantillas aisladas (`report_complete.py`, ambos tipos) muestran observaciones,
+evidencias, interpretación prudente y soluciones propuestas. No dan esos puestos, porcentajes ni resultados no medidos.
+Prioridad de información útil y fallos de acceso por delante de detalles menores; se evita repetir idiomas entre prioridades.
+Versiones `diagnostico-hub-3` y `completo-hub-2`; los PDF antiguos quedan conservados. Biblioteca: último PDF por negocio/tipo.
+El control de entrega comercial de `visibilidad/completo.py` permanece intacto; la auditoría automática del Hub no lo sustituye.
+
+Repetición real desde UI pública a 375 px, con servicios restaurados: nombre → selección → diagnóstico nuevo,
+completo pedido al modelo local → subida privada → descarga por botón y enlaces de sesión. 14/10 s de cola+motor
+para los informes de esta ronda; respuesta del modelo puede añadir tiempo. 245.589/470.571 bytes, hashes idénticos.
+Antes/después, recomendación y calidad de los detectores no se dan por validados porque termine un PDF.
+
+Pruebas repetibles añadidas:
+
+```powershell
+..\..\Visibilidad-IA\.venv\Scripts\python scripts/report-presentation-test.py
+node node_modules/supabase/dist/supabase.js db query --linked --file scripts/report-resilience-test.sql -o json
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/probar-recuperacion-arranque.ps1
+```
+
+La prueba SQL usa transacción y rollback: lease expirada de ambas colas, reserva nueva, rechazo de publicación vieja,
+finalización única y máximo tres interrupciones. No equivale a matar un worker durante una auditoría en producción.
+La prueba del lanzador sí detiene y recupera la interfaz real, manteniendo los trabajadores.
+Evidencia privada local en `.local/report-worker/qa-2026-10-19/verification.json` y
+`.local/operations/recuperacion-verificada.json`; no se suben audios, claves, PDFs ni datos a Git.

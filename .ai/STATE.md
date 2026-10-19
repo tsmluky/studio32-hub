@@ -1,6 +1,6 @@
 # Estado — studio32-hub
 
-> Se **sobrescribe**, no se acumula. Última actualización: 2026-10-18 (asistente remoto y análisis completo probados con sesión pública).
+> Se **sobrescribe**, no se acumula. Última actualización: 2026-10-19 (aceptación de Pancho desde teléfono, Xaruga y recuperación del arranque).
 
 ## Qué es
 
@@ -8,6 +8,21 @@ Centro de gestión de Studio32, principalmente para Pancho; posible comercial de
 El código actual conserva los tres miembros originales; no se ha cambiado su acceso.
 
 ## Frente activo: Hub personal y asistente
+
+- **Revisión 19/10:** Pancho confirma búsqueda y ambos PDF desde su teléfono: Xaruga, Reina 219. Registros reales:
+  diagnóstico 1 A4 y completo 11 A4, 23/13 segundos originales; nombres, tipos, hashes y evidencias coherentes.
+- Se encontraron los servicios parados y un registro de procesos antiguo. Restaurado el conjunto y corregido el lanzador:
+  recupera solo servicios ausentes, conserva los activos por PID/fecha, archiva registros obsoletos y revierte solo lo nuevo si falla.
+  Prueba real: caída de interfaz, recuperación de solo esa interfaz, cuatro servicios intactos y reapertura sin duplicados.
+- Calidad: los textos heredados atribuían conclusiones de IA a etiquetas técnicas y proyectaban puestos del índice histórico.
+  Adaptador aislado de Hub revisado: resultados/evidencias/limitaciones, prioridades útiles, sin puesto, porcentajes censales ni
+  recomendaciones no medidas. No toca motor compartido ni su control comercial validado. Cachés nuevas diagnóstico v3/completo v2.
+  Conserva PDF anteriores; biblioteca presenta la última versión de cada negocio/tipo. No se afirma antes/después.
+- Nueva prueba pública autenticada a 375 px: búsqueda Xaruga → diagnóstico nuevo (14 s) → completo pedido a Qwen (motor 10 s)
+  → descarga por botón y enlaces. PDF nuevos 245.589/470.571 bytes, 1/11 A4, hashes verificados y revisión visual.
+  22 pruebas núcleo/política + 12 Python + 8 HTTP + 4 comprobaciones descarga/permisos; tres suites SQL con rollback,
+  incluida recuperación de leases de ambas colas. TypeScript/build correctos. Evidencias `.local/report-worker/qa-2026-10-19/`.
+
 
 - **Mi estudio**, en `src/operations/` y como entrada de la aplicación autenticada: Mi mesa, Negocios, Asistente
   y Actividad; móvil probado a 375 px y herramientas anteriores accesibles. Sin cambiar miembros ni sus permisos.
@@ -18,7 +33,7 @@ El código actual conserva los tres miembros originales; no se ha cambiado su ac
 - Notas, visitas, conversaciones y propuestas en SQLite local por usuario; snapshots/cola remotos privados en Supabase, fuera de payload/Git. Validación externa de
   negocio/hora, confirmación editable, transacciones e idempotencia. Contexto del modelo acotado.
 - Voz instalada: faster-whisper 1.2.1 + PyAV 16.1.0 + Whisper small CPU int8. Grabación/adjunto → texto editable;
-  sin voz de salida. Audio sintético adjuntado desde el Hub publicado → Whisper PC → borrador editable, corregido y enviado; copia borrada. Voz/micrófono del teléfono pendientes de prueba.
+  sin voz de salida. Audio sintético adjuntado desde el Hub publicado → Whisper PC → borrador editable, corregido y enviado; copia borrada. Voz/micrófono del teléfono sin aceptación explícita todavía; los registros muestran una transcripción terminada.
 - TypeScript/build correctos, 22 pruebas núcleo/política y 8 comprobaciones HTTP. Navegador real: búsqueda→informe,
   propuesta doble, descarte y nota guardada/recuperada (nota de prueba retirada con copia; visitas reales: ninguna).
 - Nombre/ciudad → confirmar local → encargo → progreso → PDF. Cola autenticada `ops_report_*`, RLS por propietario/workspace,
@@ -28,7 +43,7 @@ El código actual conserva los tres miembros originales; no se ha cambiado su ac
 - Cliente publicado usa sesión Supabase real; preview usa pasarela loopback sin claves en navegador. Asistente, voz y propuestas conectados por cola propia con aislamiento por usuario.
   Publicado en `hub.studio32.es` con autorización de Pancho: push `9969dc7`, Cloudflare Pages correcto,
   HTML/JS/CSS públicos verificados con RPC nuevas, proyecto Supabase correcto y sin credencial privada del worker.
-  Falta aceptación desde teléfono físico/4G/impresión; no se atribuye una prueba de teléfono real a la vista responsive.
+  Pancho confirmó diagnóstico y completo desde su teléfono el 19/10; quedan 4G/impresión no especificados; no se atribuye una prueba de teléfono real a la vista responsive.
   Worker activo; tras reiniciar PC hay que arrancarlo. Operación/pruebas: `docs/INFORMES-DESDE-MOVIL.md`.
 - Verificación posterior a la crítica de Pancho: antes faltaba probar la UI pública autenticada. Con su sesión iniciada,
   reproducido «Asiers burger» sin resultados. El buscador no es un buscador general de Internet: mapa/registro tienen lagunas.

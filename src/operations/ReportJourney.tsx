@@ -91,6 +91,14 @@ export default function ReportJourney({
       w.status !== "offline" && Date.now() - Date.parse(w.last_seen) < 75000,
   );
   const doc = state?.documents.find((d) => d.id === report?.result?.documentId);
+  const library = (state?.documents || []).filter(
+    (d, i, docs) =>
+      docs.findIndex(
+        (other) =>
+          other.business_key === d.business_key &&
+          other.report_type === d.report_type,
+      ) === i,
+  );
   useEffect(() => {
     if (focusJob && report?.id === focusJob)
       resultTarget.current?.scrollIntoView({
@@ -573,7 +581,7 @@ export default function ReportJourney({
           <div className="ops-list-caption">
             TUS INFORMES <span>Disponibles aunque el PC esté apagado</span>
           </div>
-          {state.documents.slice(0, 12).map((d) => (
+          {library.slice(0, 12).map((d) => (
             <div key={d.id}>
               <FileText size={19} />
               <span>
