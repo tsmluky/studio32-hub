@@ -7,6 +7,12 @@ description: Encuentra, analiza y prioriza negocios físicos/locales como potenc
 
 Skill operativa para detectar y cualificar potenciales clientes de **Studio32 · Digital Systems**: negocios físicos/locales que pueden necesitar web premium, automatización, reservas, WhatsApp business, chatbot, o rebranding digital ligero.
 
+## Portado entre entornos e informes de restaurantes · 19/10/2026
+
+Antes de reutilizar Huella fuera del entorno original de Claude, lee [el portado por capacidades](../../calidad-informes/PORTADO-HUELLA.md). `places_search`, `web_search` y `web_fetch` son capacidades que debes comprobar en ese entorno: no supongas que existen por figurar aquí. Sustituye cada una por una herramienta disponible y registra fuente/método/fecha, o marca cobertura parcial. No simules reseñas, búsquedas ni verificaciones. Ningún fallback de pago sin permiso.
+
+Si el encargo es una **auditoría de un restaurante**, conserva detalle ancla, voz comprobada y fortalezas como insumos; sigue la skill `restaurante-ia` y el contrato de calidad del repo del motor. No aplicar filtros de email, rating o número de reseñas a un informe solicitado. No convertir `huecos_digitales` en fallos aprobados sin contrastarlos. No importar campañas ni generar/enviar correos por ese encargo. El Modo C sigue siendo el contrato de campañas existente; el schema histórico no se usa como si fuera el de C. El worker del completo todavía no ejecuta esta investigación: copiar el Markdown no acredita integración.
+
 **No es un buscador genérico de "malas webs".** Busca la intersección:
 
 > Negocio con valor comercial + presencia digital mejorable + argumento de venta claro + capacidad probable de pago

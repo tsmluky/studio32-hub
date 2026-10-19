@@ -981,3 +981,13 @@ El análisis completo remoto revisa la web actual, incluye cada comprobación, e
 La prueba física de Pancho confirmó transporte y documentos de Xaruga; la revisión del PDF encontró frases heredadas como «no sabe que eres un restaurante» a partir de schema ausente. Faltan pruebas para esa conclusión y el índice histórico no está validado para presentar resultados públicos. El Hub conserva diseño A4 y auditoría guardada, pero separa observación, interpretación y arreglo: sin proyectar puestos ni afirmar qué recomendará una IA. Se retiran comparativas/porcentajes históricos de las nuevas plantillas; no se cambian fórmulas ni archivos del motor compartido. El completo automático de auditoría no sustituye al expediente comercial validado ni genera un antes/después. Versiones nuevas invalidan solo la reutilización de caché; los archivos anteriores se conservan.
 
 El lanzador pasa a recuperar procesos propios ausentes sin reiniciar los sanos. Identidad por PID y fecha, puertos ajenos protegidos; no se añade arranque automático de Windows ni se instala nada. Prueba operativa: solo interfaz detenida y recuperada, cuatro servicios intactos, segunda apertura sin duplicados.
+
+## 2026-10-19 · Contrato de calidad y portado de Huella
+
+Pancho pide revisar tres completos, definir qué aporta y qué perjudica al informe, cubrir SEO además de lectura IA y comprobar el recorrido de skills. Aclara que Huella es principalmente la skill de prospección que usaba en Claude, no solo el rastro digital del negocio.
+
+Se separan alcance/cobertura, observaciones, interpretaciones, prioridades y pruebas de cierre. Desconocido no es cero; metadatos no demuestran tareas ni posiciones. Revisión de contenido y aspecto vinculada a hashes del documento y manifiesto. Las afirmaciones de mejora siguen requiriendo el validador canónico del motor.
+
+La skill original depende de herramientas que no están todas en el worker. Se documenta el portado por capacidades y contratos; no se migran campañas ni se activa envío. Las dos copias de restaurante-ia se unifican en el motor. Validador independiente v1 probado; integrar captura/huella y puerta de publicación es trabajo pendiente, no una capacidad ya desplegada.
+
+El Hub es repositorio público (verificado): ejemplos y tests públicos usan negocios ficticios. Dictamen real en el motor privado y fuentes/PDF en carpetas locales ignoradas. Sin APIs, instalaciones ni cambios en datos remotos en esta revisión.

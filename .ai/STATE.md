@@ -1,6 +1,6 @@
 # Estado — studio32-hub
 
-> Se **sobrescribe**, no se acumula. Última actualización: 2026-10-19 (aceptación de Pancho desde teléfono, Xaruga y recuperación del arranque).
+> Se **sobrescribe**, no se acumula. Última actualización: 2026-10-19 (calidad de tres completos y recorrido de Huella).
 
 ## Qué es
 
@@ -8,6 +8,19 @@ Centro de gestión de Studio32, principalmente para Pancho; posible comercial de
 El código actual conserva los tres miembros originales; no se ha cambiado su acceso.
 
 ## Frente activo: Hub personal y asistente
+
+- **Calidad 19/10:** revisión de tres completos y fuentes guardadas; los tres requieren revisión editorial/técnica.
+  Dictamen con nombres en el repo privado `Visibilidad-IA`, `REVISION-INFORMES-2026-10-19.md`; no publicar aquí
+  datos ni hallazgos particulares. Estándar/recorrido en ese repo: `CALIDAD-INFORMES.md`, `RECORRIDO-INFORMES.md`.
+- Pancho pide cobertura SEO + visibilidad IA y portar Huella de la skill de prospección de Claude. Origen encontrado
+  en escritorio: `skills/studio32-lead-prospector/`; Modo C, schema histórico y huella premium son contratos distintos.
+  `calidad-informes/PORTADO-HUELLA.md` detalla capacidades/consumidores. El completo móvil actual llama auditor/renderer;
+  **no ejecuta ficha/huella ni toda la skill**. Ambas copias de `restaurante-ia` del motor se unifican y validan.
+- Validador aislado v1: **37 regresiones** correctas; hashes/citas/sedes, cobertura, desconocidos, denominadores,
+  métodos y revisión humana ligada a manifiesto/documento. No certifica semántica. Ejemplo privado generado con dos
+  fuentes reales: borrador documental válido, rechazo de entrega como completo actual (salida 3).
+  Datos y HTML en `.local/quality-reports/`, ignorados por Git. Pendiente portar investigación y completar detectores,
+  adaptar salidas al contrato y conectar control antes de publicar. No se modifica el flujo productivo ni PDF remotos.
 
 - **Revisión 19/10:** Pancho confirma búsqueda y ambos PDF desde su teléfono: Xaruga, Reina 219. Registros reales:
   diagnóstico 1 A4 y completo 11 A4, 23/13 segundos originales; nombres, tipos, hashes y evidencias coherentes.
